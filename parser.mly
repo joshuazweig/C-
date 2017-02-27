@@ -67,7 +67,7 @@ typ:
   | MINT { Mint }
   | CURVE { Curve }
   | POINT { Point }
-  | typ POINTER { ($1, $2) }  (* unclear if this is a proper declaration *)
+  | typ POINTER { Pointer($1) }  // unclear if this is a proper declaration 
 
 vdecl_list:
     /* nothing */    { [] }
