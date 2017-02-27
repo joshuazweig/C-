@@ -91,8 +91,8 @@ stmt:
      { For($3, $5, $7, $9) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
   | DO stmt WHILE LPAREN expr RPAREN { DoWhile($2, $5) }     /* ADDED */
-  | BREAK SEMI { Break $1 }    /* ADDED */
-  | CONTINUE SEMI { Continue $1 } /* added */
+  | BREAK SEMI { Break }    /* ADDED */
+  | CONTINUE SEMI { Continue } /* added */
   | SEMI { NullStmt } /* ADDED - unclear if could be Noexpr */
 
 expr_opt:
@@ -106,7 +106,7 @@ expr:
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
   | expr DIVIDE expr { Binop($1, Div,   $3) }
-  | expr EXP    expr { Binop($1, Exp,   $3) } 
+  | expr POW    expr { Binop($1, Exp,   $3) } 
   | expr EQ     expr { Binop($1, Equal, $3) }
   | expr NEQ    expr { Binop($1, Neq,   $3) }
   | expr LT     expr { Binop($1, Less,  $3) }
