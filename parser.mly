@@ -123,14 +123,13 @@ expr:
   | NULL { Null }   /* Added all after this line in expr */
   | DEREF expr       { Unop(Deref, $2) }
   | ADDRESSOF lval   { Unop(Addrof, $2) }  /* must be an lvalue */
-  | expr POW expr { Binop($1, Pow, $3) }  
   | expr MOD expr { Binop($1, Mod, $3) } 
   | lval MODASSIGN expr  { ModAssign($1, $3) }
   | DBLQUOTE ID DBLQUOTE { String($2) } /* string literal */
   | SGLQUOTE ID SGLQUOTE { Char($2) } /* char literal */
   | LBRACE actuals_list RBRACE  { Constr($2) } /* construct mints/stones */
   | ID LSQUARE expr RSQUARE { Subscript($1, $3) }
-  
+
 /* Added -- unclear if in grammar or semantic checking ? */
 lval:
       ID                     { Id($1) }  /* can't be a function pointer ?? */
