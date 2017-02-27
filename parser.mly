@@ -77,8 +77,7 @@ vdecl:
    typ ID SEMI { ($1, $2) }
 
 stmt_list:
-    /* nothing */  { [] }
-  | stmt_list stmt { $2 :: $1 }
+  stmt_list stmt { $2 :: $1 }
 
 stmt:
     expr SEMI { Expr $1 }   /*expr_opt here instead of nullstmt maybe*/
