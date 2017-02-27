@@ -130,10 +130,12 @@ expr:
   | ID LSQUARE expr RSQUARE { Subscript($1, $3) }
 
 /* Added -- unclear if in grammar or semantic checking ? */
+/* Removed most lval in favor of handling during semantic checking */
+/* TODO: veryify */
 lval:
       ID                     { Id($1) }  /* can't be a function pointer ?? */
-    | LPAREN lval RPAREN     { $2 }
-    | DEREF expr             { Deref($2) }
+//    | LPAREN lval RPAREN     { $2 }
+//    | DEREF expr             { Deref($2) }
     
 actuals_opt:
     /* nothing */ { [] }
