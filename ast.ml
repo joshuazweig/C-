@@ -16,7 +16,13 @@ type expr =
   | Unop of uop * expr
   | Assign of string * expr
   | Call of string * expr list
-  | Noexpr
+  | Noexpr    (* not Null? *)
+  | Null
+  | ModAssign of string * expr
+  | String of string
+  | Char of string
+  | Constr of expr list
+  | Subscript of string * expr
 
 type stmt =
     Block of stmt list
