@@ -28,7 +28,7 @@ open Ast
 %right ACCESS
 %left STAR DIVIDE MOD //star is times
 %left POW
-%right NOT MINUS STAR ADDRESSOF /* minus is neg, mod is addof, star is deref */
+%right NOT NEG ADDRESSOF DEREF /* minus is neg, mod is addof, star is deref */
 
 %start program
 %type <Ast.program> program
@@ -114,13 +114,13 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | expr AND    expr { Binop($1, And,   $3) }
   | expr OR     expr { Binop($1, Or,    $3) }
-  | MINUS expr %prec MINUS { Unop(Neg, $2) } /* second minus is neg */
+  | MINUS expr %prec NEG { Unop(Neg, $2) } /* second minus is neg */
   | NOT expr         { Unop(Not, $2) }
   | lval ASSIGN expr   { Assign($1, $3) } //changed ID to lval
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
   | NULL { Null }   /* Added all after this line in expr */
-  | STAR expr       { Unop(Deref, $2) } // star is deref
+  | DEREF expr       { Unop(Deref, $2) } // star is deref
   | ADDRESSOF lval   { Unop(Addrof, $2) }  /* must be an lvalue */
   | expr MOD expr { Binop($1, Mod, $3) }
   | lval MODASSIGN expr  { ModAssign($1, $3) }
