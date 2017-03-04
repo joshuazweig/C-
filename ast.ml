@@ -1,7 +1,7 @@
 (* Abstract Syntax Tree and functions for printing it *)
 
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
-          And | Or | Pow | Mod | 
+          And | Or | Pow | Mod 
 
 type uop = Neg | Not | Deref | AddrOf | Access
 
@@ -20,7 +20,7 @@ type expr =
   | Null
   | ModAssign of string * expr
   | String of string
-  | Char of string
+  | Char of char
   | Constr of expr list
   | Subscript of string * expr
 
@@ -29,8 +29,12 @@ type stmt =
   | Expr of expr
   | Return of expr
   | If of expr * stmt * stmt
-  | For of expr * expr * expr * stmt
+  | For of expr * expr * expr * stmt   (* need to account for optional exprs? *)
   | While of expr * stmt
+  | DoWhile of stmt * expr
+  | Break
+  | Continue
+  | NullStmt
 
 type func_decl = {
     typ : typ;
@@ -77,6 +81,12 @@ let rec string_of_expr = function
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
+  | Null -> "NULL"  (* pointer to zero *)
+  | ModAssign(v, e) -> v ^ " %= " ^ string_of_expr e
+  | String(s) -> s
+  | Char(c) -> string_of_char c
+  | Constr(el) -> "{" ^ String.concat ", " (List.map string_of_expr el) ^ "}"
+  | Subscript(s, e) -> s ^ "[" ^ string_of_expr e ^ "]" 
 
 let rec string_of_stmt = function
     Block(stmts) ->
@@ -90,9 +100,18 @@ let rec string_of_stmt = function
       "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
+  | DoWhile(s, e) -> "do { \n" ^ string_of_stmt s ^ "\n} while (" ^ string_of_expr e ^ ")\n"
+  | Break -> "break;\n"
+  | Continue -> "continue;\n"
+  | NullStmt -> ";\n"
 
 let string_of_typ = function
     Int -> "int"
+  | Char -> "char"
+  | Stone -> "stone"
+  | Mint -> "mint"
+  | Curve -> "curve"
+  | Point -> "point"
   | Void -> "void"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
