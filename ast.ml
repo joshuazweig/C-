@@ -84,7 +84,7 @@ let rec string_of_expr = function
   | Null -> "NULL"  (* pointer to zero *)
   | ModAssign(v, e) -> v ^ " %= " ^ string_of_expr e
   | String(s) -> s
-  | Char(c) -> string_of_char c
+  | Char(c) -> Char.escaped c
   | Constr(el) -> "{" ^ String.concat ", " (List.map string_of_expr el) ^ "}"
   | Subscript(s, e) -> s ^ "[" ^ string_of_expr e ^ "]" 
 
