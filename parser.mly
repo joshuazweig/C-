@@ -6,7 +6,7 @@ open Ast
 
 %token SEMI COMMA COLON LPAREN RPAREN LBRACE RBRACE LSQUARE RSQUARE
 %token PLUS MINUS STAR DIVIDE POW MOD ASSIGN NOT /*NEG*/ /* minus is neg, star is times */
-//%token MODASSIGN /* star is deref, modassign is handled by mod + assign */
+%token MODASSIGN /* star is deref*/
 %token EQ NEQ LT LEQ GT GEQ AND OR
 %token RETURN IF ELSE FOR WHILE DO BREAK CONTINUE
 %token INT CHAR VOID POINTER NULL
@@ -19,7 +19,7 @@ open Ast
 //COMMA?
 %nonassoc NOELSE
 %nonassoc ELSE
-%right ASSIGN
+%right MODASSIGN ASSIGN
 %left OR
 %left AND
 %left EQ NEQ
@@ -123,7 +123,7 @@ expr:
   | STAR expr       { Unop(Deref, $2) } // star is deref
   | ADDRESSOF lval   { Unop(Addrof, $2) }  /* must be an lvalue */
   | expr MOD expr { Binop($1, Mod, $3) }
-  | lval MOD ASSIGN expr  { ModAssign($1, $4) }
+  | lval MODASSIGN expr  { ModAssign($1, $3) }
   | DBLQUOTE ID DBLQUOTE { String($2) } /* string literal */
   | SGLQUOTE ID SGLQUOTE { Char($2) } /* char literal */
   | LBRACE actuals_list RBRACE  { Constr($2) } /* construct mints/stones */

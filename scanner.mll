@@ -13,7 +13,7 @@ rule token = parse
 | '-' { MINUS }   | "&&" { AND }   | "void" { VOID }
 | '!' { NOT }     | "||" { OR }    | "true" { TRUE }
 | '/' { DIVIDE }  | "!" { NOT }    | "false" { FALSE }
-| '[' { LSQUARE }                  | "break" { BREAK }
+| '[' { LSQUARE } | "%=" { MODASSIGN} | "break" { BREAK }
 | ']' { RSQUARE }                  | "do" { DO }
 | ':' { COLON }                    | "mint" { MINT }
 | '-' { MINUS }                     | "*" { STAR }
