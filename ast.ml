@@ -23,7 +23,7 @@ type expr =
   | Char of char
   | Constr of expr list
   | Subscript of string * expr
-  | Inf of string
+  | Inf
 
 type stmt =
     Block of stmt list
