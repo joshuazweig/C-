@@ -69,7 +69,7 @@ let string_of_uop = function
     Neg -> "-"
   | Not -> "!"
   | Deref -> "*"
-  | AddrOf -> "%"
+  | AddrOf -> "&"
   | Access -> "access"
 
 let rec string_of_expr = function

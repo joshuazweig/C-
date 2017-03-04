@@ -121,7 +121,7 @@ expr:
   | LPAREN expr RPAREN { $2 }
   | NULL { Null }   /* Added all after this line in expr */
   | DEREF expr       { Unop(Deref, $2) } // star is deref
-  | ADDRESSOF lval   { Unop(Addrof, $2) }  /* must be an lvalue */
+  | ADDRESSOF expr   { Unop(AddrOf, $2) }  /* must be an lvalue, changed back to unop */
   | expr MOD expr { Binop($1, Mod, $3) }
   | lval MODASSIGN expr  { ModAssign($1, $3) }
   | DBLQUOTE ID DBLQUOTE { String($2) } /* string literal */
