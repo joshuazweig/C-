@@ -4,7 +4,7 @@ rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
 | "/*" { comment lexbuf } (* Comments *)
 | '(' { LPAREN }  | '=' { ASSIGN } | "if" { IF }
-| ')'' { RPAREN } | "==" { EQ }    | "else" { ELSE }
+| ')' { RPAREN } | "==" { EQ }    | "else" { ELSE }
 | '{' { LBRACE }  | "!=" { NEQ }   | "for" { FOR }
 | '}' { RBRACE }  | '<' { LT }     | "while" { WHILE }
 | ';' { SEMI }    | "<=" { LEQ }   | "return" { RETURN }
