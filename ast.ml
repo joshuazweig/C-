@@ -20,7 +20,7 @@ type expr =
   | Null
   | ModAssign of string * expr
   | String of string
-  | Char of char
+  | Char of string
   | Constr of expr list
   | Subscript of string * expr
   | Inf
@@ -86,7 +86,7 @@ let rec string_of_expr = function
   | Inf -> "Inf"
   | ModAssign(v, e) -> v ^ " %= " ^ string_of_expr e
   | String(s) -> s
-  | Char(c) -> Char.escaped c
+  | Char(c) -> Char.escaped(c)
   | Constr(el) -> "{" ^ String.concat ", " (List.map string_of_expr el) ^ "}"
   | Subscript(s, e) -> s ^ "[" ^ string_of_expr e ^ "]"
 
