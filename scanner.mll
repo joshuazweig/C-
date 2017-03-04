@@ -11,8 +11,8 @@ rule token = parse
 | ',' { COMMA }   | ">" { GT }     | "int" { INT }
 | '+' { PLUS }    | ">=" { GEQ }   
 | '-' { MINUS }   | "&&" { AND }   | "void" { VOID }
-| '!' { NOT }     | "||" { OR }    | "true" { TRUE }
-| '/' { DIVIDE }  | "!" { NOT }    | "false" { FALSE }
+| '!' { NOT }     | "||" { OR }    
+| '/' { DIVIDE }  | "!" { NOT }    
 | '[' { LSQUARE } | "%=" { MODASSIGN} | "break" { BREAK }
 | ']' { RSQUARE }                  | "do" { DO }
 | ':' { COLON }                    | "mint" { MINT }
