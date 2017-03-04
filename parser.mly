@@ -116,14 +116,14 @@ expr:
   | expr OR     expr { Binop($1, Or,    $3) }
   | MINUS expr %prec NEG { Unop(Neg, $2) } /* second minus is neg */
   | NOT expr         { Unop(Not, $2) }
-  | expr ASSIGN expr   { Assign($1, $3) } //changed ID to lval
+  | ID ASSIGN expr   { Assign($1, $3) } //changed ID to lval
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
   | NULL { Null }   /* Added all after this line in expr */
   | DEREF expr       { Unop(Deref, $2) } // star is deref
   | ADDRESSOF expr   { Unop(AddrOf, $2) }  /* must be an lvalue, changed back to unop */
   | expr MOD expr { Binop($1, Mod, $3) }
-  | expr MODASSIGN expr  { ModAssign($1, $3) }
+  | ID MODASSIGN expr  { ModAssign($1, $3) }
   | DBLQUOTE ID DBLQUOTE { String($2) } /* string literal */
   | SGLQUOTE ID SGLQUOTE { Ch($2) } /* char literal */
   | LBRACE actuals_list RBRACE  { Constr($2) } /* construct mints/stones */
@@ -134,12 +134,12 @@ expr:
 /* Added -- unclear if in grammar or semantic checking ? */
 /* Removed most lval in favor of handling during semantic checking */
 /* TODO: veryify */
-/*
-lval:
-      ID                     { Id($1) }  /* can't be a function pointer ?? */
+
+//lval:
+//      ID                     { Id($1) }  /* can't be a function pointer ?? */
 //    | LPAREN lval RPAREN     { $2 }
 //    | STAR expr             { Deref($2) } // star is deref
-*/ 
+ 
 actuals_opt:
     /* nothing */ { [] }
   | actuals_list  { List.rev $1 }
