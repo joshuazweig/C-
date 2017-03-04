@@ -5,8 +5,8 @@ open Ast
 %}
 
 %token SEMI COMMA COLON LPAREN RPAREN LBRACE RBRACE LSQUARE RSQUARE
-%token PLUS MINUS TIMES DIVIDE POW MOD ASSIGN NOT /*NEG*/
-%token DEREF ADDRESSOF MODASSIGN
+%token PLUS MINUS STAR DIVIDE POW MOD ASSIGN NOT /*NEG*/ /* minus is neg, star is times */
+%token MODASSIGN /* star is deref */
 %token EQ NEQ LT LEQ GT GEQ AND OR
 %token RETURN IF ELSE FOR WHILE DO BREAK CONTINUE
 %token INT CHAR VOID POINTER NULL
@@ -26,9 +26,9 @@ open Ast
 %left LT GT LEQ GEQ
 %left PLUS MINUS
 %right ACCESS
-%left TIMES DIVIDE MOD
+%left STAR DIVIDE MOD //star is times
 %left POW
-%right NOT NEG DEREF ADDRESSOF
+%right NOT MINUS STAR ADDRESSOF /* minus is neg, mod is addof, star is deref */
 
 %start program
 %type <Ast.program> program
@@ -67,7 +67,7 @@ typ:
   | MINT { Mint }
   | CURVE { Curve }
   | POINT { Point }
-  | typ POINTER { Pointer($1) }  // unclear if this is a proper declaration 
+  | typ POINTER { Pointer($1) }  // unclear if this is a proper declaration
 
 vdecl_list:
     /* nothing */    { [] }
@@ -103,9 +103,9 @@ expr:
   | ID               { Id($1) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
-  | expr TIMES  expr { Binop($1, Mult,  $3) }
+  | expr STAR  expr { Binop($1, Mult,  $3) } //star is times
   | expr DIVIDE expr { Binop($1, Div,   $3) }
-  | expr POW    expr { Binop($1, Exp,   $3) } 
+  | expr POW    expr { Binop($1, Exp,   $3) }
   | expr EQ     expr { Binop($1, Equal, $3) }
   | expr NEQ    expr { Binop($1, Neq,   $3) }
   | expr LT     expr { Binop($1, Less,  $3) }
@@ -114,15 +114,15 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | expr AND    expr { Binop($1, And,   $3) }
   | expr OR     expr { Binop($1, Or,    $3) }
-  | MINUS expr %prec NEG { Unop(Neg, $2) }
+  | MINUS expr %prec MINUS { Unop(Neg, $2) } /* second minus is neg */
   | NOT expr         { Unop(Not, $2) }
   | lval ASSIGN expr   { Assign($1, $3) } //changed ID to lval
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
   | NULL { Null }   /* Added all after this line in expr */
-  | DEREF expr       { Unop(Deref, $2) }
+  | STAR expr       { Unop(Deref, $2) } // star is deref
   | ADDRESSOF lval   { Unop(Addrof, $2) }  /* must be an lvalue */
-  | expr MOD expr { Binop($1, Mod, $3) } 
+  | expr MOD expr { Binop($1, Mod, $3) }
   | lval MODASSIGN expr  { ModAssign($1, $3) }
   | DBLQUOTE ID DBLQUOTE { String($2) } /* string literal */
   | SGLQUOTE ID SGLQUOTE { Char($2) } /* char literal */
@@ -135,8 +135,8 @@ expr:
 lval:
       ID                     { Id($1) }  /* can't be a function pointer ?? */
 //    | LPAREN lval RPAREN     { $2 }
-//    | DEREF expr             { Deref($2) }
-    
+//    | STAR expr             { Deref($2) } // star is deref
+
 actuals_opt:
     /* nothing */ { [] }
   | actuals_list  { List.rev $1 }

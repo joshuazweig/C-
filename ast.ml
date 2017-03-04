@@ -1,11 +1,11 @@
 (* Abstract Syntax Tree and functions for printing it *)
 
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
-          And | Or | Pow | Mod 
+          And | Or | Pow | Mod
 
 type uop = Neg | Not | Deref | AddrOf | Access
 
-type typ = Int | Char | Stone | Mint | Curve | Point | Void 
+type typ = Int | Char | Stone | Mint | Curve | Point | Void
 
 type bind = typ * string
 
@@ -86,7 +86,7 @@ let rec string_of_expr = function
   | String(s) -> s
   | Char(c) -> Char.escaped c
   | Constr(el) -> "{" ^ String.concat ", " (List.map string_of_expr el) ^ "}"
-  | Subscript(s, e) -> s ^ "[" ^ string_of_expr e ^ "]" 
+  | Subscript(s, e) -> s ^ "[" ^ string_of_expr e ^ "]"
 
 let rec string_of_stmt = function
     Block(stmts) ->
