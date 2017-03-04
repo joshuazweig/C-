@@ -9,7 +9,7 @@ rule token = parse
 | '}' { RBRACE }  | '<' { LT }     | "while" { WHILE }
 | ';' { SEMI }    | "<=" { LEQ }   | "return" { RETURN }
 | ',' { COMMA }   | ">" { GT }     | "int" { INT }
-| '+' { PLUS }    | ">=" { GEQ }   | "bool" { BOOL }
+| '+' { PLUS }    | ">=" { GEQ }   
 | '-' { MINUS }   | "&&" { AND }   | "void" { VOID }
 | '!' { NOT }     | "||" { OR }    | "true" { TRUE }
 | '/' { DIVIDE }  | "!" { NOT }    | "false" { FALSE }
