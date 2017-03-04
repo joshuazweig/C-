@@ -3,20 +3,20 @@
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
 | "/*" { comment lexbuf } (* Comments *)
-| '(' { LPAREN }  | '=' { ASSIGN } | "if" { IF }
-| ')' { RPAREN } | "==" { EQ }    | "else" { ELSE }
-| '{' { LBRACE }  | "!=" { NEQ }   | "for" { FOR }
-| '}' { RBRACE }  | '<' { LT }     | "while" { WHILE }
-| ';' { SEMI }    | "<=" { LEQ }   | "return" { RETURN }
-| ',' { COMMA }   | ">" { GT }     | "int" { INT }
+| '(' { LPAREN }  | '=' { ASSIGN }    | "if" { IF }
+| ')' { RPAREN }  | "==" { EQ }       | "else" { ELSE }
+| '{' { LBRACE }  | "!=" { NEQ }      | "for" { FOR }
+| '}' { RBRACE }  | '<' { LT }        | "while" { WHILE }
+| ';' { SEMI }    | "<=" { LEQ }      | "return" { RETURN }
+| ',' { COMMA }   | ">" { GT }        | "int" { INT }
 | '+' { PLUS }    | ">=" { GEQ }   
-| '-' { MINUS }   | "&&" { AND }   | "void" { VOID }
+| '-' { MINUS }   | "&&" { AND }      | "void" { VOID }
 | '!' { NOT }     | "||" { OR }    
 | '/' { DIVIDE }  | "!" { NOT }    
 | '[' { LSQUARE } | "%=" { MODASSIGN} | "break" { BREAK }
-| ']' { RSQUARE }                  | "do" { DO }
-| ':' { COLON }                    | "mint" { MINT }
-| '-' { MINUS }                     | "*" { STAR }
+| ']' { RSQUARE }                     | "do" { DO }
+| ':' { COLON }                       | "mint" { MINT }
+| '-' { MINUS }                       | "*" { STAR }
 | '%' { MOD }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
