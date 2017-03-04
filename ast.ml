@@ -23,6 +23,7 @@ type expr =
   | Char of char
   | Constr of expr list
   | Subscript of string * expr
+  | Inf of string
 
 type stmt =
     Block of stmt list
@@ -82,6 +83,7 @@ let rec string_of_expr = function
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
   | Null -> "NULL"  (* pointer to zero *)
+  | Inf -> "Inf"
   | ModAssign(v, e) -> v ^ " %= " ^ string_of_expr e
   | String(s) -> s
   | Char(c) -> Char.escaped c
