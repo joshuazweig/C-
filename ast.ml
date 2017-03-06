@@ -107,7 +107,7 @@ let rec string_of_stmt = function
   | Continue -> "continue;\n"
   | NullStmt -> ";\n"
 
-let string_of_typ = function
+let rec string_of_typ = function
     Int -> "int"
   | Ch -> "char"
   | Stone -> "stone"
@@ -115,6 +115,7 @@ let string_of_typ = function
   | Curve -> "curve"
   | Point -> "point"
   | Void -> "void"
+  | Pointer _ as t -> "pointer " ^ string_of_typ(t)
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
