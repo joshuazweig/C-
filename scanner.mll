@@ -17,7 +17,10 @@ rule token = parse
 | '-'      { MINUS }
 | '*'      { STAR }
 | '/'      { DIVIDE }
+| '%'      { MOD }
 | '='      { ASSIGN }
+| '^'      { POW }
+| "%="     { MODASSIGN }
 | "=="     { EQ }
 | "!="     { NEQ }
 | '<'      { LT }
@@ -42,6 +45,11 @@ rule token = parse
 | "stone"  { STONE }
 | "mint"   { CURVE }
 | "point"  { POINT }
+| "curve"  { CURVE }
+| '~'      { INF }
+| "access" { ACCESS }
+| '\''     { SGLQUOTE }
+| '"'      { DBLQUOTE }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | eof { EOF }

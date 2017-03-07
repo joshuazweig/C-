@@ -5,11 +5,11 @@ open Ast
 %}
 
 %token SEMI COMMA LPAREN RPAREN LBRACE RBRACE LSQUARE RSQUARE
-%token PLUS MINUS STAR DIVIDE MOD ASSIGN NOT /*NEG*/ /* minus is neg, star is times */
+%token PLUS MINUS STAR DIVIDE MOD ASSIGN NOT POW /*NEG*/ /* minus is neg, star is times */
 %token MODASSIGN /* star is deref*/
 %token EQ NEQ LT LEQ GT GEQ AND OR
 %token RETURN IF ELSE FOR WHILE DO BREAK CONTINUE
-%token INT CHAR VOID POINTER NULL
+%token INT CHAR VOID NULL 
 %token STONE MINT CURVE POINT INF ACCESS
 %token <int> LITERAL   //need string literals
 %token <string> ID
@@ -29,6 +29,7 @@ open Ast
 %left STAR DIVIDE MOD //star is times
 %left POW
 %right NOT NEG ADDRESSOF DEREF /* minus is neg, mod is addof, star is deref */
+%left POINTER
 
 %start program
 %type <Ast.program> program
@@ -67,7 +68,7 @@ typ:
   | MINT { Mint }
   | CURVE { Curve }
   | POINT { Point }
-  | typ POINTER { Pointer($1) }  // unclear if this is a proper declaration
+  | typ STAR %prec POINTER { Pointer($1) }  // unclear if this is a proper declaration
 
 vdecl_list:
     /* nothing */    { [] }
@@ -105,7 +106,7 @@ expr:
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr STAR   expr { Binop($1, Mult,  $3) } //star is times
   | expr DIVIDE expr { Binop($1, Div,   $3) }
-  | expr STAR STAR expr %prec POW{ Binop($1, Pow,   $3) }
+  | expr POW    expr { Binop($1, Pow,   $3) }
   | expr EQ     expr { Binop($1, Equal, $3) }
   | expr NEQ    expr { Binop($1, Neq,   $3) }
   | expr LT     expr { Binop($1, Less,  $3) }
