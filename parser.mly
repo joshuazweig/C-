@@ -4,8 +4,8 @@
 open Ast
 %}
 
-%token SEMI COMMA COLON LPAREN RPAREN LBRACE RBRACE LSQUARE RSQUARE
-%token PLUS MINUS STAR DIVIDE POW MOD ASSIGN NOT /*NEG*/ /* minus is neg, star is times */
+%token SEMI COMMA LPAREN RPAREN LBRACE RBRACE LSQUARE RSQUARE
+%token PLUS MINUS STAR DIVIDE MOD ASSIGN NOT /*NEG*/ /* minus is neg, star is times */
 %token MODASSIGN /* star is deref*/
 %token EQ NEQ LT LEQ GT GEQ AND OR
 %token RETURN IF ELSE FOR WHILE DO BREAK CONTINUE
@@ -61,7 +61,7 @@ formal_list:
 
 typ:
     INT { Int }
-  | CHAR { Ch }
+  | CHAR { Char }
   | VOID { Void }
   | STONE { Stone }
   | MINT { Mint }
@@ -105,7 +105,7 @@ expr:
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr STAR   expr { Binop($1, Mult,  $3) } //star is times
   | expr DIVIDE expr { Binop($1, Div,   $3) }
-  | expr POW    expr { Binop($1, Pow,   $3) }
+  | expr STAR STAR expr %prec POW{ Binop($1, Pow,   $3) }
   | expr EQ     expr { Binop($1, Equal, $3) }
   | expr NEQ    expr { Binop($1, Neq,   $3) }
   | expr LT     expr { Binop($1, Less,  $3) }
@@ -120,7 +120,7 @@ expr:
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
   | NULL { Null }   /* Added all after this line in expr */
-  | DEREF expr       { Unop(Deref, $2) } // star is deref
+  | STAR expr %prec DEREF     { Unop(Deref, $2) } // star is deref
   | ADDRESSOF expr   { Unop(AddrOf, $2) }  /* must be an lvalue, changed back to unop */
   | expr MOD expr { Binop($1, Mod, $3) }
   | ID MODASSIGN expr  { ModAssign($1, $3) }

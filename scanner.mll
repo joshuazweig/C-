@@ -1,28 +1,52 @@
+(* Ocamllex scanner for MicroC *)
+
 { open Parser }
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
-| "/*" { comment lexbuf } (* Comments *)
-| '(' { LPAREN }  | '=' { ASSIGN }    | "if" { IF }
-| ')' { RPAREN }  | "==" { EQ }       | "else" { ELSE }
-| '{' { LBRACE }  | "!=" { NEQ }      | "for" { FOR }
-| '}' { RBRACE }  | '<' { LT }        | "while" { WHILE }
-| ';' { SEMI }    | "<=" { LEQ }      | "return" { RETURN }
-| ',' { COMMA }   | ">" { GT }        | "int" { INT }
-| '+' { PLUS }    | ">=" { GEQ }   
-| '-' { MINUS }   | "&&" { AND }      | "void" { VOID }
-| '!' { NOT }     | "||" { OR }    
-| '/' { DIVIDE }  | "!" { NOT }    
-| '[' { LSQUARE } | "%=" { MODASSIGN} | "break" { BREAK }
-| ']' { RSQUARE }                     | "do" { DO }
-| ':' { COLON }                       | "mint" { MINT }
-| '-' { MINUS }                       | "*" { STAR }
-| '%' { MOD }
+| "/*"     { comment lexbuf }           (* Comments *)
+| '('      { LPAREN }
+| ')'      { RPAREN }
+| '{'      { LBRACE }
+| '}'      { RBRACE }
+| '['      { LSQUARE }
+| ']'      { RSQUARE }
+| ';'      { SEMI }
+| ','      { COMMA }
+| '+'      { PLUS }
+| '-'      { MINUS }
+| '*'      { STAR }
+| '/'      { DIVIDE }
+| '='      { ASSIGN }
+| "=="     { EQ }
+| "!="     { NEQ }
+| '<'      { LT }
+| "<="     { LEQ }
+| ">"      { GT }
+| ">="     { GEQ }
+| "&&"     { AND }
+| "||"     { OR }
+| "!"      { NOT }
+| "if"     { IF }
+| "else"   { ELSE }
+| "for"    { FOR }
+| "while"  { WHILE }
+| "do"     { DO }
+| "break"  { BREAK }
+| "continue" { CONTINUE }
+| "return" { RETURN }
+| "int"    { INT }
+| "void"   { VOID }
+| "char"   { CHAR }
+| "NULL"   { NULL }
+| "stone"  { STONE }
+| "mint"   { CURVE }
+| "point"  { POINT }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | eof { EOF }
-| _ as char { raise (Failure("illegal character " ^
-                              Char.escaped char)) }
+| _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
+
 and comment = parse
-    "*/" { token lexbuf }
-| _      { comment lexbuf }
+  "*/" { token lexbuf }
+| _    { comment lexbuf }

@@ -5,7 +5,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not | Deref | AddrOf | Access
 
-type typ = Int | Ch | Stone | Mint | Curve | Point | Void | Pointer of typ
+type typ = Int | Char | Stone | Mint | Curve | Point | Void | Pointer of typ
 
 type bind = typ * string
 
@@ -20,7 +20,7 @@ type expr =
   | Null
   | ModAssign of string * expr
   | String of string
-  | Ch of string (* Maybe change back to char *)
+  | Char of string (* Maybe change back to char *)
   | Constr of expr list
   | Subscript of string * expr
   | Inf
@@ -86,7 +86,7 @@ let rec string_of_expr = function
   | Inf -> "Inf"
   | ModAssign(v, e) -> v ^ " %= " ^ string_of_expr e
   | String(s) -> s
-  | Ch(c) -> c
+  | Char(c) -> c
   | Constr(el) -> "{" ^ String.concat ", " (List.map string_of_expr el) ^ "}"
   | Subscript(s, e) -> s ^ "[" ^ string_of_expr e ^ "]"
 
@@ -109,7 +109,7 @@ let rec string_of_stmt = function
 
 let rec string_of_typ = function
     Int -> "int"
-  | Ch -> "char"
+  | Char -> "char"
   | Stone -> "stone"
   | Mint -> "mint"
   | Curve -> "curve"
