@@ -1,6 +1,6 @@
 (* Semantic checking for the MicroC compiler *)
 
-open Ast
+(* open Ast *)
 
 module StringMap = Map.Make(String)
 
@@ -9,4 +9,5 @@ module StringMap = Map.Make(String)
 
    Check each global variable, then check each function *)
 
-let check (globals, functions) = () 
+let check (_globals, _functions) = 
+  () 
