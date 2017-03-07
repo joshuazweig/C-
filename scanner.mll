@@ -43,7 +43,7 @@ rule token = parse
 | "char"   { CHAR }
 | "NULL"   { NULL }
 | "stone"  { STONE }
-| "mint"   { CURVE }
+| "mint"   { MINT }
 | "point"  { POINT }
 | "curve"  { CURVE }
 | '~'      { INF }
