@@ -8,6 +8,6 @@ clean :
 	ocamlbuild -clean
 	rm -rf testall.log *.diff cmod scanner.ml parser.ml parser.mli
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o
-	rm -rf *.err *.ll *.diff
+	rm -rf *.err *.ll *.diff *.out
 .PHONY : all
 all : clean cmod.native

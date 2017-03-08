@@ -131,17 +131,6 @@ expr:
   | LBRACE actuals_list RBRACE  { Constr($2) } /* construct mints/stones */
   | ID LSQUARE expr RSQUARE { Subscript($1, $3) }
 
-
-//LVALS CUT OUT BELOW
-/* Added -- unclear if in grammar or semantic checking ? */
-/* Removed most lval in favor of handling during semantic checking */
-/* TODO: veryify */
-
-//lval:
-//      ID                     { Id($1) }  /* can't be a function pointer ?? */
-//    | LPAREN lval RPAREN     { $2 }
-//    | STAR expr             { Deref($2) } // star is deref
- 
 actuals_opt:
     /* nothing */ { [] }
   | actuals_list  { List.rev $1 }
