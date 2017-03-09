@@ -30,7 +30,6 @@ open Ast
 %left POW
 %right NOT NEG ADDRESSOF DEREF /* minus is neg, mod is addof, star is deref */
 %left POINTER
-%nonassoc CONSTRUCT
 
 %start program
 %type <Ast.program> program
