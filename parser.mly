@@ -4,13 +4,13 @@
 open Ast
 %}
 
-%token SEMI COMMA LPAREN RPAREN LBRACE RBRACE LSQUARE RSQUARE
+%token SEMI COMMA LPAREN RPAREN LBRACE RBRACE LSQUARE RSQUARE 
 %token PLUS MINUS STAR DIVIDE MOD ASSIGN NOT POW /*NEG*/ /* minus is neg, star is times */
-%token MODASSIGN /* star is deref*/
+%token MODASSIGN /* star is deref*/ 
 %token EQ NEQ LT LEQ GT GEQ AND OR
 %token RETURN IF ELSE FOR WHILE DO BREAK CONTINUE
 %token INT CHAR VOID NULL 
-%token STONE MINT CURVE POINT INF ACCESS
+%token STONE MINT CURVE POINT INF ACCESS 
 %token <int> LITERAL   //need string literals
 %token <string> ID
 %token SGLQUOTE DBLQUOTE
@@ -30,6 +30,7 @@ open Ast
 %left POW
 %right NOT NEG ADDRESSOF DEREF /* minus is neg, mod is addof, star is deref */
 %left POINTER
+%nonassoc CONSTRUCT
 
 %start program
 %type <Ast.program> program
@@ -124,11 +125,12 @@ expr:
   | NULL { Null }   /* Added all after this line in expr */
   | STAR expr %prec DEREF     { Unop(Deref, $2) } // star is deref
   | ADDRESSOF expr   { Unop(AddrOf, $2) }  /* must be an lvalue, changed back to unop */
-  | expr MOD expr { Binop($1, Mod, $3) }
+  | expr MOD expr { Binop($1,   Mod, $3) }
   | ID MODASSIGN expr  { ModAssign($1, $3) }
   | DBLQUOTE ID DBLQUOTE { String($2) } /* string literal */
   | SGLQUOTE ID SGLQUOTE { Ch($2) } /* char literal */
-  | LBRACE actuals_list RBRACE  { Constr($2) } /* construct mints/stones */
+  | LT expr COMMA expr GT { Twoparam($2, $4) }
+  | LT expr COMMA expr COMMA expr GT { Threeparam($2, $4, $6) }
   | ID LSQUARE expr RSQUARE { Subscript($1, $3) }
 
 actuals_opt:

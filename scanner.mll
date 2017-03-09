@@ -1,6 +1,8 @@
-(* Ocamllex scanner for MicroC *)
+  (* Ocamllex scanner for MicroC *)
 
 { open Parser }
+
+(* why are some string and some chars LT, GT eg *)
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
@@ -25,11 +27,11 @@ rule token = parse
 | "!="     { NEQ }
 | '<'      { LT }
 | "<="     { LEQ }
-| ">"      { GT }
+| '>'     { GT }
 | ">="     { GEQ }
 | "&&"     { AND }
 | "||"     { OR }
-| "!"      { NOT }
+| '!'      { NOT }
 | "if"     { IF }
 | "else"   { ELSE }
 | "for"    { FOR }
