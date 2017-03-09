@@ -29,7 +29,6 @@ open Ast
 %left STAR DIVIDE MOD //star is times
 %left POW
 %right NOT NEG ADDRESSOF DEREF /* minus is neg, mod is addof, star is deref */
-%left POINTER
 
 %start program
 %type <Ast.program> program
@@ -68,7 +67,7 @@ typ:
   | MINT { Mint }
   | CURVE { Curve }
   | POINT { Point }
-  | typ STAR %prec POINTER { Pointer($1) }  // unclear if this is a proper declaration
+  | typ STAR { Pointer($1) }  // unclear if this is a proper declaration
 
 vdecl_list:
     /* nothing */    { [] }
@@ -103,6 +102,7 @@ expr_opt:
 expr:
     LITERAL          { Literal($1) }
   | ID               { Id($1) }
+  | INF              { Inf }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr STAR   expr { Binop($1, Mult,  $3) } //star is times
@@ -131,6 +131,7 @@ expr:
   | LT expr COMMA expr GT { Construct2($2, $4) }
   | LT expr COMMA expr COMMA expr GT { Construct3($2, $4, $6) }
   | ID LSQUARE expr RSQUARE { Subscript($1, $3) }
+  | ACCESS expr { Unop(Access, $2) }
 
 actuals_opt:
     /* nothing */ { [] }
