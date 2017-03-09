@@ -5,10 +5,10 @@ open Ast
 %}
 
 %token SEMI COMMA LPAREN RPAREN LBRACE RBRACE LSQUARE RSQUARE 
-%token PLUS MINUS STAR DIVIDE MOD ASSIGN NOT POW /*NEG*/ /* minus is neg, star is times */
+%token PLUS MINUS STAR DIVIDE MOD ASSIGN NOT POW ADDRESSOF /*NEG*/ /* minus is neg, star is times */
 %token MODASSIGN /* star is deref*/ 
 %token EQ NEQ LT LEQ GT GEQ AND OR
-%token RETURN IF ELSE FOR WHILE DO BREAK CONTINUE
+%token RETURN IF ELSE FOR WHILE DO BREAK CONTINUE 
 %token INT CHAR VOID NULL 
 %token STONE MINT CURVE POINT INF ACCESS 
 %token <int> LITERAL   //need string literals

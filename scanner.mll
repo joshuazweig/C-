@@ -20,6 +20,7 @@ rule token = parse
 | '*'      { STAR }
 | '/'      { DIVIDE }
 | '%'      { MOD }
+| '&'      { ADDRESSOF }
 | '='      { ASSIGN }
 | '^'      { POW }
 | "%="     { MODASSIGN }
@@ -27,7 +28,7 @@ rule token = parse
 | "!="     { NEQ }
 | '<'      { LT }
 | "<="     { LEQ }
-| '>'     { GT }
+| '>'      { GT }
 | ">="     { GEQ }
 | "&&"     { AND }
 | "||"     { OR }
