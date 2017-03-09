@@ -14,6 +14,8 @@ type expr =
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
+  | Construct2 of expr * expr
+  | Construct3 of expr * expr * expr
   | Assign of string * expr
   | Call of string * expr list
   | Noexpr    (* not Null? *)
@@ -21,7 +23,6 @@ type expr =
   | ModAssign of string * expr
   | String of string
   | Ch of string (* Maybe change back to char *)
-  | Constr of expr list
   | Subscript of string * expr
   | Inf
 
@@ -87,7 +88,6 @@ let rec string_of_expr = function
   | ModAssign(v, e) -> v ^ " %= " ^ string_of_expr e
   | String(s) -> s
   | Ch (c) -> c
-  | Constr(el) -> "{" ^ String.concat ", " (List.map string_of_expr el) ^ "}"
   | Subscript(s, e) -> s ^ "[" ^ string_of_expr e ^ "]"
 
 let rec string_of_stmt = function
