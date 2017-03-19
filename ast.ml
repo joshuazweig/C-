@@ -1,11 +1,11 @@
 (* Abstract Syntax Tree and functions for printing it *)
 
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
-          And | Or | Pow | Mod 
+          And | Or | Pow | Mod
 
 type uop = Neg | Not | Deref | AddrOf | Access
 
-type typ = Int | Char | Stone | Mint | Curve | Point | Void 
+type typ = Int | Char | Stone | Mint | Curve | Point | Void | Pointer of typ
 
 type bind = typ * string
 
@@ -14,15 +14,17 @@ type expr =
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
+  | Construct2 of expr * expr
+  | Construct3 of expr * expr * expr
   | Assign of string * expr
   | Call of string * expr list
   | Noexpr    (* not Null? *)
   | Null
   | ModAssign of string * expr
   | String of string
-  | Char of char
-  | Constr of expr list
+  | Ch of string (* Maybe change back to char *)
   | Subscript of string * expr
+  | Inf
 
 type stmt =
     Block of stmt list
@@ -68,7 +70,7 @@ let string_of_uop = function
     Neg -> "-"
   | Not -> "!"
   | Deref -> "*"
-  | AddrOf -> "%"
+  | AddrOf -> "&"
   | Access -> "access"
 
 let rec string_of_expr = function
@@ -82,11 +84,11 @@ let rec string_of_expr = function
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
   | Null -> "NULL"  (* pointer to zero *)
+  | Inf -> "Inf"
   | ModAssign(v, e) -> v ^ " %= " ^ string_of_expr e
   | String(s) -> s
-  | Char(c) -> Char.escaped c
-  | Constr(el) -> "{" ^ String.concat ", " (List.map string_of_expr el) ^ "}"
-  | Subscript(s, e) -> s ^ "[" ^ string_of_expr e ^ "]" 
+  | Ch (c) -> c
+  | Subscript(s, e) -> s ^ "[" ^ string_of_expr e ^ "]"
 
 let rec string_of_stmt = function
     Block(stmts) ->
@@ -105,7 +107,7 @@ let rec string_of_stmt = function
   | Continue -> "continue;\n"
   | NullStmt -> ";\n"
 
-let string_of_typ = function
+let rec string_of_typ = function
     Int -> "int"
   | Char -> "char"
   | Stone -> "stone"
@@ -113,6 +115,7 @@ let string_of_typ = function
   | Curve -> "curve"
   | Point -> "point"
   | Void -> "void"
+  | Pointer _ as t -> "pointer " ^ string_of_typ(t)
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
