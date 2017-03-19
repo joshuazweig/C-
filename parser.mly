@@ -127,7 +127,7 @@ expr:
   | ADDRESSOF expr   { Unop(AddrOf, $2) }  /* must be an lvalue, changed back to unop */
   | expr MOD expr { Binop($1,   Mod, $3) }
   | ID MODASSIGN expr  { ModAssign($1, $3) }
-  | DBLQUOTE ID DBLQUOTE { String($2) } /* string literal */
+  | STRING { String($1) } /* string literal */
   | SGLQUOTE ID SGLQUOTE { Ch($2) } /* char literal */
   | LT expr COMMA expr GT { Construct2($2, $4) }
   | LT expr COMMA expr COMMA expr GT { Construct3($2, $4, $6) }
