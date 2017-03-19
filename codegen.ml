@@ -27,11 +27,11 @@ let translate (globals, functions) =
   let ltype_of_typ = function
       A.Int -> i32_t
     | A.Char -> i8_t
-    | A.Stone ->
-    | A.Mint ->
-    | A.Curve -> 
-    | A.Point ->
-    | A.Pointer _ -> 
+    | A.Stone -> i8_t
+    | A.Mint -> i8_t
+    | A.Curve -> i8_t
+    | A.Point -> i8_t
+    | A.Pointer _ -> i8_t
     | A.Void -> void_t in
 
   (* Declare each global variable; remember its value in a map *)
@@ -86,32 +86,46 @@ let translate (globals, functions) =
 
     (* Construct code for an expression; return its value *)
     let rec expr builder = function
-	A.Literal i -> L.const_int i32_t i
+	    A.Literal i -> L.const_int i32_t i
       (*| A.BoolLit b -> L.const_int i1_t (if b then 1 else 0) *)
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
+      | A.Inf ->
+      | A.Null ->
+      | A.ModAssign (i, e) -> 
+      | A.String s -> 
+      | A.Ch c ->
+      | A.Construct2 (a, b) ->              (* for both mints and curves, and points at infinity *)
+      | A.Construct3 (c, a, b) ->           (* for points, on a curve *)
+      | A.Subscript (i, e) -> 
       | A.Binop (e1, op, e2) ->
-	  let e1' = expr builder e1
-	  and e2' = expr builder e2 in
-	  (match op with
-	    A.Add     -> L.build_add
-	  | A.Sub     -> L.build_sub
-	  | A.Mult    -> L.build_mul
+    	  let e1' = expr builder e1
+    	  and e2' = expr builder e2 in
+    	  (match op with
+    	    A.Add     -> L.build_add  (* Need to change this type to type *)
+      	  | A.Sub     -> L.build_sub
+      	  | A.Mult    -> L.build_mul
           | A.Div     -> L.build_sdiv
-	  | A.And     -> L.build_and
-	  | A.Or      -> L.build_or
-	  | A.Equal   -> L.build_icmp L.Icmp.Eq
-	  | A.Neq     -> L.build_icmp L.Icmp.Ne
-	  | A.Less    -> L.build_icmp L.Icmp.Slt
-	  | A.Leq     -> L.build_icmp L.Icmp.Sle
-	  | A.Greater -> L.build_icmp L.Icmp.Sgt
-	  | A.Geq     -> L.build_icmp L.Icmp.Sge
-	  ) e1' e2' "tmp" builder
+          | A.Pow     -> 
+          | A.Mod     -> 
+      	  | A.And     -> L.build_and
+      	  | A.Or      -> L.build_or
+      	  | A.Equal   -> L.build_icmp L.Icmp.Eq
+      	  | A.Neq     -> L.build_icmp L.Icmp.Ne
+      	  | A.Less    -> L.build_icmp L.Icmp.Slt
+      	  | A.Leq     -> L.build_icmp L.Icmp.Sle
+      	  | A.Greater -> L.build_icmp L.Icmp.Sgt
+      	  | A.Geq     -> L.build_icmp L.Icmp.Sge
+    	  ) e1' e2' "tmp" builder
       | A.Unop(op, e) ->
-	  let e' = expr builder e in
-	  (match op with
-	    A.Neg     -> L.build_neg
-          | A.Not     -> L.build_not) e' "tmp" builder
+    	  let e' = expr builder e in
+    	  (match op with
+    	    A.Neg     -> L.build_neg
+          | A.Not     -> L.build_not
+          | A.Deref   ->
+          | A.AddrOf  -> 
+          | A.Access  ->
+        ) e' "tmp" builder
       | A.Assign (s, e) -> let e' = expr builder e in
 	                   ignore (L.build_store e' (lookup s) builder); e'
       | A.Call ("print", [e]) | A.Call ("printb", [e]) ->
