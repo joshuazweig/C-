@@ -13,6 +13,7 @@ open Ast
 %token STONE MINT CURVE POINT INF ACCESS 
 %token <int> LITERAL   //need string literals
 %token <string> ID
+%token <string> STRING
 %token SGLQUOTE DBLQUOTE
 %token EOF
 
