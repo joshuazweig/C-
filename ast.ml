@@ -174,7 +174,7 @@ let rec token_of_expr = function
   | ModAssign(v, e) -> v ^ " MODASSIGN " ^ token_of_expr e
   | String(s) -> s (* TODO *)
   | Ch (c) -> c (* TODO *)
-  | Subscript(s, e) -> "ID LSQUARE " ^ token_of_expr e ^ " RSQUARE"
+  | Subscript(_, e) -> "ID LSQUARE " ^ token_of_expr e ^ " RSQUARE"
   | Construct2(e1, e2) ->
       "LBRACE " ^ token_of_expr e1 ^ " COMMA " ^ token_of_expr e2 ^ " RBRACE"
   | Construct3(e1, e2, e3) ->
