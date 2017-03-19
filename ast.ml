@@ -159,12 +159,12 @@ let token_of_uop = function
   | Access -> "ACCESS"
 
 let rec token_of_expr = function
-    Literal(l) -> "LITERAL"
-  | Id(s) -> "ID"
+    Literal(_) -> "LITERAL"
+  | Id(_) -> "ID"
   | Binop(e1, o, e2) ->
       token_of_expr e1 ^ " " ^ token_of_op o ^ " " ^ token_of_expr e2
   | Unop(o, e) -> token_of_uop o ^ token_of_expr e
-  | Assign(v, e) -> "ID ASSIGN " ^ token_of_expr e
+  | Assign(_, e) -> "ID ASSIGN " ^ token_of_expr e
   | Call(f, el) ->
       f ^ "LPAREN" ^ String.concat "COMMA " (List.map token_of_expr el) ^ "RPAREN"
   | Noexpr -> ""
@@ -202,7 +202,7 @@ let rec token_of_typ = function
   | Void -> "VOID"
   | Pointer _ as t -> "pointer " ^ token_of_typ(t) (* TODO *)
 
-let token_of_vdecl (t, id) = token_of_typ t ^ " ID SEMI "
+let token_of_vdecl (t, _) = token_of_typ t ^ " ID SEMI "
 
 let token_of_fdecl fdecl =
   token_of_typ fdecl.typ ^ " " ^
