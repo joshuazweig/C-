@@ -83,7 +83,7 @@ let translate (globals, functions) =
     let rec expr builder = function
 	A.Literal i -> L.const_int i32_t i
       (*| A.BoolLit b -> L.const_int i1_t (if b then 1 else 0) *)
-      | A.String s -> L.const_string context s
+      | A.String s -> L.build_global_stringptr s s builder
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
       | A.Binop (e1, op, e2) ->
@@ -116,8 +116,7 @@ let translate (globals, functions) =
       | A.Call ("printf", act) ->
           let actuals = List.rev (List.map (expr builder)
           (List.rev act)) in
-         let result = (match fdecl.A.typ with A.Void -> ""
-                                            | _ -> "printf_result") in
+          let result = "" in  (* printf is void function *)
           L.build_call printf_func (Array.of_list actuals) result builder
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
