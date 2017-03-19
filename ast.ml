@@ -135,30 +135,30 @@ let string_of_program (vars, funcs) =
 
 
 
-let string_of_op = function
-    Add -> "+"
-  | Sub -> "-"
-  | Mult -> "*"
-  | Div -> "/"
-  | Mod -> "%"
-  | Pow -> "**"
-  | Equal -> "=="
-  | Neq -> "!="
-  | Less -> "<"
-  | Leq -> "<="
-  | Greater -> ">"
-  | Geq -> ">="
-  | And -> "&&"
-  | Or -> "||"
+let token_of_op = function
+    Add -> "PLUS"
+  | Sub -> "MINUS"
+  | Mult -> "STAR"
+  | Div -> "DIVIDE"
+  | Mod -> "MOD"
+  | Pow -> "POW"
+  | Equal -> "EQ"
+  | Neq -> "NEQ"
+  | Less -> "LT"
+  | Leq -> "LEQ"
+  | Greater -> "GT"
+  | Geq -> "GEQ"
+  | And -> "AND"
+  | Or -> "OR"
 
 let string_of_uop = function
-    Neg -> "-"
-  | Not -> "!"
-  | Deref -> "*"
-  | AddrOf -> "&"
-  | Access -> "access"
+    Neg -> "MINUS"
+  | Not -> "NOT"
+  | Deref -> "STAR"
+  | AddrOf -> "ADDRESOF"
+  | Access -> "ACCESS"
 
-let rec string_of_expr = function
+let rec token_of_expr = function
     Literal(l) -> string_of_int l
   | Id(s) -> s
   | Binop(e1, o, e2) ->
@@ -175,7 +175,7 @@ let rec string_of_expr = function
   | Ch (c) -> c
   | Subscript(s, e) -> s ^ "[" ^ string_of_expr e ^ "]"
 
-let rec string_of_stmt = function
+let rec token_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
@@ -192,7 +192,7 @@ let rec string_of_stmt = function
   | Continue -> "continue;\n"
   | NullStmt -> ";\n"
 
-let rec string_of_typ = function
+let rec token_of_typ = function
     Int -> "INT"
   | Char -> "CHAR"
   | Stone -> "STONE"
@@ -202,9 +202,9 @@ let rec string_of_typ = function
   | Void -> "VOID"
   | Pointer _ as t -> "pointer " ^ string_of_typ(t)
 
-let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
+let token_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
-let string_of_fdecl fdecl =
+let token_of_fdecl fdecl =
   string_of_typ fdecl.typ ^ " " ^
   fdecl.fname ^ "(" ^ String.concat ", " (List.map snd fdecl.formals) ^
   ")\n{\n" ^
