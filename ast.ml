@@ -174,7 +174,7 @@ let rec token_of_expr = function
   | ModAssign(v, e) -> v ^ " MODASSIGN " ^ token_of_expr e
   | String(s) -> s (* TODO *)
   | Ch (c) -> c (* TODO *)
-  | Subscript(s, e) -> s ^ "LSQUARE " ^ token_of_expr e ^ " RSQUARE" (* TODO *)
+  | Subscript(s, e) -> "ID LSQUARE " ^ token_of_expr e ^ " RSQUARE"
   | Construct2(e1, e2) ->
       "LBRACE " ^ token_of_expr e1 ^ " COMMA " ^ token_of_expr e2 ^ " RBRACE"
   | Construct3(e1, e2, e3) ->
@@ -219,5 +219,5 @@ let token_of_fdecl fdecl =
   "RBRACE "
 
 let string_of_tokens (vars, funcs) =
-  String.concat "" (List.map token_of_vdecl vars) ^ "\n" ^
+  String.concat "" (List.map token_of_vdecl vars)  ^
   String.concat "\n" (List.map token_of_fdecl funcs) ^ "\n"
