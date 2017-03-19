@@ -151,7 +151,7 @@ let token_of_op = function
   | And -> "AND"
   | Or -> "OR"
 
-let string_of_uop = function
+let token_of_uop = function
     Neg -> "MINUS"
   | Not -> "NOT"
   | Deref -> "STAR"
@@ -162,32 +162,32 @@ let rec token_of_expr = function
     Literal(l) -> string_of_int l
   | Id(s) -> s
   | Binop(e1, o, e2) ->
-      string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
-  | Unop(o, e) -> string_of_uop o ^ string_of_expr e
-  | Assign(v, e) -> v ^ " = " ^ string_of_expr e
+      token_of_expr e1 ^ " " ^ token_of_op o ^ " " ^ token_of_expr e2
+  | Unop(o, e) -> token_of_uop o ^ token_of_expr e
+  | Assign(v, e) -> v ^ " = " ^ token_of_expr e
   | Call(f, el) ->
-      f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+      f ^ "(" ^ String.concat ", " (List.map token_of_expr el) ^ ")"
   | Noexpr -> ""
   | Null -> "NULL"  (* pointer to zero *)
   | Inf -> "Inf"
-  | ModAssign(v, e) -> v ^ " %= " ^ string_of_expr e
+  | ModAssign(v, e) -> v ^ " %= " ^ token_of_expr e
   | String(s) -> s
   | Ch (c) -> c
-  | Subscript(s, e) -> s ^ "[" ^ string_of_expr e ^ "]"
+  | Subscript(s, e) -> s ^ "[" ^ token_of_expr e ^ "]"
 
 let rec token_of_stmt = function
     Block(stmts) ->
-      "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
-  | Expr(expr) -> string_of_expr expr ^ ";\n";
-  | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
-  | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
-  | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
-      string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
+      "{\n" ^ String.concat "" (List.map token_of_stmt stmts) ^ "}\n"
+  | Expr(expr) -> token_of_expr expr ^ ";\n";
+  | Return(expr) -> "return " ^ token_of_expr expr ^ ";\n";
+  | If(e, s, Block([])) -> "if (" ^ token_of_expr e ^ ")\n" ^ token_of_stmt s
+  | If(e, s1, s2) ->  "if (" ^ token_of_expr e ^ ")\n" ^
+      token_of_stmt s1 ^ "else\n" ^ token_of_stmt s2
   | For(e1, e2, e3, s) ->
-      "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
-      string_of_expr e3  ^ ") " ^ string_of_stmt s
-  | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
-  | DoWhile(s, e) -> "do { \n" ^ string_of_stmt s ^ "\n} while (" ^ string_of_expr e ^ ")\n"
+      "for (" ^ token_of_expr e1  ^ " ; " ^ token_of_expr e2 ^ " ; " ^
+      token_of_expr e3  ^ ") " ^ token_of_stmt s
+  | While(e, s) -> "while (" ^ token_of_expr e ^ ") " ^ token_of_stmt s
+  | DoWhile(s, e) -> "do { \n" ^ token_of_stmt s ^ "\n} while (" ^ token_of_expr e ^ ")\n"
   | Break -> "break;\n"
   | Continue -> "continue;\n"
   | NullStmt -> ";\n"
@@ -200,18 +200,18 @@ let rec token_of_typ = function
   | Curve -> "CURVE"
   | Point -> "POINT"
   | Void -> "VOID"
-  | Pointer _ as t -> "pointer " ^ string_of_typ(t)
+  | Pointer _ as t -> "pointer " ^ token_of_typ(t)
 
 let token_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
 let token_of_fdecl fdecl =
-  string_of_typ fdecl.typ ^ " " ^
+  token_of_typ fdecl.typ ^ " " ^
   fdecl.fname ^ "(" ^ String.concat ", " (List.map snd fdecl.formals) ^
   ")\n{\n" ^
-  String.concat "" (List.map string_of_vdecl fdecl.locals) ^
-  String.concat "" (List.map string_of_stmt fdecl.body) ^
+  String.concat "" (List.map token_of_vdecl fdecl.locals) ^
+  String.concat "" (List.map token_of_stmt fdecl.body) ^
   "}\n"
 
 let string_of_tokens (vars, funcs) =
-  String.concat "" (List.map tokens_of_vdecl vars) ^ "\n" ^
-  String.concat "\n" (List.map tokens_of_fdecl funcs)
+  String.concat "" (List.map token_of_vdecl vars) ^ "\n" ^
+  String.concat "\n" (List.map token_of_fdecl funcs)
