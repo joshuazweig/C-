@@ -89,6 +89,9 @@ let rec string_of_expr = function
   | String(s) -> s
   | Ch (c) -> c
   | Subscript(s, e) -> s ^ "[" ^ string_of_expr e ^ "]"
+  | Construct2(e1, e2) -> "{" ^ string_of_expr e1 ^ ", " ^ string_of_expr e2 ^ "}"
+  | Construct3(e1, e2, e3) ->
+      "{" ^ string_of_expr e1 ^ ", " ^ string_of_expr e2 ^ ", " ^ string_of_expr e3 ^ "}"
 
 let rec string_of_stmt = function
     Block(stmts) ->
@@ -174,6 +177,11 @@ let rec token_of_expr = function
   | String(s) -> s (* TODO *)
   | Ch (c) -> c (* TODO *)
   | Subscript(s, e) -> s ^ "LSQUARE " ^ token_of_expr e ^ " RSQUARE" (* TODO *)
+  | Construct2(e1, e2) ->
+      "LBRACE " ^ token_of_expr e1 ^ " COMMA " ^ token_of_expr e2 ^ " RBRACE"
+  | Construct3(e1, e2, e3) ->
+      "LBRACE " ^ token_of_expr e1 ^ " COMMA " ^ token_of_expr e2 ^
+      "COMMA " ^ token_of_expr e3 ^ " RBRACE"
 
 let rec token_of_stmt = function
     Block(stmts) ->
