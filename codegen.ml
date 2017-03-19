@@ -26,7 +26,12 @@ let translate (globals, functions) =
 
   let ltype_of_typ = function
       A.Int -> i32_t
-   (*| A.Bool -> i1_t *)
+    | A.Char -> i8_t
+    | A.Stone ->
+    | A.Mint ->
+    | A.Curve -> 
+    | A.Point ->
+    | A.Pointer _ -> 
     | A.Void -> void_t in
 
   (* Declare each global variable; remember its value in a map *)
