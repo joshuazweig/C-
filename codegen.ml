@@ -82,7 +82,7 @@ let translate (globals, functions) =
     (* Construct code for an expression; return its value *)
     let rec expr builder = function
 	A.Literal i -> L.const_int i32_t i
-      | A.String s -> L.const_stringz context s 
+      | A.String s -> (*L.const_string context s*) L.build_global_stringptr (s^"\n") "fmts" builder 
       (*| A.BoolLit b -> L.const_int i1_t (if b then 1 else 0) *)
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
@@ -113,7 +113,7 @@ let translate (globals, functions) =
       | A.Call ("print", [e]) | A.Call ("printb", [e]) ->
 	  L.build_call printf_func [| int_format_str ; (expr builder e) |]
 	    "printf" builder
-      | A.Call("prints", [e]) -> let s = L.string_of_llvalue (expr builder e) in print_string s; 
+      | A.Call("prints", [e]) -> (*let s = L.string_of_llvalue (expr builder e) in print_string s;*) 
       L.build_call printf_func [| (expr builder e) |]
       "printf" builder
       | A.Call (f, act) ->
