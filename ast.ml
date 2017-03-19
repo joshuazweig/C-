@@ -173,20 +173,20 @@ let rec token_of_expr = function
   | ModAssign(v, e) -> v ^ " MODASSIGN " ^ token_of_expr e
   | String(s) -> s (* TODO *)
   | Ch (c) -> c (* TODO *)
-  | Subscript(s, e) -> s ^ "[" ^ token_of_expr e ^ "]" (* TODO *)
+  | Subscript(s, e) -> s ^ "LSQUARE " ^ token_of_expr e ^ " RSQUARE" (* TODO *)
 
 let rec token_of_stmt = function
     Block(stmts) ->
-      "LBRACE " ^ String.concat "" (List.map token_of_stmt stmts) ^ "RBRACE "
-  | Expr(expr) -> token_of_expr expr ^ "SEMI ";
-  | Return(expr) -> "RETURN " ^ token_of_expr expr ^ "SEMI ";
-  | If(e, s, Block([])) -> "IF LPAREN" ^ token_of_expr e ^ "RPAREN " ^ token_of_stmt s
-  | If(e, s1, s2) ->  "IF LPAREN" ^ token_of_expr e ^ "RPAREN " ^
+      "LBRACE " ^ String.concat "" (List.map token_of_stmt stmts) ^ " RBRACE "
+  | Expr(expr) -> token_of_expr expr ^ " SEMI ";
+  | Return(expr) -> "RETURN " ^ token_of_expr expr ^ " SEMI ";
+  | If(e, s, Block([])) -> "IF LPAREN " ^ token_of_expr e ^ " RPAREN " ^ token_of_stmt s
+  | If(e, s1, s2) ->  "IF LPAREN " ^ token_of_expr e ^ " RPAREN " ^
       token_of_stmt s1 ^ "ELSE " ^ token_of_stmt s2
   | For(e1, e2, e3, s) ->
       "FOR LPAREN" ^ token_of_expr e1  ^ " SEMI " ^ token_of_expr e2 ^ " SEMI " ^
       token_of_expr e3  ^ "RPAREN " ^ token_of_stmt s
-  | While(e, s) -> "WHILE LPAREN" ^ token_of_expr e ^ "RPAREN " ^ token_of_stmt s
+  | While(e, s) -> "WHILE LPAREN " ^ token_of_expr e ^ " RPAREN " ^ token_of_stmt s
   | DoWhile(s, e) -> "DO LBRACE " ^ token_of_stmt s ^ " RBRACE WHILE LPAREN" ^ token_of_expr e ^ "RPAREN "
   | Break -> "BREAK SEMI "
   | Continue -> "CONTINUE SEMI "
@@ -202,11 +202,11 @@ let rec token_of_typ = function
   | Void -> "VOID"
   | Pointer _ as t -> "pointer " ^ token_of_typ(t) (* TODO *)
 
-let token_of_vdecl (t, id) = token_of_typ t ^ " ID SEMI"
+let token_of_vdecl (t, id) = token_of_typ t ^ " ID SEMI "
 
 let token_of_fdecl fdecl =
   token_of_typ fdecl.typ ^ " " ^
-  fdecl.fname ^ "LPAREN" ^ String.concat "COMMA " (List.map snd fdecl.formals) ^
+  "ID LPAREN " ^ String.concat "COMMA " (List.map snd fdecl.formals) ^
   "RPAREN LBRACE " ^
   String.concat "" (List.map token_of_vdecl fdecl.locals) ^
   String.concat "" (List.map token_of_stmt fdecl.body) ^
@@ -214,4 +214,4 @@ let token_of_fdecl fdecl =
 
 let string_of_tokens (vars, funcs) =
   String.concat "" (List.map token_of_vdecl vars) ^ "\n" ^
-  String.concat "\n" (List.map token_of_fdecl funcs)
+  String.concat "\n" (List.map token_of_fdecl funcs) ^ "\n"
