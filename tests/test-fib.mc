@@ -12,5 +12,6 @@ int main()
   print(fib(3));
   print(fib(4));
   print(fib(5));
+  prints("Done!");
   return 0;
 }

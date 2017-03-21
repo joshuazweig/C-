@@ -89,9 +89,9 @@ let rec string_of_expr = function
   | String(s) -> s
   | Ch (c) -> c
   | Subscript(s, e) -> s ^ "[" ^ string_of_expr e ^ "]"
-  | Construct2(e1, e2) -> "<" ^ string_of_expr e1 ^ ", " ^ string_of_expr e2 ^ ">"
-  | Construct3(e1, e2, e3) -> "<" ^ string_of_expr e1 ^ ", " ^ string_of_expr e2 ^ ", " ^ string_of_expr e2 ^ ">"
-
+  | Construct2(e1, e2) -> "{" ^ string_of_expr e1 ^ ", " ^ string_of_expr e2 ^ "}"
+  | Construct3(e1, e2, e3) ->
+      "{" ^ string_of_expr e1 ^ ", " ^ string_of_expr e2 ^ ", " ^ string_of_expr e3 ^ "}"
 
 let rec string_of_stmt = function
     Block(stmts) ->
@@ -133,3 +133,91 @@ let string_of_fdecl fdecl =
 let string_of_program (vars, funcs) =
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl funcs)
+
+
+
+let token_of_op = function
+    Add -> "PLUS"
+  | Sub -> "MINUS"
+  | Mult -> "STAR"
+  | Div -> "DIVIDE"
+  | Mod -> "MOD"
+  | Pow -> "POW"
+  | Equal -> "EQ"
+  | Neq -> "NEQ"
+  | Less -> "LT"
+  | Leq -> "LEQ"
+  | Greater -> "GT"
+  | Geq -> "GEQ"
+  | And -> "AND"
+  | Or -> "OR"
+
+let token_of_uop = function
+    Neg -> "MINUS"
+  | Not -> "NOT"
+  | Deref -> "STAR"
+  | AddrOf -> "ADDRESOF"
+  | Access -> "ACCESS"
+
+let rec token_of_expr = function
+    Literal(_) -> "LITERAL"
+  | Id(_) -> "ID"
+  | Binop(e1, o, e2) ->
+      token_of_expr e1 ^ " " ^ token_of_op o ^ " " ^ token_of_expr e2
+  | Unop(o, e) -> token_of_uop o ^ token_of_expr e
+  | Assign(_, e) -> "ID ASSIGN " ^ token_of_expr e
+  | Call(f, el) ->
+      f ^ "LPAREN" ^ String.concat "COMMA " (List.map token_of_expr el) ^ "RPAREN"
+  | Noexpr -> ""
+  | Null -> "NULL"  (* pointer to zero *)
+  | Inf -> "INF"
+  | ModAssign(v, e) -> v ^ " MODASSIGN " ^ token_of_expr e
+  | String(s) -> s (* TODO *)
+  | Ch (c) -> c (* TODO *)
+  | Subscript(_, e) -> "ID LSQUARE " ^ token_of_expr e ^ " RSQUARE"
+  | Construct2(e1, e2) ->
+      "LBRACE " ^ token_of_expr e1 ^ " COMMA " ^ token_of_expr e2 ^ " RBRACE"
+  | Construct3(e1, e2, e3) ->
+      "LBRACE " ^ token_of_expr e1 ^ " COMMA " ^ token_of_expr e2 ^
+      "COMMA " ^ token_of_expr e3 ^ " RBRACE"
+
+let rec token_of_stmt = function
+    Block(stmts) ->
+      "LBRACE " ^ String.concat "" (List.map token_of_stmt stmts) ^ " RBRACE "
+  | Expr(expr) -> token_of_expr expr ^ " SEMI ";
+  | Return(expr) -> "RETURN " ^ token_of_expr expr ^ " SEMI ";
+  | If(e, s, Block([])) -> "IF LPAREN " ^ token_of_expr e ^ " RPAREN " ^ token_of_stmt s
+  | If(e, s1, s2) ->  "IF LPAREN " ^ token_of_expr e ^ " RPAREN " ^
+      token_of_stmt s1 ^ "ELSE " ^ token_of_stmt s2
+  | For(e1, e2, e3, s) ->
+      "FOR LPAREN" ^ token_of_expr e1  ^ " SEMI " ^ token_of_expr e2 ^ " SEMI " ^
+      token_of_expr e3  ^ "RPAREN " ^ token_of_stmt s
+  | While(e, s) -> "WHILE LPAREN " ^ token_of_expr e ^ " RPAREN " ^ token_of_stmt s
+  | DoWhile(s, e) -> "DO LBRACE " ^ token_of_stmt s ^ " RBRACE WHILE LPAREN" ^ token_of_expr e ^ "RPAREN "
+  | Break -> "BREAK SEMI "
+  | Continue -> "CONTINUE SEMI "
+  | NullStmt -> "SEMI "
+
+let rec token_of_typ = function
+    Int -> "INT"
+  | Char -> "CHAR"
+  | Stone -> "STONE"
+  | Mint -> "MINT"
+  | Curve -> "CURVE"
+  | Point -> "POINT"
+  | Void -> "VOID"
+  | Pointer _ as t -> "pointer " ^ token_of_typ(t) (* TODO *)
+
+let token_of_vdecl (t, _) = token_of_typ t ^ " ID SEMI "
+
+let token_of_fdecl fdecl =
+  token_of_typ fdecl.typ ^ " " ^
+  "ID LPAREN " ^ String.concat "COMMA " (List.map snd fdecl.formals) ^
+  "RPAREN LBRACE " ^
+  String.concat "" (List.map token_of_vdecl fdecl.locals) ^
+  String.concat "" (List.map token_of_stmt fdecl.body) ^
+  "RBRACE "
+
+let string_of_tokens (vars, funcs) =
+  String.concat "" (List.map token_of_vdecl vars)  ^
+  String.concat "\n" (List.map token_of_fdecl funcs) ^ "\n"
