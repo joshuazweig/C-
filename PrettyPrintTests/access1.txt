@@ -1,0 +1,5 @@
+int main() {
+    mint m;
+    access m;
+}
+
