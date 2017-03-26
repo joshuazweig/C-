@@ -1,0 +1,4 @@
+int main() {
+    printf("%s\n%s\n", "Hello World!", "\t o k \'\"");
+    return 0;
+}
