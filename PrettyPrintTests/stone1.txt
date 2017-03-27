@@ -1,0 +1,5 @@
+int main() {
+    stone x;
+    x = 5;
+}
+

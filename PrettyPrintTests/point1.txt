@@ -1,0 +1,7 @@
+int main() {
+    curve c;
+    point p;
+    
+    p = <c, 5, 6>;
+}
+
