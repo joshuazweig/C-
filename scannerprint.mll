@@ -1,3 +1,5 @@
+(* Prints program tokens *)
+
 { open Printf }
 
 rule token = parse
