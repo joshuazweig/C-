@@ -5,41 +5,45 @@ struct stone {
 };
 
 struct mint {
-	stone val;
-	const stone mod;
+	struct stone val;
+	struct stone mod; //should be immutable
 };
 
 struct curve {
-	mint a;
-	mint b;	
+	struct mint a;
+	struct mint b;	
 };
 
 struct point {
-	curve c;
-	stone x;
-	stone y;
+	struct curve c;
+	struct stone x;
+	struct stone y;
 	int inf;
 };
 
-stone *access(mint x) {
-	return stone a[] = { x.val, x.mod }; 
+struct stone *access_m(struct mint x) {
+	struct stone a[] = { x.val, x.mod }; 
+	return &a[0];
 }
 
-stone *access(curve c) {
-	stone *a = access(c.a);
-	stone *b = access(c.b);
-	return stone a[] = { a[0], a[1], b[0], b[1] };
+struct stone *access_c(struct curve c) {
+	struct stone *a = access_m(c.a);
+	struct stone *b = access_m(c.b);
+	struct stone z[] = { a[0], a[1], b[0], b[1] };
+	return z;
 }
 
-stone *access(point p) {
-	stone *c = access(p.c);
-	return stone a[] = { c[0], c[1], c[2], c[3], p.x, p.y };
+struct stone *access_p(struct point p) {
+	struct stone *c = access_c(p.c);
+	struct stone a[] = { c[0], c[1], c[2], c[3], p.x, p.y };
+	return a;
 }
 
 int main() {
 
 	// construct 2 mints from 4 stones
-	struct stone v, md;
+	struct stone v;
+	struct stone md;
 	v.val = 12;
 	md.val = 29;
 
@@ -47,7 +51,8 @@ int main() {
 	m.val = v;
 	m.mod = md;
 
-	struct stone v1, md1;
+	struct stone v1;
+	struct stone md1;
 	v1.val = 13;
 	md1.val = 29;
 
@@ -66,12 +71,14 @@ int main() {
 	y.val = 13;
 
 	struct point p;
-	p.curve = c;
+	p.c = c;
 	p.x = x;
 	p.y = y;
 	p.inf = 0;  // not infinity
 
 	// test access
+
+	return 0;
 
 }
 
