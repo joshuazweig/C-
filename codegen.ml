@@ -109,7 +109,7 @@ let translate (globals, functions) =
       | A.Ch c ->
       | A.Construct2 (a, b) ->              (* for both mints and curves, and points at infinity *)
       | A.Construct3 (c, a, b) ->             (* for points, on a curve *)
-      | A.Subscript (i, e) -> 
+      | A.Subscript (i, e) ->  
       | A.Binop (e1, op, e2) ->
         let e1' = expr builder e1
         and e2' = expr builder e2 in
@@ -134,9 +134,9 @@ let translate (globals, functions) =
         (match op with
           A.Neg     -> L.build_neg
           | A.Not     -> L.build_not
-          | A.Deref   ->
-          | A.AddrOf  -> 
-          | A.Access  ->
+          | A.Deref   -> L.build_load  (* llvm derefs for you - loads object pointed to *)
+          | A.AddrOf  -> L.build_ptrtoint L.address_space (* create pointer to address *)
+          | A.Access  -> 
         ) e' "tmp" builder
       | A.Assign (s, e) -> let e' = expr builder e in
 	                   ignore (L.build_store e' (lookup s) builder); e'
