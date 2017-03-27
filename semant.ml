@@ -95,14 +95,25 @@ let check (globals, functions) =
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in
 
+    let type_of_pointer t ex = match t with
+        Pointer(_ as x) -> x;
+      | _ -> raise (Failure ("non-pointer expression " ^ string_of_expr ex ^ 
+      " is being used as a pointer"))
+    in
+
     (* Return the type of an expression or throw an exception *)
     let rec expr = function
 	Literal _ -> Int
       | Id s -> type_of_identifier s
+      | String(_) -> Pointer(Char)
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
 	(match op with
-          Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int
-	| Equal | Neq when t1 = t2 -> Int
+          Add | Sub when t1 = Point && t2 = Point -> Point
+        | Add | Sub | Mult | Div | Pow when t1 = Int && t2 = Int -> Int
+        | Add | Sub | Mult | Div | Pow when t1 = Stone && t2 = Stone -> Stone
+        | Add | Sub | Mult | Pow when t1 = Mint && t2 = Mint -> Mint
+	| Equal | Neq when t1 = t2 -> Int  (* might want to extend this to allow
+        e.g., t1 and t2 both integer types so one can do stone=int *)
 	| Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Int
         | _ -> raise (Failure ("illegal binary operator " ^
               string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
@@ -111,9 +122,22 @@ let check (globals, functions) =
       | Unop(op, e) as ex -> let t = expr e in
 	 (match op with
 	   Neg when t = Int -> Int
+         | Neg when t = Stone -> Stone
+         | Neg when t = Mint -> Mint
+         | Neg when t = Point -> Point
+         | Neg when t = Char -> Char
+         | Not when t = Int -> Int  
+         | Deref -> type_of_pointer t e
+         | AddrOf -> Pointer(t)
+         | Access when t = Mint -> Pointer(Stone)
+         | Access when t = Point -> Pointer(Mint)
+         | Access when t = Curve -> Pointer(Stone)
          | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
 	  		   string_of_typ t ^ " in " ^ string_of_expr ex)))
       | Noexpr -> Void
+
+      (* Definitely need to change this to support things which return lvalues,
+       * e.g. dereferencing *)
       | Assign(var, e) as ex -> let lt = type_of_identifier var
                                 and rt = expr e in
         check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
@@ -121,7 +145,7 @@ let check (globals, functions) =
 				     string_of_expr ex))
       | Call(fname, actuals) as call -> let fd = function_decl fname in
          if List.length actuals != List.length fd.formals then
-           if fname = "printf" then () else 
+           if fname = "printf" then () else (*variadic fix*)
            raise (Failure ("expecting " ^ string_of_int
              (List.length fd.formals) ^ " arguments in " ^ string_of_expr call))
          else
@@ -133,9 +157,9 @@ let check (globals, functions) =
            fd.typ
     in
 
-    (*let check_bool_expr e = if expr e != Bool
-     then raise (Failure ("expected Boolean expression in " ^ string_of_expr e))
-     else () in *)
+    let check_int_expr e = if expr e != Int
+     then raise (Failure ("expected integer expression in " ^ string_of_expr e))
+     else () in
 
     (* Verify a statement or throw an exception *)
     let rec stmt = function
@@ -151,10 +175,11 @@ let check (globals, functions) =
          raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
                          string_of_typ func.typ ^ " in " ^ string_of_expr e))
            
-      | If(p, b1, b2) -> () (*check_bool_expr p; stmt b1; stmt b2 *)
-      | For(e1, e2, e3, st) -> () (* ignore (expr e1); check_bool_expr e2;
-                               ignore (expr e3); stmt st *)
-      | While(p, s) -> () (* check_bool_expr p; stmt s *)
+      | If(p, b1, b2) -> check_int_expr p; stmt b1; stmt b2 
+      | For(e1, e2, e3, st) -> ignore (expr e1); check_int_expr e2;
+                               ignore (expr e3); stmt st
+      | While(p, s) -> check_int_expr p; stmt s
+      | DoWhile(s, p) -> stmt s; check_int_expr p
     in
 
     stmt (Block func.body)
