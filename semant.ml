@@ -45,13 +45,14 @@ let check (globals, functions) =
   
   if List.mem "access" (List.map (fun fd -> fd.fname) functions)
   then raise (Failure ("function access may not be defined")) else ();
-  
+ 
+
   report_duplicate (fun n -> "duplicate function " ^ n)
     (List.map (fun fd -> fd.fname) functions);
 
   (* Function declaration for a named function *)
   let built_in_decls =  StringMap.add "printf"
-     { typ = Void; fname = "printf"; formals = [()]; (* change formals
+     { typ = Void; fname = "printf"; formals = []; (* change formals
      to be variadic? Right now, this is fixed by just not comparing formals and
      actuals list if the name of the function is printf  *)
        locals = []; body = [] } StringMap.empty
@@ -62,7 +63,8 @@ let check (globals, functions) =
   in
 
   let function_decl s = try StringMap.find s function_decls
-       with Not_found -> raise (Failure ("unrecognized function " ^ s))
+       with Not_found -> if s = "main" then raise (Failure ("main function must be defined"))
+       else raise (Failure ("unrecognized function " ^ s))
   in
 
   let _ = function_decl "main" in (* Ensure "main" is defined *)
