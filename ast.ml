@@ -89,6 +89,9 @@ let rec string_of_expr = function
   | String(s) -> s
   | Ch (c) -> c
   | Subscript(s, e) -> s ^ "[" ^ string_of_expr e ^ "]"
+  | Construct2(e1, e2) -> "{" ^ string_of_expr e1 ^ ", " ^ string_of_expr e2 ^ "}"
+  | Construct3(e1, e2, e3) ->
+      "{" ^ string_of_expr e1 ^ ", " ^ string_of_expr e2 ^ ", " ^ string_of_expr e3 ^ "}"
 
 let rec string_of_stmt = function
     Block(stmts) ->
@@ -130,3 +133,4 @@ let string_of_fdecl fdecl =
 let string_of_program (vars, funcs) =
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl funcs)
+

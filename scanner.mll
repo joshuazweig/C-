@@ -1,4 +1,4 @@
-  (* Ocamllex scanner for MicroC *)
+  (* Ocamllex scanner for ModC *)
 
 { open Parser }
 

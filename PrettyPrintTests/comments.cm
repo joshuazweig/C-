@@ -1,0 +1,4 @@
+int main() /* This is the main function */ {
+    int x; /* Int declaration */
+} /* That was a cool test, huh? */
+

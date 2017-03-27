@@ -16,3 +16,4 @@ let _ =
     Ast -> print_string (Ast.string_of_program ast)
   | LLVM_IR -> print_string (Ast.string_of_program ast)
   | Compile -> print_string (Ast.string_of_program ast)
+
