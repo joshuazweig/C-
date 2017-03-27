@@ -22,12 +22,27 @@ let translate (globals, functions) =
   let the_module = L.create_module context "Cmod"
   and i32_t  = L.i32_type  context
   and i8_t   = L.i8_type   context
-  and void_t = L.void_type context in
+  and i1_t   = L.i1_type   context
+  and void_t = L.void_type context 
+  and void_pointer = L.pointer_type (L.void_type context) in  (* void pointer *)
+  let mint_type = L.struct_type context [| void_pointer ; void_pointer |] in (* struct of two void pointers *)
+  let curve_type = L.struct_type context [| mint_type ; mint_type |] in (* cruve defined by two modints *)
+  let point_std_type = L.struct_type context [| curve_type ; void_pointer ; void_pointer |] in(* curve + two stones *)
+  (* Must consider best way to implement points wrt Inf *)
+  (* maybe define diff points for inf and normal to enforce that 
+  it has to be one or two, not arb length array *)
+  
 
-  let ltype_of_typ = function
+  let rec ltype_of_typ = function
       A.Int -> i32_t
-   (*| A.Bool -> i1_t *)
-    | A.Void -> void_t in
+    | A.Char -> i1_t (* chars are 1 byte ints *)
+    | A.Void -> void_t 
+    | A.Stone -> void_pointer (* Pointer to arb prec list for C lib *)
+    | A.Mint -> mint_type
+    | A.Curve -> curve_type 
+    | A.Point -> point_std_type
+    | A.Pointer x -> L.pointer_type (ltype_of_typ x) in 
+    (* Cant define pointer w normal form bc need type at time *)
 
   (* Declare each global variable; remember its value in a map *)
   let global_vars =
