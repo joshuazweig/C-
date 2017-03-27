@@ -135,9 +135,7 @@ let check (globals, functions) =
          | Not when t = Int -> Int  
          | Deref -> type_of_pointer t e
          | AddrOf -> Pointer(t)
-         | Access when t = Mint -> Pointer(Stone)
-         | Access when t = Point -> Pointer(Mint)
-         | Access when t = Curve -> Pointer(Stone)
+         | Access when t = Mint || t = Point || t = Curve -> Pointer(Stone)
          | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
 	  		   string_of_typ t ^ " in " ^ string_of_expr ex)))
       | Construct2(e1, e2) -> let t1 = expr e1 and t2 = expr e2 in
