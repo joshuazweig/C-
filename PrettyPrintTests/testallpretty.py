@@ -4,9 +4,9 @@ import sys
 
 cwd = os.getcwd()
 for filename in os.listdir(cwd):
-    if filename.endswith(".txt"):
-        cmp = filename.replace('.txt','.mc')
-        out = filename.replace('.txt','.out')
+    if filename.endswith(".cm"):
+        cmp = filename.replace('.cm','.out')
+        out = filename.replace('.cm','.tmp')
         command = 'ocaml ../scannerprint.ml < '+ filename +' | menhir --interpret --interpret-show-cst ../parser.mly > ' + out
         os.system(command)
         with open('./' + out, 'r') as hosts0:
@@ -19,5 +19,5 @@ for filename in os.listdir(cwd):
                 )
                 for line in diff:
                     sys.stdout.write(line)
-rmout = "rm *.out"
+rmout = "rm *.tmp"
 os.system(rmout)
