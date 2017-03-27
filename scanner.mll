@@ -7,6 +7,7 @@
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
 | "/*"     { comment lexbuf }           (* Comments *)
+| "//"     { comment2 lexbuf }
 | '('      { LPAREN }
 | ')'      { RPAREN }
 | '{'      { LBRACE }
@@ -61,6 +62,10 @@ rule token = parse
 and comment = parse
   "*/" { token lexbuf }
 | _    { comment lexbuf }
+
+and comment2 = parse
+  '\n' { token lexbuf }
+| _    { comment2 lexbuf }
 
 and build_str sb = parse
  | '"'      { B.contents sb }
