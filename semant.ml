@@ -103,9 +103,15 @@ let check (globals, functions) =
 
     (* Return the type of an expression or throw an exception *)
     let rec expr = function
-	Literal _ -> Int
+        Inf -> Point
+      | Null -> Pointer(Void)
+      | Literal _ -> Int
       | Id s -> type_of_identifier s
-      | String(_) -> Pointer(Char)
+      | Ch _ -> Char
+      | String _ -> Pointer(Char)
+      | Subscript(a, i)  as e -> if (expr i) = Int then (type_of_pointer
+      (type_of_identifier a) e) else raise (Failure ("use of non-integer type as index in " ^
+        string_of_expr e))
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
 	(match op with
           Add | Sub when t1 = Point && t2 = Point -> Point
@@ -134,6 +140,18 @@ let check (globals, functions) =
          | Access when t = Curve -> Pointer(Stone)
          | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
 	  		   string_of_typ t ^ " in " ^ string_of_expr ex)))
+      | Construct2(e1, e2) -> let t1 = expr e1 and t2 = expr e2 in
+        (match (t1, t2) with
+          (Stone, Stone) -> Mint
+        | (Mint, Mint)   -> Curve
+        | _ -> raise (Failure ("illegal constructor type pair (" ^ string_of_typ t1 
+        ^ "," ^ string_of_typ t2 ^ ")")))
+      | Construct3(e1, e2, e3) -> let t1 = expr e1 and t2 = expr e2 and t3 =
+          expr e3 in
+        (match (t1, t2, t3) with
+        | (Curve, Mint, Mint) -> Point
+        | _ -> raise (Failure ("illegal constructor type pair (" ^ string_of_typ t1 
+        ^ "," ^ string_of_typ t2 ^ "," ^ string_of_typ t3 ^ ")")))
       | Noexpr -> Void
 
       (* Definitely need to change this to support things which return lvalues,
@@ -143,6 +161,12 @@ let check (globals, functions) =
         check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
 				     " = " ^ string_of_typ rt ^ " in " ^ 
 				     string_of_expr ex))
+      | ModAssign(var, e) as ex -> let lt = type_of_identifier var
+                                   and rt = expr e in
+        (match (lt, rt) with
+          ((Int|Stone) as t, (Int|Stone)) -> t
+        | _ -> raise (Failure ("illegal use of %= with types " ^ string_of_typ
+        lt ^ " and " ^ string_of_typ rt ^ " in " ^ string_of_expr ex)))
       | Call(fname, actuals) as call -> let fd = function_decl fname in
          if List.length actuals != List.length fd.formals then
            if fname = "printf" then () else (*variadic fix*)
