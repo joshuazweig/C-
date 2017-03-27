@@ -3,6 +3,10 @@ cmod.native:
 	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 \
 		cmod.native
 
+.PHONY : scannerprint
+scannerprint:
+	ocamllex scannerprint.mll
+
 .PHONY : clean
 clean :
 	ocamlbuild -clean
@@ -10,4 +14,4 @@ clean :
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o
 	rm -rf *.err *.ll *.diff *.out
 .PHONY : all
-all : clean cmod.native
+all : clean cmod.native scannerprint
