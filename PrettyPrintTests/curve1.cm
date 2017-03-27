@@ -1,0 +1,8 @@
+int main() {
+    mint m1;
+    mint m2;
+    curve c;
+
+    c = <m1, m2>;
+}
+

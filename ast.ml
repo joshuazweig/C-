@@ -135,6 +135,7 @@ let string_of_program (vars, funcs) =
   String.concat "\n" (List.map string_of_fdecl funcs)
 
 
+(* for testing *)
 
 let token_of_op = function
     Add -> "PLUS"
