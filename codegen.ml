@@ -35,7 +35,7 @@ let translate (globals, functions) =
 
   let rec ltype_of_typ = function
       A.Int -> i32_t
-    | A.Char -> i1_t (* chars are 1 byte ints *)
+    | A.Char -> i8_t (* chars are 1 byte ints *)
     | A.Void -> void_t 
     | A.Stone -> void_pointer (* Pointer to arb prec list for C lib *)
     | A.Mint -> mint_type
