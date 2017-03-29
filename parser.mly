@@ -14,7 +14,7 @@ open Ast
 %token <int> LITERAL   //need string literals
 %token <string> ID
 %token <string> STRING
-%token SGLQUOTE DBLQUOTE
+%token SGLQUOTE // DBLQUOTE
 %token EOF
 
 //COMMA?
