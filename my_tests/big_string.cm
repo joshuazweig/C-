@@ -1,0 +1,4 @@
+int main() {
+    printf("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzowytaowta86oa57ynoca375ya7o3yao3crya398yaco53ybaco389y5acn92835ycano2y5a2o35c3\n");
+    return 0;
+}

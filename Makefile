@@ -13,6 +13,6 @@ clean :
 	rm -rf testall.log *.diff cmod scanner.ml parser.ml parser.mli
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o 
 	rm -rf *.err *.ll *.diff *.out
-
+	-rm -f scannerprint.ml
 .PHONY : all
 all : clean cmod.native scanprint
