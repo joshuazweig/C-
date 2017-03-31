@@ -99,6 +99,8 @@ let translate (globals, functions) =
       | A.String s -> L.build_global_stringptr s "fmts" builder 
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
+    (*  | A.Construct2 (e1, e2) -> 
+      | A.Construct3 (e1, e2, e3) -> *)
       | A.Binop (e1, op, e2) ->
 	  let e1' = expr builder e1
 	  and e2' = expr builder e2 in
