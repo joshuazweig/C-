@@ -20,11 +20,12 @@ module StringMap = Map.Make(String)
 let translate (globals, functions) =
   let context = L.global_context () in
   let the_module = L.create_module context "Cmod"
+  and i64_t  = L.i64_type context (* 8 bytes *)
   and i32_t  = L.i32_type  context
   and i8_t   = L.i8_type   context
   and i1_t   = L.i1_type   context
   and void_t = L.void_type context 
-  and obj_pointer = L.pointer_type (L.i32_type context) in  (* void pointer *)
+  and obj_pointer = L.pointer_type (L.i64_t context) in  (* void pointer, 8 bytes *)
   let mint_type = L.struct_type context  [| obj_pointer ; obj_pointer |] in (* struct of two void pointers *)
   let curve_type = L.struct_type context [| mint_type ; mint_type |] in (* cruve defined by two modints *)
   let point_type = L.struct_type context [| curve_type ; obj_pointer ; obj_pointer |] in(* curve + two stones *)
@@ -47,12 +48,23 @@ let translate (globals, functions) =
   let global_vars =
     let global_var m (t, n) =
       let init = L.const_int (ltype_of_typ t) 0
-      in StringMap.add n (L.define_global n init the_module) m in
+      in StringMap.add n ((L.define_global n init the_module), t) m in
     List.fold_left global_var StringMap.empty globals in
 
   (* Declare printf(), which the print built-in function will call *)
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
+
+  (* Declare other linked to / "built in" functions *)
+  (* Function returns an 8 byte pointer, taking in two 8 byte pointers as arguments *)
+  let mint_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
+  let mint_add_func = L.declare_function "mint_add_func" mint_add_func_t the_module in 
+
+  let stone_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
+  let stone_add_func = L.declare_function "stone_add_func" stone_add_func_t the_module in 
+
+  let point_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
+  let point_add_func = L.declare_function "point_add_func" point_add_func_t the_module in 
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -78,11 +90,11 @@ let translate (globals, functions) =
       let add_formal m (t, n) p = L.set_value_name n p;
 	let local = L.build_alloca (ltype_of_typ t) n builder in
 	ignore (L.build_store p local builder);
-	StringMap.add n local m in
+	StringMap.add n (local, t) m in (* local, t to add type info to map as well *)
 
       let add_local m (t, n) =
 	let local_var = L.build_alloca (ltype_of_typ t) n builder
-	in StringMap.add n local_var m in
+	in StringMap.add n (local_var, t) m in (* BSURE this might be it *)
 
       let formals = List.fold_left2 add_formal StringMap.empty fdecl.A.formals
           (Array.to_list (L.params the_function)) in
@@ -95,39 +107,51 @@ let translate (globals, functions) =
 
     (* Construct code for an expression; return its value *)
     let rec expr builder = function
-	     A.Literal i -> L.const_int i32_t i
-      | A.String s -> L.build_global_stringptr s "fmts" builder 
-      | A.Noexpr -> L.const_int i32_t 0
-      | A.Id s -> L.build_load (lookup s) s builder
-    (*  | A.Construct2 (e1, e2) -> 
+	     A.Literal i -> (L.const_int i32_t i, A.Int) (*we dont want too big of int in here, maybe declare stone literals as strings*)
+      | A.String s -> (L.build_global_stringptr s "fmts" builder, A.Pointer(A.Char)) 
+      | A.Noexpr -> (L.const_int i32_t 0, A.Void)
+      | A.Id s ->
+        let binding = lookup s in
+          (L.build_load (fst binding) s builder, snd binding)
+     (* | A.Construct2 (e1, e2) -> 
       | A.Construct3 (e1, e2, e3) -> *)
       | A.Binop (e1, op, e2) ->
-	  let e1' = expr builder e1
-	  and e2' = expr builder e2 in
+    	  let (e1', t1) = expr builder e1
+    	  and (e2', t2) = expr builder e2 in (* must t1 == t2 for all binop? if so, t2 can be _ *)
+    	  let (o, t) = (match op with
+    	    A.Add     -> 
+            if t1 = A.Int then (L.build_add, A.Int)
+            (* Well need to pass in struct pointers, no? *)
+            else if t1 = A.Pointer(A.Mint) then 
+              (L.build_call mint_add_func [| e1' ; e2' |] "mint_add_func" builder, 
+                A.Pointer(A.Mint))
+            else if t1 = A.Pointer(A.Stone) then 
+              (L.build_call stone_add_func [| e1' ; e2' |] "stone_add_func" builder, 
+                A.Pointer(A.Stone))
+            else (* must be two points *) 
+              (L.build_call point_add_func [| e1' ; e2' |] "point_add_func" builder, 
+                A.Pointer(A.Point)) 
+    	  | A.Sub     -> (L.build_sub, A.Int)
+    	  | A.Mult    -> (L.build_mul, A.Int)
+        | A.Div     -> (L.build_sdiv, A.Int)
+    	  | A.And     -> (L.build_and, A.Int) (* bc no bool *)
+    	  | A.Or      -> (L.build_or, A.Int)
+    	  | A.Equal   -> (L.build_icmp L.Icmp.Eq, A.Int)
+    	  | A.Neq     -> (L.build_icmp L.Icmp.Ne, A.Int)
+    	  | A.Less    -> (L.build_icmp L.Icmp.Slt, A.Int)
+    	  | A.Leq     -> (L.build_icmp L.Icmp.Sle, A.Int)
+    	  | A.Greater -> (L.build_icmp L.Icmp.Sgt, A.Int)
+    	  | A.Geq     -> (L.build_icmp L.Icmp.Sge, A.Int)
+	  ) in (o e1' e2' "tmp" builder, t)
+      | A.Unop(op, e) -> (*these will also require type matching *)
+	  let e', t = expr builder e in
 	  (match op with
-	    A.Add     -> L.build_add
-	  | A.Sub     -> L.build_sub
-	  | A.Mult    -> L.build_mul
-          | A.Div     -> L.build_sdiv
-	  | A.And     -> L.build_and
-	  | A.Or      -> L.build_or
-	  | A.Equal   -> L.build_icmp L.Icmp.Eq
-	  | A.Neq     -> L.build_icmp L.Icmp.Ne
-	  | A.Less    -> L.build_icmp L.Icmp.Slt
-	  | A.Leq     -> L.build_icmp L.Icmp.Sle
-	  | A.Greater -> L.build_icmp L.Icmp.Sgt
-	  | A.Geq     -> L.build_icmp L.Icmp.Sge
-	  ) e1' e2' "tmp" builder
-      | A.Unop(op, e) ->
-	  let e' = expr builder e in
-	  (match op with
-	    A.Neg     -> L.build_neg
-          | A.Not     -> L.build_not) e' "tmp" builder
+	     A.Neg     -> L.build_neg
+      | A.Not     -> L.build_not) e' "tmp" builder, t))
       | A.Assign (s, e) -> let e' = expr builder e in
 	                   ignore (L.build_store e' (lookup s) builder); e'
       | A.Call ("print", [e]) | A.Call ("printb", [e]) ->
-	  L.build_call printf_func [| int_format_str ; (expr builder e) |]
-	    "printf" builder
+	  L.build_call printf_func [| int_format_str ; (expr builder e) |]  "printf" builder
       | A.Call ("printf", act) ->
           let actuals = List.rev (List.map (expr builder)
           (List.rev act)) in
