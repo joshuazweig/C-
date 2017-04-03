@@ -185,10 +185,10 @@ let check (globals, functions) =
 
     (* Verify a statement or throw an exception *)
     let rec stmt in_loop = function
-	Block sl -> let rec check_block = function
+	Block (vl, sl) -> let rec check_block = function
            [Return _ as s] -> stmt in_loop s
          | Return _ :: _ -> raise (Failure "nothing may follow a return")
-         | Block sl :: ss -> check_block (sl @ ss)
+         | Block (vl, sl) :: ss -> check_block (sl @ ss)
          | s :: ss -> stmt in_loop s ; check_block ss
          | [] -> ()
         in check_block sl
@@ -209,7 +209,7 @@ let check (globals, functions) =
       | NullStmt -> ()
     in
 
-    stmt false (Block func.body)
+    stmt false (Block ([], func.body))
    
   in
   List.iter check_function functions

@@ -45,12 +45,12 @@ decls:
  | decls fdecl { fst $1, ($2 :: snd $1) }
 
 fdecl:
-   typ ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
+   typ ID LPAREN formals_opt RPAREN LBRACE combined_list RBRACE
      { { typ = $1;
      fname = $2;
      formals = $4;
-     locals = List.rev $7;
-     body = List.rev $8 } }
+     locals = List.rev (fst $7);
+     body = List.rev (snd $7) } }
 
 formals_opt:
     /* nothing */ { [] }
@@ -70,23 +70,28 @@ typ:
   | POINT { Point }
   | typ STAR { Pointer($1) }  // unclear if this is a proper declaration
 
-vdecl_list:
-    /* nothing */    { [] }
-  | vdecl_list vdecl { $2 :: $1 }
+combined_list:
+    /* nothing */ { [], [] } /* first list is vdecl, second list is stmt */
+  | combined_list vdecl { ($2 :: fst $1), snd $1 }
+  | combined_list stmt { fst $1, ($2 :: snd $1) }
+
+/*vdecl_list:
+    /* nothing     { [] }
+  | vdecl_list vdecl { $2 :: $1 }*/
 
 vdecl:
    typ ID SEMI { ($1, $2) }
 
 stmt_list:
-  /* nothing */ { [] }
+   /* nothing */ { [] }
   | stmt_list stmt { $2 :: $1 }
 
 stmt:
     expr SEMI { Expr $1 }   /*expr_opt here instead of nullstmt maybe*/
   | RETURN SEMI { Return Noexpr }
   | RETURN expr SEMI { Return $2 }
-  | LBRACE stmt_list RBRACE { Block(List.rev $2) }
-  | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
+  | LBRACE combined_list RBRACE { Block(List.rev (fst $2), List.rev (snd $2)) }
+  | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([], [])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
   | FOR LPAREN expr_opt SEMI expr_opt SEMI expr_opt RPAREN stmt   /* made expr2 optional */
      { For($3, $5, $7, $9) }

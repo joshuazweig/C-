@@ -149,7 +149,7 @@ let translate (globals, functions) =
     (* Build the code for the given statement; return the builder for
        the statement's successor *)
     let rec stmt builder = function
-	A.Block sl -> List.fold_left stmt builder sl
+	A.Block (vl, sl) -> List.fold_left stmt builder sl
       | A.Expr e -> ignore (expr builder e); builder
       | A.Return e -> ignore (match fdecl.A.typ with
 	                 A.Void -> L.build_ret_void builder
@@ -185,11 +185,11 @@ let translate (globals, functions) =
 	  L.builder_at_end context merge_bb
 
       | A.For (e1, e2, e3, body) -> stmt builder
-	    ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] )
+      ( A.Block ([], [A.Expr e1 ; A.While (e2, A.Block ([], [body ; A.Expr e3])) ]))
     in
 
     (* Build the code for each statement in the function *)
-    let builder = stmt builder (A.Block fdecl.A.body) in
+    let builder = stmt builder (A.Block ([], fdecl.A.body)) in
 
     (* Add a return if the last block falls off the end *)
     add_terminal builder (match fdecl.A.typ with

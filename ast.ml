@@ -27,7 +27,7 @@ type expr =
   | Inf
 
 type stmt =
-    Block of stmt list
+    Block of (bind list * stmt list)
   | Expr of expr
   | Return of expr
   | If of expr * stmt * stmt
@@ -94,11 +94,11 @@ let rec string_of_expr = function
       "{" ^ string_of_expr e1 ^ ", " ^ string_of_expr e2 ^ ", " ^ string_of_expr e3 ^ "}"
 
 let rec string_of_stmt = function
-    Block(stmts) ->
+    Block(vdecls, stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
-  | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
+  | If(e, s, Block([], [])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
       string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
   | For(e1, e2, e3, s) ->
