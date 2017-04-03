@@ -1,0 +1,5 @@
+int main() {
+    stone x;
+    char *a;
+    return a[x];
+}

@@ -1,0 +1,6 @@
+int main() {
+    char *x;
+    x = "Hello World!";
+    printf("%s\n", x);
+    return 0;
+}
