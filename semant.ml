@@ -184,12 +184,12 @@ let check (globals, functions) =
      else () in
 
     (* Verify a statement or throw an exception *)
-    let rec stmt = function
+    let rec stmt in_loop = function
 	Block sl -> let rec check_block = function
-           [Return _ as s] -> stmt s
+           [Return _ as s] -> stmt in_loop s
          | Return _ :: _ -> raise (Failure "nothing may follow a return")
          | Block sl :: ss -> check_block (sl @ ss)
-         | s :: ss -> stmt s ; check_block ss
+         | s :: ss -> stmt in_loop s ; check_block ss
          | [] -> ()
         in check_block sl
       | Expr e -> ignore (expr e)
@@ -197,14 +197,19 @@ let check (globals, functions) =
          raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
                          string_of_typ func.typ ^ " in " ^ string_of_expr e))
            
-      | If(p, b1, b2) -> check_int_expr p; stmt b1; stmt b2 
+      | If(p, b1, b2) -> check_int_expr p; stmt false b1; stmt false b2 
       | For(e1, e2, e3, st) -> ignore (expr e1); check_int_expr e2;
-                               ignore (expr e3); stmt st
-      | While(p, s) -> check_int_expr p; stmt s
-      | DoWhile(s, p) -> stmt s; check_int_expr p
+                               ignore (expr e3); stmt true st
+      | While(p, s) -> check_int_expr p; stmt true s
+      | DoWhile(s, p) -> stmt true s; check_int_expr p
+      | Break -> if in_loop then () else
+          raise (Failure ("break statement found outside of a loop context"))
+      | Continue -> if in_loop then () else
+          raise (Failure ("continue statement found outside of a loop context"))
+      | NullStmt -> ()
     in
 
-    stmt (Block func.body)
+    stmt false (Block func.body)
    
   in
   List.iter check_function functions
