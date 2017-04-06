@@ -12,6 +12,7 @@ scanprint:
 
 spec_add: spec_add.c
 	gcc -c spec_add.c
+	clang -S -emit-llvm spec_add.c
 
 .PHONY: clean
 clean :
