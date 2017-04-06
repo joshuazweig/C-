@@ -24,11 +24,11 @@ let translate (globals, functions) =
   and i32_t  = L.i32_type  context
   and i8_t   = L.i8_type   context
   and i1_t   = L.i1_type   context
-  and void_t = L.void_type context 
-  and obj_pointer = L.pointer_type (L.i64_t context) in  (* void pointer, 8 bytes *)
+  and void_t = L.void_type context in
+  let obj_pointer = L.pointer_type (L.i64_type context) in  (* void pointer, 8 bytes *)
   let mint_type = L.struct_type context  [| obj_pointer ; obj_pointer |] in (* struct of two void pointers *)
   let curve_type = L.struct_type context [| mint_type ; mint_type |] in (* cruve defined by two modints *)
-  let point_type = L.struct_type context [| curve_type ; obj_pointer ; obj_pointer |] in(* curve + two stones *)
+  let point_type = L.struct_type context [| curve_type ; obj_pointer ; obj_pointer; i1_t |] in(* curve + two stones *)
   (* Must consider best way to implement points wrt Inf *)
   (* maybe define diff points for inf and normal to enforce that 
   it has to be one or two, not arb length array *)
@@ -113,41 +113,53 @@ let translate (globals, functions) =
       | A.Id s ->
         let binding = lookup s in
           (L.build_load (fst binding) s builder, snd binding)
-     (* | A.Construct2 (e1, e2) -> 
+   (* | A.Construct2 (e1, e2) -> 
       | A.Construct3 (e1, e2, e3) -> *)
       | A.Binop (e1, op, e2) ->
     	  let (e1', t1) = expr builder e1
     	  and (e2', t2) = expr builder e2 in (* must t1 == t2 for all binop? if so, t2 can be _ *)
-    	  let (o, t) = (match op with
-    	    A.Add     -> 
-            if t1 = A.Int then (L.build_add, A.Int)
-            (* Well need to pass in struct pointers, no? *)
-            else if t1 = A.Pointer(A.Mint) then 
-              (L.build_call mint_add_func [| e1' ; e2' |] "mint_add_func" builder, 
-                A.Pointer(A.Mint))
-            else if t1 = A.Pointer(A.Stone) then 
-              (L.build_call stone_add_func [| e1' ; e2' |] "stone_add_func" builder, 
-                A.Pointer(A.Stone))
-            else (* must be two points *) 
-              (L.build_call point_add_func [| e1' ; e2' |] "point_add_func" builder, 
-                A.Pointer(A.Point)) 
-    	  | A.Sub     -> (L.build_sub, A.Int)
-    	  | A.Mult    -> (L.build_mul, A.Int)
-        | A.Div     -> (L.build_sdiv, A.Int)
-    	  | A.And     -> (L.build_and, A.Int) (* bc no bool *)
-    	  | A.Or      -> (L.build_or, A.Int)
-    	  | A.Equal   -> (L.build_icmp L.Icmp.Eq, A.Int)
-    	  | A.Neq     -> (L.build_icmp L.Icmp.Ne, A.Int)
-    	  | A.Less    -> (L.build_icmp L.Icmp.Slt, A.Int)
-    	  | A.Leq     -> (L.build_icmp L.Icmp.Sle, A.Int)
-    	  | A.Greater -> (L.build_icmp L.Icmp.Sgt, A.Int)
-    	  | A.Geq     -> (L.build_icmp L.Icmp.Sge, A.Int)
-	  ) in (o e1' e2' "tmp" builder, t)
+        (match t1 with
+           A.Int -> 
+              ((match op with
+                A.Add     -> L.build_add
+              | A.Sub     -> L.build_sub
+              | A.Mult    -> L.build_mul
+              | A.Div     -> L.build_sdiv
+              | A.And     -> L.build_and
+              | A.Or      -> L.build_or
+              | A.Equal   -> L.build_icmp L.Icmp.Eq
+              | A.Neq     -> L.build_icmp L.Icmp.Ne
+              | A.Less    -> L.build_icmp L.Icmp.Slt
+              | A.Leq     -> L.build_icmp L.Icmp.Sle
+              | A.Greater -> L.build_icmp L.Icmp.Sgt
+              | A.Geq     -> L.build_icmp L.Icmp.Sge
+              ) e1' e2' "tmp" builder, A.Int) 
+          | A.Pointer(A.Mint) ->
+              ((match op with
+              A.Add -> 
+                L.build_call mint_add_func [| e1' ; e2' |] "mint_add_func" builder
+
+              ), A.Pointer(A.Mint))
+              
+          | A.Pointer(A.Stone) -> 
+              ((match op with
+              A.Add -> 
+                L.build_call stone_add_func [| e1' ; e2' |] "stone_add_func" builder
+
+              ), A.Pointer(A.Stone))
+          | A.Pointer(A.Point) ->
+              ((match op with
+              A.Add -> 
+                L.build_call point_add_func [| e1' ; e2' |] "point_add_func" builder
+
+              ), A.Pointer(A.Point))
+          
+        )
       | A.Unop(op, e) -> (*these will also require type matching *)
 	  let e', t = expr builder e in
 	  (match op with
 	     A.Neg     -> L.build_neg
-      | A.Not     -> L.build_not) e' "tmp" builder, t))
+      | A.Not     -> L.build_not) e' "tmp" builder, t
       | A.Assign (s, e) -> let e' = expr builder e in
 	                   ignore (L.build_store e' (lookup s) builder); e'
       | A.Call ("print", [e]) | A.Call ("printb", [e]) ->
