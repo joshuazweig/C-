@@ -25,7 +25,7 @@ let translate (globals, functions) =
   and i8_t   = L.i8_type   context
   and i1_t   = L.i1_type   context
   and void_t = L.void_type context in
-  let obj_pointer = L.pointer_type (L.i64_type context) in  (* void pointer, 8 bytes *)
+  let obj_pointer = L.pointer_type (L.i8_type context) in  (* void pointer, 8 bytes *)
   let mint_type = L.struct_type context  [| obj_pointer ; obj_pointer |] in (* struct of two void pointers *)
   let curve_type = L.struct_type context [| mint_type ; mint_type |] in (* cruve defined by two modints *)
   let point_type = L.struct_type context [| curve_type ; obj_pointer ; obj_pointer; i1_t |] in(* curve + two stones *)
@@ -57,7 +57,7 @@ let translate (globals, functions) =
 
   (* Declare other linked to / "built in" functions *)
   (* Function returns an 8 byte pointer, taking in two 8 byte pointers as arguments *)
-  let mint_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
+  let mint_add_func_t = L.function_type mint_type [| mint_type ; mint_type |] in 
   let mint_add_func = L.declare_function "mint_add_func" mint_add_func_t the_module in 
 
   let stone_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
@@ -134,25 +134,25 @@ let translate (globals, functions) =
               | A.Greater -> L.build_icmp L.Icmp.Sgt
               | A.Geq     -> L.build_icmp L.Icmp.Sge
               ) e1' e2' "tmp" builder, A.Int) 
-          | A.Pointer(A.Mint) ->
+          | A.Mint ->
               ((match op with
               A.Add -> 
                 L.build_call mint_add_func [| e1' ; e2' |] "mint_add_func" builder
-
-              ), A.Pointer(A.Mint))
+                  
+              ), A.Mint)
               
-          | A.Pointer(A.Stone) -> 
+          | A.Stone -> 
               ((match op with
               A.Add -> 
                 L.build_call stone_add_func [| e1' ; e2' |] "stone_add_func" builder
-
-              ), A.Pointer(A.Stone)) 
-          | A.Pointer(A.Point) ->
+                
+              ), A.Stone) 
+          | A.Point ->
               ((match op with
               A.Add -> 
                 L.build_call point_add_func [| e1' ; e2' |] "point_add_func" builder
 
-              ), A.Pointer(A.Point)) 
+              ), A.Point) 
         )  
 
       | A.Unop(op, e) -> (*these will also require type matching *)
