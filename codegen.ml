@@ -57,10 +57,9 @@ let translate (globals, functions) =
 
   (* Declare other linked to / "built in" functions *)
   (* Function returns an 8 byte pointer, taking in two 8 byte pointers as arguments *)
-  (*let mint_add_func_t = L.function_type mint_type [| obj_pointer ; obj_pointer ; obj_pointer ; obj_pointer |] in 
-  (*
-  let mint_add_func_t = L.function_type mint_type [| i64_t ; i64_t ; i64_t ; i64_t |] in *)*)
-  let mint_add_func_t = L.function_type mint_type [| mint_type ; mint_type |] in
+  let mint_add_func_t = L.function_type mint_type [| L.pointer_type i8_t ; L.pointer_type i8_t  ; L.pointer_type i8_t  ; L.pointer_type i8_t  |] in 
+  
+  (*let mint_add_func_t = L.function_type mint_type [| i64_t ; i64_t ; i64_t ; i64_t |] in *)
   let mint_add_func = L.declare_function "mint_add_func" mint_add_func_t the_module in 
 
   let stone_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
@@ -151,13 +150,18 @@ let translate (globals, functions) =
                 b1p = L.build_struct_gep e2' 0 "b1p" builder and
                 b2p = L.build_struct_gep e2' 1 "b2p" builder in
 
-                let a1 = L.build_load a1p "a1" builder and 
-                a2 = L.build_load a2p "a2" builder and
-                b1 = L.build_load b1p "b1" builder and 
-                b2 = L.build_load b2p "b2" builder in
+                let a1x = L.build_load a1p "a1x" builder and 
+                a2x = L.build_load a2p "a2x" builder and
+                b1x = L.build_load b1p "b1x" builder and 
+                b2x = L.build_load b2p "b2x" builder in
+
+                (*let a1 = L.build_inttoptr a1x obj_pointer "a1" builder and
+                a2 = L.build_inttoptr a2x obj_pointer "a2" builder and 
+                b1 = L.build_inttoptr b1x obj_pointer "b1" builder and 
+                b2 = L.build_inttoptr b2x obj_pointer "b2" builder in *)
+
                 
-                L.build_call mint_add_func [| e1' ; e2' |] "mint_add_func" builder 
-                (*L.build_call mint_add_func [| a1; a2; b1; b2 |] "mint_add_func" builder*)
+                L.build_call mint_add_func [| a1x; a1x; a1x; a1x |] "mint_add_func" builder
               ), A.Mint)
               
           | A.Stone -> 
