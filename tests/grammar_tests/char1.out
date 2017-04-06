@@ -12,7 +12,7 @@ ACCEPT
       [vdecl_list: [vdecl_list:] [vdecl: [typ: CHAR] ID SEMI]]
       [stmt_list:
         [stmt_list:]
-        [stmt: [expr: ID ASSIGN [expr: SGLQUOTE ID SGLQUOTE]] SEMI]
+        [stmt: [expr: ID ASSIGN [expr: CHARLIT]] SEMI]
       ]
       RBRACE
     ]

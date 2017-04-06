@@ -50,7 +50,7 @@ rule token = parse
 | "curve"  { print_string "CURVE " }
 | '~'      { print_string "INF " }
 | "access" { print_string "ACCESS " }
-| "'"     { print_string "SGLQUOTE " }
+| ['\''][' '-'~']*['\'']     { print_string "CHARLIT " }
 | ['"'][' '-'~']*['"'] { print_string "STRING " }
 | ['0'-'9']+ { print_string "LITERAL " }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* { print_string "ID " }
