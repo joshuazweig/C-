@@ -146,35 +146,40 @@ let translate (globals, functions) =
               A.Add -> 
                 L.build_call stone_add_func [| e1' ; e2' |] "stone_add_func" builder
 
-              ), A.Pointer(A.Stone))
+              ), A.Pointer(A.Stone)) 
           | A.Pointer(A.Point) ->
               ((match op with
               A.Add -> 
                 L.build_call point_add_func [| e1' ; e2' |] "point_add_func" builder
 
-              ), A.Pointer(A.Point))
-          
-        )
+              ), A.Pointer(A.Point)) 
+        )  
+
       | A.Unop(op, e) -> (*these will also require type matching *)
-	  let e', t = expr builder e in
-	  (match op with
-	     A.Neg     -> L.build_neg
-      | A.Not     -> L.build_not) e' "tmp" builder, t
-      | A.Assign (s, e) -> let e' = expr builder e in
-	                   ignore (L.build_store e' (lookup s) builder); e'
+      	  let e', t = expr builder e in
+      	  (match op with
+      	     A.Neg     -> L.build_neg
+            | A.Not     -> L.build_not) e' "tmp" builder, t
+
+      | A.Assign (s, e) -> let (e', t) = expr builder e in
+                       ignore (L.build_store e' (fst (lookup s)) builder); (e', t)
+                       
       | A.Call ("print", [e]) | A.Call ("printb", [e]) ->
-	  L.build_call printf_func [| int_format_str ; (expr builder e) |]  "printf" builder
+	       (L.build_call printf_func [| int_format_str ; fst (expr builder e) |]  "printf" builder, A.Void)
+      
       | A.Call ("printf", act) ->
-          let actuals = List.rev (List.map (expr builder)
-          (List.rev act)) in
+          let actuals, types = List.split (List.rev (List.map (expr builder)
+          (List.rev act))) in
           let result = "" in  (* printf is void function *)
-          L.build_call printf_func (Array.of_list actuals) result builder
+          (L.build_call printf_func (Array.of_list actuals) result builder, 
+            A.Pointer(Char))
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
-	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
+	 let actuals, types = List.split (List.rev (List.map (expr builder) (List.rev act))) in
 	 let result = (match fdecl.A.typ with A.Void -> ""
                                             | _ -> f ^ "_result") in
-         L.build_call fdef (Array.of_list actuals) result builder
+         (L.build_call fdef (Array.of_list actuals) result builder, fdecl.A.typ)
+
     in
 
     (* Invoke "f builder" if the current block doesn't already
@@ -187,13 +192,13 @@ let translate (globals, functions) =
     (* Build the code for the given statement; return the builder for
        the statement's successor *)
     let rec stmt builder = function
-	A.Block sl -> List.fold_left stmt builder sl
+	     A.Block sl -> List.fold_left stmt builder sl
       | A.Expr e -> ignore (expr builder e); builder
       | A.Return e -> ignore (match fdecl.A.typ with
 	                 A.Void -> L.build_ret_void builder
-	    | _ -> L.build_ret (expr builder e) builder); builder
+	    | _ -> L.build_ret (fst (expr builder e)) builder); builder
       | A.If (predicate, then_stmt, else_stmt) ->
-         let bool_val = expr builder predicate in
+         let bool_val = fst(expr builder predicate) in
 	 let merge_bb = L.append_block context "merge" the_function in
 
 	 let then_bb = L.append_block context "then" the_function in
@@ -216,7 +221,7 @@ let translate (globals, functions) =
 	    (L.build_br pred_bb);
 
 	  let pred_builder = L.builder_at_end context pred_bb in
-	  let bool_val = expr pred_builder predicate in
+	  let bool_val = fst (expr pred_builder predicate) in
 
 	  let merge_bb = L.append_block context "merge" the_function in
 	  ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
