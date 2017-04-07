@@ -8,9 +8,21 @@ struct stone {
 struct mint {
     struct stone val;
     struct stone mod; //should be immutable
+    int a;
 };
 
-struct mint mint_add_func(struct mint a, struct mint b)
+struct cruve {
+    struct mint a;
+    struct mint b;
+    struct mint c;
+};
+
+struct curve* curve_add_func(struct curve *a, struct curve *b)
+{
+    printf("Curve\n");
+    return a;
+}
+struct mint* mint_add_func(struct mint *a, struct mint *b)
 {
   printf("We made it!\n");
   return a;  

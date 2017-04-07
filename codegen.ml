@@ -25,7 +25,7 @@ let translate (globals, functions) =
   and i8_t   = L.i8_type   context
   and i1_t   = L.i1_type   context
   and void_t = L.void_type context in
-  let obj_pointer = L.pointer_type (L.i64_type context) in  (* void pointer, 8 bytes *)
+  let obj_pointer = L.pointer_type (L.i64_type context) in  (* void pointer, 8 bytes -- pointer to pointer *)
   let mint_type = L.struct_type context  [| obj_pointer ; obj_pointer |] in (* struct of two void pointers *)
   let curve_type = L.struct_type context [| mint_type ; mint_type |] in (* cruve defined by two modints *)
   let point_type = L.struct_type context [| curve_type ; obj_pointer ; obj_pointer; i1_t |] in(* curve + two stones *)
@@ -155,13 +155,13 @@ let translate (globals, functions) =
                 b1x = L.build_load b1p "b1x" builder and 
                 b2x = L.build_load b2p "b2x" builder in
 
-                (*let a1 = L.build_inttoptr a1x obj_pointer "a1" builder and
-                a2 = L.build_inttoptr a2x obj_pointer "a2" builder and 
-                b1 = L.build_inttoptr b1x obj_pointer "b1" builder and 
-                b2 = L.build_inttoptr b2x obj_pointer "b2" builder in *)
+                let a1 = L.build_load a1x  "a1" builder and
+                a2 = L.build_load a2x  "a2" builder and 
+                b1 = L.build_load b1x  "b1" builder and 
+                b2 = L.build_load b2x  "b2" builder in 
 
                 
-                L.build_call mint_add_func [| a1x; a1x; a1x; a1x |] "mint_add_func" builder
+                L.build_call mint_add_func [| a1; a2; b1; b2 |] "mint_add_func" builder
               ), A.Mint)
               
           | A.Stone -> 
