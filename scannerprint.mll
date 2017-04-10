@@ -5,6 +5,7 @@
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
 | "/*"     { comment lexbuf }           (* Comments *)
+| "//"     { comment2 lexbuf }
 | '('      { print_string "LPAREN " }
 | ')'      { print_string "RPAREN " }
 | '{'      { print_string "LBRACE " }
@@ -49,14 +50,18 @@ rule token = parse
 | "curve"  { print_string "CURVE " }
 | '~'      { print_string "INF " }
 | "access" { print_string "ACCESS " }
-| '\''     { print_string "SGLQUOTE " }
-| '"'      { print_string "DBLQUOTE " }
+| ['\''][' '-'~']*['\'']     { print_string "CHARLIT " }
+| ['"'][' '-'~']*['"'] { print_string "STRING " }
 | ['0'-'9']+ { print_string "LITERAL " }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* { print_string "ID " }
 
 and comment = parse
   "*/" { token lexbuf }
 | _    { comment lexbuf }
+
+and comment2 = parse
+  '\n' { token lexbuf }
+| _    { comment2 lexbuf }
 
 {
   let main () =

@@ -53,7 +53,7 @@ rule token = parse
 | "curve"  { CURVE }
 | '~'      { INF }
 | "access" { ACCESS }
-| "'"      { SGLQUOTE }
+| "'"      { CHARLIT (read_char lexbuf) }
 | '"'      { STRING (build_str (B.create 100) lexbuf) }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
@@ -77,3 +77,19 @@ and build_str sb = parse
  | '\\''r'  { B.add_char sb '\r';  build_str sb lexbuf }
  | '\\''t'  { B.add_char sb '\t';  build_str sb lexbuf }
  | _ as t   { B.add_char sb t;     build_str sb lexbuf }
+
+ and read_char = parse
+ | '\\''\\' { check_length '\'' lexbuf }
+ | '\\''"'  { check_length '"' lexbuf }
+ | '\\''\'' { check_length '\'' lexbuf }
+ | '\\''n'  { check_length '\n' lexbuf }
+ | '\\''r'  { check_length '\r' lexbuf }
+ | '\\''t'  { check_length '\t' lexbuf }
+ | '\\''0'  { check_length (char_of_int 0) lexbuf } (* '\0' char in C *)
+ (* this should only match characters of length 1, as expected *)
+ | (_ as t) { check_length t lexbuf }
+ 
+ 
+and check_length buf = parse
+ | '\'' { buf }
+ | _ as t { raise( Failure ("illegal char literal " ^ Char.escaped t)) }

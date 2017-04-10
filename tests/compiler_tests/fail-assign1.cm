@@ -1,0 +1,11 @@
+int main()
+{
+  int i;
+  char c;
+
+  i = 42;
+  i = 10;
+  c = 'a';
+  c = 'b';
+  i = 'x';
+}
