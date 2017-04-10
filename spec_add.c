@@ -11,7 +11,11 @@ struct mint {
     int a;
 };
 
-void * stone_add_func()
+void* stone_add_func(void *a, void *b)
+{
+
+	return a;
+}
 
 struct mint* mint_add_func(struct mint *a, struct mint *b)
 {
