@@ -27,4 +27,4 @@ clean :
 	-rm -f scannerprint.ml *.tmp
 
 .PHONY : all
-all : clean cmod.native scanprint spec_add.o
+all : clean cmod.native spec_add.o
