@@ -22,10 +22,19 @@ let translate (globals, functions) =
   let the_module = L.create_module context "Cmod"
   and i32_t  = L.i32_type  context
   and i8_t   = L.i8_type   context
-  and void_t = L.void_type context in
+  and i1_t   = L.i1_type   context
+  and void_t = L.void_type context 
+  and obj_pointer = L.pointer_type (L.i32_type context) in  (* void pointer *)
+  let mint_type = L.struct_type context  [| obj_pointer ; obj_pointer |] in (* struct of two void pointers *)
+  let curve_type = L.struct_type context [| mint_type ; mint_type |] in (* cruve defined by two modints *)
+  let point_type = L.struct_type context [| curve_type ; obj_pointer ; obj_pointer |] in(* curve + two stones *)
+  (* Must consider best way to implement points wrt Inf *)
+  (* maybe define diff points for inf and normal to enforce that 
+  it has to be one or two, not arb length array *)
 
-  let ltype_of_typ = function
+  let rec ltype_of_typ = function
       A.Int -> i32_t
+<<<<<<< HEAD
      | A.Char -> i8_t
      | A.Stone -> (* Will need structs for these *) 
      | A.Mint -> 
@@ -33,6 +42,16 @@ let translate (globals, functions) =
      | A.Point -> 
      | A.Pointer _ -> 
      | A.Void -> void_t in         
+=======
+    | A.Char -> i8_t (* chars are 1 byte ints *)
+    | A.Void -> void_t 
+    | A.Stone -> obj_pointer (* Pointer to arb prec list for C lib *)
+    | A.Mint -> mint_type
+    | A.Curve -> curve_type 
+    | A.Point -> point_type 
+    | A.Pointer x -> L.pointer_type (ltype_of_typ x)  in
+    (* Cant define pointer w normal form bc need type at time *)
+>>>>>>> 56426d0df774ae09d0fe52eec8e58141ad6852ae
 
   (* Declare each global variable; remember its value in a map *)
   let global_vars =
@@ -86,10 +105,15 @@ let translate (globals, functions) =
 
     (* Construct code for an expression; return its value *)
     let rec expr builder = function
+<<<<<<< HEAD
 	    A.Literal i -> L.const_int i32_t i
       | A.String s -> (*L.const_string context s*) L.build_global_stringptr (s^"\n") "fmts" builder 
       (*| A.BoolLit b -> L.const_int i1_t (if b then 1 else 0) *)
       | A.String s -> L.build_global_stringptr s s builder
+=======
+	     A.Literal i -> L.const_int i32_t i
+      | A.String s -> L.build_global_stringptr s "fmts" builder 
+>>>>>>> 56426d0df774ae09d0fe52eec8e58141ad6852ae
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
       | A.Inf ->
@@ -101,6 +125,7 @@ let translate (globals, functions) =
       | A.Construct3 (c, a, b) ->             (* for points, on a curve *)
       | A.Subscript (i, e) -> 
       | A.Binop (e1, op, e2) ->
+<<<<<<< HEAD
       	  let e1' = expr builder e1
       	  and e2' = expr builder e2 in
       	  (match op with
@@ -119,6 +144,24 @@ let translate (globals, functions) =
         	  | A.Greater -> L.build_icmp L.Icmp.Sgt
         	  | A.Geq     -> L.build_icmp L.Icmp.Sge
       	  ) e1' e2' "tmp" builder
+=======
+	  let e1' = expr builder e1
+	  and e2' = expr builder e2 in
+	  (match op with
+	    A.Add     -> L.build_add
+	  | A.Sub     -> L.build_sub
+	  | A.Mult    -> L.build_mul
+          | A.Div     -> L.build_sdiv
+	  | A.And     -> L.build_and
+	  | A.Or      -> L.build_or
+	  | A.Equal   -> L.build_icmp L.Icmp.Eq
+	  | A.Neq     -> L.build_icmp L.Icmp.Ne
+	  | A.Less    -> L.build_icmp L.Icmp.Slt
+	  | A.Leq     -> L.build_icmp L.Icmp.Sle
+	  | A.Greater -> L.build_icmp L.Icmp.Sgt
+	  | A.Geq     -> L.build_icmp L.Icmp.Sge
+	  ) e1' e2' "tmp" builder
+>>>>>>> 56426d0df774ae09d0fe52eec8e58141ad6852ae
       | A.Unop(op, e) ->
       	  let e' = expr builder e in
       	  (match op with
@@ -162,8 +205,13 @@ let translate (globals, functions) =
       | A.Continue -> 
       | A.NullStmt ->
       | A.Return e -> ignore (match fdecl.A.typ with
+<<<<<<< HEAD
 	         A.Void -> L.build_ret_void builder
           | _ -> L.build_ret (expr builder e) builder); builder
+=======
+	                 A.Void -> L.build_ret_void builder
+	    | _ -> L.build_ret (expr builder e) builder); builder
+>>>>>>> 56426d0df774ae09d0fe52eec8e58141ad6852ae
       | A.If (predicate, then_stmt, else_stmt) ->
            let bool_val = expr builder predicate in
         	 let merge_bb = L.append_block context "merge" the_function in
