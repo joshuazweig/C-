@@ -25,9 +25,10 @@ globalerror=0
 keep=0
 
 Usage() {
-    echo "Usage: testall.sh [options] [.mc files]"
+    echo "Usage: testall.sh [options] [.cm files]"
     echo "-k    Keep intermediate files"
     echo "-h    Print this help"
+    echo "-v    Use alternate Travis build LLI path"
     exit 1
 }
 
@@ -74,8 +75,8 @@ RunFail() {
 Check() {
     error=0
     basename=`echo $1 | sed 's/.*\\///
-                             s/.mc//'`
-    reffile=`echo $1 | sed 's/.mc$//'`
+                             s/.cm//'`
+    reffile=`echo $1 | sed 's/.cm$//'`
     basedir="`echo $1 | sed 's/\/[^\/]*$//'`/."
 
     echo -n "$basename..."
@@ -107,8 +108,8 @@ Check() {
 CheckFail() {
     error=0
     basename=`echo $1 | sed 's/.*\\///
-                             s/.mc//'`
-    reffile=`echo $1 | sed 's/.mc$//'`
+                             s/.cm//'`
+    reffile=`echo $1 | sed 's/.cm$//'`
     basedir="`echo $1 | sed 's/\/[^\/]*$//'`/."
 
     echo -n "$basename..."
@@ -136,13 +137,16 @@ CheckFail() {
     fi
 }
 
-while getopts kdpsh c; do
+while getopts kdpshv c; do
     case $c in
 	k) # Keep intermediate files
 	    keep=1
 	    ;;
 	h) # Help
 	    Usage
+	    ;;
+        v) # Test flag for Travis-CI
+	    LLI="/usr/lib/llvm-3.8/bin/lli"
 	    ;;
     esac
 done
@@ -162,7 +166,7 @@ if [ $# -ge 1 ]
 then
     files=$@
 else
-    files="tests/test-*.mc tests/fail-*.mc"
+    files="tests/compiler_tests/test-*.cm tests/compiler_tests/fail-*.cm"
 fi
 
 for file in $files

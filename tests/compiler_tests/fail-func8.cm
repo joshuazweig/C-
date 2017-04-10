@@ -1,0 +1,13 @@
+void foo(int a, int b)
+{
+}
+
+void bar()
+{
+}
+
+int main()
+{
+  foo(42, 1);
+  foo(42, bar()); /* int and void, not int and int */
+}
