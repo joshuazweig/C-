@@ -14,7 +14,7 @@ open Ast
 %token <int> LITERAL   //need string literals
 %token <string> ID
 %token <string> STRING
-%token SGLQUOTE // DBLQUOTE
+%token <char> CHARLIT
 %token EOF
 
 //COMMA?
@@ -128,7 +128,7 @@ expr:
   | expr MOD expr { Binop($1,   Mod, $3) }
   | ID MODASSIGN expr  { ModAssign($1, $3) }
   | STRING { String($1) } /* string literal */
-  | SGLQUOTE ID SGLQUOTE { Ch($2) } /* char literal */
+  | CHARLIT { Ch($1) } /* char literal */
   | LT expr COMMA expr GT { Construct2($2, $4) }
   | LT expr COMMA expr COMMA expr GT { Construct3($2, $4, $6) }
   | ID LSQUARE expr RSQUARE { Subscript($1, $3) }

@@ -1,0 +1,6 @@
+int main()
+{
+  if (1) {}
+  if (0) {} else {}
+  if ('c') {} /* Error: non-bool predicate */
+}
