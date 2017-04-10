@@ -58,7 +58,7 @@ let translate (globals, functions) =
 
   (* Declare other linked to / "built in" functions *)
   (* Function returns an 8 byte pointer, taking in two 8 byte pointers as arguments *)
-  let mint_add_func_t = L.function_type mint_type [| mint_type ; mint_type |] in 
+  let mint_add_func_t = L.function_type mint_pointer [| mint_pointer ; mint_pointer |] in 
   let mint_add_func = L.declare_function "mint_add_func" mint_add_func_t the_module in 
 
   let stone_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
@@ -138,7 +138,12 @@ let translate (globals, functions) =
           | A.Mint ->
               ((match op with
               A.Add -> 
-                L.build_call mint_add_func [| e1' ; e2' |] "mint_add_func" builder
+                let ptr1 = L.build_alloca mint_type "e1" builder and
+                ptr2 = L.build_alloca mint_type "e2" builder in 
+                let s = L.build_store e1' ptr1 builder and 
+                s1 = L.build_store e2' ptr2 builder in 
+                
+                L.build_call mint_add_func [| ptr1 ; ptr2 |] "mint_add_func" builder
                   
               ), A.Mint)
               

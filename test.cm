@@ -1,0 +1,7 @@
+int main()
+{
+	mint a;
+	mint b;
+	a + b;
+	return 0;
+}
