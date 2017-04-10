@@ -11,8 +11,7 @@ scanprint:
 
 
 spec_add: spec_add.c
-	gcc -c spec_add.c
-	clang -S -emit-llvm spec_add.c
+	clang -c spec_add.c
 
 .PHONY: clean
 clean :
@@ -22,4 +21,5 @@ clean :
 	rm -rf *.err *.ll *.diff *.out
 	-rm -f scannerprint.ml
 .PHONY : all
-all : clean cmod.native scanprint spec_add
+all : clean cmod.native scanprint spec_add.o
+

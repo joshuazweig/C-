@@ -25,10 +25,11 @@ let translate (globals, functions) =
   and i8_t   = L.i8_type   context
   and i1_t   = L.i1_type   context
   and void_t = L.void_type context in
-  let obj_pointer = L.pointer_type (L.i64_type context) in  (* void pointer, 8 bytes -- pointer to pointer *)
-  let mint_type = L.struct_type context  [| obj_pointer ; obj_pointer |] in (* struct of two void pointers *)
+  let obj_pointer = L.pointer_type (L.i8_type context) in  (* void pointer, 8 bytes *)
+  let mint_type = L.struct_type context  [| obj_pointer ; obj_pointer ; i32_t |] in (* struct of two void pointers *)
   let curve_type = L.struct_type context [| mint_type ; mint_type |] in (* cruve defined by two modints *)
   let point_type = L.struct_type context [| curve_type ; obj_pointer ; obj_pointer; i1_t |] in(* curve + two stones *)
+  let mint_pointer = L.pointer_type mint_type in
   (* Must consider best way to implement points wrt Inf *)
   (* maybe define diff points for inf and normal to enforce that 
   it has to be one or two, not arb length array *)
@@ -57,9 +58,7 @@ let translate (globals, functions) =
 
   (* Declare other linked to / "built in" functions *)
   (* Function returns an 8 byte pointer, taking in two 8 byte pointers as arguments *)
-  let mint_add_func_t = L.function_type mint_type [| L.pointer_type i8_t ; L.pointer_type i8_t  ; L.pointer_type i8_t  ; L.pointer_type i8_t  |] in 
-  
-  (*let mint_add_func_t = L.function_type mint_type [| i64_t ; i64_t ; i64_t ; i64_t |] in *)
+  let mint_add_func_t = L.function_type mint_pointer [| mint_pointer ; mint_pointer |] in 
   let mint_add_func = L.declare_function "mint_add_func" mint_add_func_t the_module in 
 
   let stone_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
@@ -139,29 +138,13 @@ let translate (globals, functions) =
           | A.Mint ->
               ((match op with
               A.Add -> 
-                (*let a1 = L.build_load (L.build_struct_gep e1' 0 "a1p" builder) "a1" builder and
-                a2 = L.build_load (L.build_struct_gep e1' 1 "a2p" builder) "a2" builder and
-                b1 = L.build_load (L.build_struct_gep e2' 0 "b1p" builder) "b1" builder and
-                b2 = L.build_load (L.build_struct_gep e2' 1 "b2p" builder) "b2" builder in
-                L.build_call mint_add_func [| a1; a2; b1; b2 |] "mint_add_func" builder *)
-              (*wants 4 things that are each point to 64 bits *)
-              let a1p = L.build_struct_gep e1' 0 "a1p" builder and
-                a2p = L.build_struct_gep e1' 1 "a2p" builder and
-                b1p = L.build_struct_gep e2' 0 "b1p" builder and
-                b2p = L.build_struct_gep e2' 1 "b2p" builder in
-
-                let a1x = L.build_load a1p "a1x" builder and 
-                a2x = L.build_load a2p "a2x" builder and
-                b1x = L.build_load b1p "b1x" builder and 
-                b2x = L.build_load b2p "b2x" builder in
-
-                let a1 = L.build_load a1x  "a1" builder and
-                a2 = L.build_load a2x  "a2" builder and 
-                b1 = L.build_load b1x  "b1" builder and 
-                b2 = L.build_load b2x  "b2" builder in 
-
+                let ptr1 = L.build_alloca mint_type "e1" builder and
+                ptr2 = L.build_alloca mint_type "e2" builder in 
+                let s = L.build_store e1' ptr1 builder and 
+                s1 = L.build_store e2' ptr2 builder in 
                 
-                L.build_call mint_add_func [| a1; a2; b1; b2 |] "mint_add_func" builder
+                L.build_call mint_add_func [| ptr1 ; ptr2 |] "mint_add_func" builder
+                  
               ), A.Mint)
               
           | A.Stone -> 

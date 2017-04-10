@@ -11,17 +11,8 @@ struct mint {
     int a;
 };
 
-struct cruve {
-    struct mint a;
-    struct mint b;
-    struct mint c;
-};
+void * stone_add_func()
 
-struct curve* curve_add_func(struct curve *a, struct curve *b)
-{
-    printf("Curve\n");
-    return a;
-}
 struct mint* mint_add_func(struct mint *a, struct mint *b)
 {
   printf("We made it!\n");
@@ -29,7 +20,3 @@ struct mint* mint_add_func(struct mint *a, struct mint *b)
 
 }
 
-int main()
-{
-    return 0;
-}
