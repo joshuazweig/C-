@@ -121,8 +121,15 @@ let translate (globals, functions) =
         let (e1', t1) = expr builder e1
         and (e2', t2) = expr builder e2 in 
         (match (t1, t2) with
-          (A.Stone, A.Stone) -> (L.struct_set_body mint_type [| e1' ; e2' ; 0|] 0, A.Mint)
-          | (A.Mint, A.Mint) -> (L.struct_set_body curve_type [| e1' ; e2' |] 0, A.Curve))
+          (A.Stone, A.Stone) -> 
+            let struct_m = L.undef mint_type in 
+            let struct_m2 = L.build_insertvalue struct_m e1' 0 "sm" builder in
+            let struct_m3 = L.build_insertvalue struct_m e2' 1 "sm2" builder in 
+            (L.build_insertvalue struct_m3 (L.const_int i32_t 0) 2 "sm3" builder, A.Mint)
+          | (A.Mint, A.Mint) -> 
+            let struct_c = L.undef curve_type in 
+            let struct_c2 = L.build_insertvalue struct_c e1' 0 "sc" builder in 
+            (L.build_insertvalue struct_c2 e2' 1 "sc2" builder, A.Curve))
           (*last will be for oint defined with inf (not done yet) *)
 
      (* | A.Construct3 (e1, e2, e3) -> *)
