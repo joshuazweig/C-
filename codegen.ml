@@ -133,7 +133,7 @@ let translate (globals, functions) =
           
           (* last would have been point type but now controlled by bit in construct3 *)
 
-      | A.Construct3 (e1, e2, e3) ->
+      (*| A.Construct3 (e1, e2, e3) ->
         let (e1', t1) = expr builder e1
         and (e2', t2) = expr builder e2
         and (e3', t3) = expr builder e3 in 
@@ -144,7 +144,7 @@ let translate (globals, functions) =
             let struct_p3 = L.build_insertvalue struct_p2 e2' 1 "sp2" builder in
             let struct_p4 = L.build_insertvalue struct_p3 e3' 2 "sp3" builder in
             (L.build_insertvalue struct_p4 (L.const_int i1_t 0) 3 "sp4" builder, A.Point))
-      
+      *)
       | A.Binop (e1, op, e2) ->
     	  let (e1', t1) = expr builder e1
     	  and (e2', t2) = expr builder e2 in (* must t1 == t2 for all binop? if so, t2 can be _ *)
