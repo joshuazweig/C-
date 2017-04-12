@@ -196,7 +196,7 @@ let check (globals, functions) =
             " in " ^ func.fname)) vl;
 
           report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
-            (List.map snd vl);
+            ((List.map snd vl) @ (List.map fst (StringMap.bindings symbols)));
           
           ignore(symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
             symbols (globals @ func.formals @ func.locals ));
