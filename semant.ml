@@ -147,7 +147,7 @@ let check (globals, functions) =
       | Construct3(e1, e2, e3) -> let t1 = expr e1 and t2 = expr e2 and t3 =
           expr e3 in
         (match (t1, t2, t3) with
-        | (Curve, Mint, Mint) -> Point
+        | (Curve, Stone, Stone) -> Point
         | _ -> raise (Failure ("illegal constructor type pair (" ^ string_of_typ t1 
         ^ "," ^ string_of_typ t2 ^ "," ^ string_of_typ t3 ^ ")")))
       | Noexpr -> Void
