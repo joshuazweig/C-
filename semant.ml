@@ -188,10 +188,20 @@ let check (globals, functions) =
 	Block (vl, sl) -> let rec check_block = function
            [Return _ as s] -> stmt in_loop s
          | Return _ :: _ -> raise (Failure "nothing may follow a return")
-         | Block (vl, sl) :: ss -> check_block (sl @ ss)
+         | Block (vl, sl) :: ss -> stmt in_loop (Block(vl, sl)); check_block ss;
          | s :: ss -> stmt in_loop s ; check_block ss
          | [] -> ()
-        in check_block sl
+        in 
+          List.iter (check_not_void (fun n -> "illegal void local " ^ n ^
+            " in " ^ func.fname)) vl;
+
+          report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
+            (List.map snd vl);
+          
+          ignore(symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
+            symbols (globals @ func.formals @ func.locals ));
+
+          check_block sl
       | Expr e -> ignore (expr e)
       | Return e -> let t = expr e in if t = func.typ then () else
          raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
