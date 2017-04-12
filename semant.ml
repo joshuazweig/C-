@@ -9,6 +9,7 @@ module StringMap = Map.Make(String)
 
    Check each global variable, then check each function *)
 
+
 let check (globals, functions) =
 
   (* Raise an exception if the given list has a duplicate *)
@@ -85,13 +86,9 @@ let check (globals, functions) =
     report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
       (List.map snd func.locals);
 
-    (* Type of each variable (global, formal, or local *)
-    let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
-	StringMap.empty (globals @ func.formals @ func.locals )
-    in
 
-    let type_of_identifier s =
-      try StringMap.find s symbols
+    let type_of_identifier s lookup_table =
+      try StringMap.find s lookup_table
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in
 
@@ -102,17 +99,17 @@ let check (globals, functions) =
     in
 
     (* Return the type of an expression or throw an exception *)
-    let rec expr = function
+    let rec expr table = function
         Inf -> Point
       | Null -> Pointer(Void)
       | Literal _ -> Int
-      | Id s -> type_of_identifier s
+      | Id s -> type_of_identifier s table
       | Ch _ -> Char
       | String _ -> Pointer(Char)
-      | Subscript(a, i)  as e -> if (expr i) = Int then (type_of_pointer
-      (type_of_identifier a) e) else raise (Failure ("use of non-integer type as index in " ^
+      | Subscript(a, i)  as e -> if (expr table i) = Int then (type_of_pointer
+      (type_of_identifier a table) e) else raise (Failure ("use of non-integer type as index in " ^
         string_of_expr e))
-      | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
+      | Binop(e1, op, e2) as e -> let t1 = expr table e1 and t2 = expr table e2 in
 	(match op with
           Add | Sub when t1 = Point && t2 = Point -> Point
         | Add | Sub | Mult | Div | Pow when t1 = Int && t2 = Int -> Int
@@ -125,7 +122,7 @@ let check (globals, functions) =
               string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
               string_of_typ t2 ^ " in " ^ string_of_expr e))
         )
-      | Unop(op, e) as ex -> let t = expr e in
+      | Unop(op, e) as ex -> let t = expr table e in
 	 (match op with
 	   Neg when t = Int -> Int
          | Neg when t = Stone -> Stone
@@ -138,29 +135,29 @@ let check (globals, functions) =
          | Access when t = Mint || t = Point || t = Curve -> Pointer(Stone)
          | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
 	  		   string_of_typ t ^ " in " ^ string_of_expr ex)))
-      | Construct2(e1, e2) -> let t1 = expr e1 and t2 = expr e2 in
+      | Construct2(e1, e2) -> let t1 = expr table e1 and t2 = expr table e2 in
         (match (t1, t2) with
           (Stone, Stone) -> Mint
         | (Mint, Mint)   -> Curve
         | _ -> raise (Failure ("illegal constructor type pair (" ^ string_of_typ t1 
         ^ "," ^ string_of_typ t2 ^ ")")))
-      | Construct3(e1, e2, e3) -> let t1 = expr e1 and t2 = expr e2 and t3 =
-          expr e3 in
+      | Construct3(e1, e2, e3) -> let t1 = expr table e1 and t2 = expr table e2
+  and t3 = expr table e3 in
         (match (t1, t2, t3) with
-        | (Curve, Mint, Mint) -> Point
+        | (Curve, Stone, Stone) -> Point
         | _ -> raise (Failure ("illegal constructor type pair (" ^ string_of_typ t1 
         ^ "," ^ string_of_typ t2 ^ "," ^ string_of_typ t3 ^ ")")))
       | Noexpr -> Void
 
       (* Definitely need to change this to support things which return lvalues,
        * e.g. dereferencing *)
-      | Assign(var, e) as ex -> let lt = type_of_identifier var
-                                and rt = expr e in
+      | Assign(var, e) as ex -> print_endline "Assignment"; let lt = type_of_identifier var table
+                                and rt = expr table e in
         check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
 				     " = " ^ string_of_typ rt ^ " in " ^ 
 				     string_of_expr ex))
-      | ModAssign(var, e) as ex -> let lt = type_of_identifier var
-                                   and rt = expr e in
+      | ModAssign(var, e) as ex -> let lt = type_of_identifier var table
+                                   and rt = expr table e in
         (match (lt, rt) with
           ((Int|Stone) as t, (Int|Stone)) -> t
         | _ -> raise (Failure ("illegal use of %= with types " ^ string_of_typ
@@ -171,7 +168,7 @@ let check (globals, functions) =
            raise (Failure ("expecting " ^ string_of_int
              (List.length fd.formals) ^ " arguments in " ^ string_of_expr call))
          else
-           List.iter2 (fun (ft, _) e -> let et = expr e in
+           List.iter2 (fun (ft, _) e -> let et = expr table e in
               ignore (check_assign ft et
                 (Failure ("illegal actual argument found " ^ string_of_typ et ^
                 " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
@@ -179,42 +176,47 @@ let check (globals, functions) =
            fd.typ
     in
 
-    let check_int_expr e = if expr e != Int
+    let check_int_expr table e = if expr table e != Int
      then raise (Failure ("expected integer expression in " ^ string_of_expr e))
      else () in
 
     (* Verify a statement or throw an exception *)
-    let rec stmt in_loop = function
-	Block (vl, sl) -> let rec check_block = function
-           [Return _ as s] -> stmt in_loop s
+    let rec stmt table in_loop = function
+        Block (vl, sl) -> print_endline "In a block"; let rec check_block block_table = function
+           [Return _ as s] -> stmt block_table in_loop s
          | Return _ :: _ -> raise (Failure "nothing may follow a return")
-         | Block (vl, sl) :: ss -> stmt in_loop (Block(vl, sl)); check_block ss;
-         | s :: ss -> stmt in_loop s ; check_block ss
+         | (Block (_, _) as b) :: ss -> stmt block_table in_loop b; check_block
+         block_table ss
+         | s :: ss -> stmt block_table in_loop s ; check_block block_table ss
          | [] -> ()
         in 
           List.iter (check_not_void (fun n -> "illegal void local " ^ n ^
             " in " ^ func.fname)) vl;
+            (* check for void type *)
 
           report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
-            ((List.map snd vl) @ (List.map fst (StringMap.bindings symbols)));
-          let old_symbols = symbols in
+            ((List.map snd vl) @ (List.map fst (StringMap.bindings table)));
+            (* check for duplicate names *)
 
-          ignore(symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
-            old_symbols (globals @ func.formals @ func.locals ));
+          let new_table = List.fold_left (fun m (t, n) -> StringMap.add n t
+            m) table vl in
+          
+          List.iter (fun (s, _) -> print_endline s) (StringMap.bindings new_table);
+          print_endline "----------------";
 
-            check_block sl;
-          ignore(symbols = old_symbols);
+          check_block new_table sl
+            (* check the block with new lookup table *)
 
-      | Expr e -> ignore (expr e)
-      | Return e -> let t = expr e in if t = func.typ then () else
+      | Expr e -> ignore (expr table e)
+      | Return e -> let t = expr table e in if t = func.typ then () else
          raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
                          string_of_typ func.typ ^ " in " ^ string_of_expr e))
            
-      | If(p, b1, b2) -> check_int_expr p; stmt false b1; stmt false b2 
-      | For(e1, e2, e3, st) -> ignore (expr e1); check_int_expr e2;
-                               ignore (expr e3); stmt true st
-      | While(p, s) -> check_int_expr p; stmt true s
-      | DoWhile(s, p) -> stmt true s; check_int_expr p
+      | If(p, b1, b2) -> check_int_expr table p; stmt table false b1; stmt table false b2 
+      | For(e1, e2, e3, st) -> ignore (expr table e1); check_int_expr table e2;
+                               ignore (expr table e3); stmt table true st
+      | While(p, s) -> check_int_expr table p; stmt table true s
+      | DoWhile(s, p) -> stmt table true s; check_int_expr table p
       | Break -> if in_loop then () else
           raise (Failure ("break statement found outside of a loop context"))
       | Continue -> if in_loop then () else
@@ -222,7 +224,11 @@ let check (globals, functions) =
       | NullStmt -> ()
     in
 
-    stmt false (Block ([], func.body))
+    (* Type of each variable (global, formal, or local *)
+    let table = List.fold_left (fun m (t, n) -> StringMap.add n t m)
+      StringMap.empty (globals @ func.formals @ func.locals) in
+    
+    stmt table false (Block ([], func.body))
    
   in
   List.iter check_function functions
