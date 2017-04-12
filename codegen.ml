@@ -42,7 +42,7 @@ let translate (globals, functions) =
     | A.Mint -> mint_type
     | A.Curve -> curve_type 
     | A.Point -> point_type 
-    | A.Pointer x -> L.pointer_type (ltype_of_typ x)  in
+    | A.Pointer x -> L.pointer_type (ltype_of_typ x) in
     (* Cant define pointer w normal form bc need type at time *)
 
   (* Declare each global variable; remember its value in a map *)
@@ -66,6 +66,9 @@ let translate (globals, functions) =
 
   let point_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let point_add_func = L.declare_function "point_add_func" point_add_func_t the_module in 
+
+  let stone_create_func_t = L.function_type obj_pointer [| |] in 
+  let stone_create_func = L.declare_function "BN_new" stone_create_func_t the_module in 
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -114,8 +117,34 @@ let translate (globals, functions) =
       | A.Id s ->
         let binding = lookup s in
           (L.build_load (fst binding) s builder, snd binding)
-   (* | A.Construct2 (e1, e2) -> L.set struct body
-      | A.Construct3 (e1, e2, e3) -> *)
+    | A.Construct2 (e1, e2) -> 
+        let (e1', t1) = expr builder e1
+        and (e2', t2) = expr builder e2 in 
+        (match (t1, t2) with
+          (A.Stone, A.Stone) -> 
+            let struct_m = L.undef mint_type in 
+            let struct_m2 = L.build_insertvalue struct_m e1' 0 "sm" builder in
+            let struct_m3 = L.build_insertvalue struct_m e2' 1 "sm2" builder in 
+            (L.build_insertvalue struct_m3 (L.const_int i32_t 0) 2 "sm3" builder, A.Mint)
+          | (A.Mint, A.Mint) -> 
+            let struct_c = L.undef curve_type in 
+            let struct_c2 = L.build_insertvalue struct_c e1' 0 "sc" builder in 
+            (L.build_insertvalue struct_c2 e2' 1 "sc2" builder, A.Curve))
+          
+          (* last would have been point type but now controlled by bit in construct3 *)
+
+      (*| A.Construct3 (e1, e2, e3) ->
+        let (e1', t1) = expr builder e1
+        and (e2', t2) = expr builder e2
+        and (e3', t3) = expr builder e3 in 
+        (match (t1, t2, t3) with
+          (A.Curve, A.Stone, A.Stone) -> (*only construct 3?*)
+            let struct_p = L.undef point_type in
+            let struct_p2 = L.build_insertvalue struct_p e1' 0 "sp" builder in 
+            let struct_p3 = L.build_insertvalue struct_p2 e2' 1 "sp2" builder in
+            let struct_p4 = L.build_insertvalue struct_p3 e3' 2 "sp3" builder in
+            (L.build_insertvalue struct_p4 (L.const_int i1_t 0) 3 "sp4" builder, A.Point))
+      *)
       | A.Binop (e1, op, e2) ->
     	  let (e1', t1) = expr builder e1
     	  and (e2', t2) = expr builder e2 in (* must t1 == t2 for all binop? if so, t2 can be _ *)
@@ -167,9 +196,17 @@ let translate (globals, functions) =
       	     A.Neg     -> L.build_neg
             | A.Not     -> L.build_not) e' "tmp" builder, t
 
-      | A.Assign (s, e) -> let (e', t) = expr builder e in
-                       ignore (L.build_store e' (fst (lookup s)) builder); (e', t)
+      | A.Assign (s, e) -> let (e', t) = expr builder e and
+                              (* if t string, otherwise is behavior normal?*)
+                            (*snd lookup is type of thing*)
+                           ltype = (snd (lookup s)) in (match ltype with
+                           | A.Stone -> let ptr = 
+                                          L.build_call stone_create_func [| |] "stone_create_func" builder in 
+                                        L.build_store ptr (fst (lookup s)) builder; (ptr, t)
+
+                           | _ -> ignore (L.build_store e' (fst (lookup s)) builder); (e', t) )
                        
+
       | A.Call ("print", [e]) | A.Call ("printb", [e]) ->
 	       (L.build_call printf_func [| int_format_str ; fst (expr builder e) |]  "printf" builder, A.Void)
       

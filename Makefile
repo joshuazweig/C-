@@ -25,6 +25,6 @@ clean :
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o 
 	rm -rf *.err *.ll *.diff *.out
 	-rm -f scannerprint.ml *.tmp
-
+	rm -f *.exe *.s 
 .PHONY : all
 all : clean cmod.native spec_add.o
