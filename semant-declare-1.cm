@@ -1,0 +1,7 @@
+int main() {
+    int i;
+    int x;
+    for (i = 0; i < 5; i=i+1) {
+        int x; // should be error due to duplicate local
+    }
+}

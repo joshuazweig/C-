@@ -197,11 +197,14 @@ let check (globals, functions) =
 
           report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
             ((List.map snd vl) @ (List.map fst (StringMap.bindings symbols)));
-          
-          ignore(symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
-            symbols (globals @ func.formals @ func.locals ));
+          let old_symbols = symbols in
 
-          check_block sl
+          ignore(symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
+            old_symbols (globals @ func.formals @ func.locals ));
+
+            check_block sl;
+          ignore(symbols = old_symbols);
+
       | Expr e -> ignore (expr e)
       | Return e -> let t = expr e in if t = func.typ then () else
          raise (Failure ("return gives " ^ string_of_typ t ^ " expected " ^
