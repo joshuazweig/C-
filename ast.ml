@@ -118,7 +118,7 @@ let rec string_of_typ = function
   | Curve -> "curve"
   | Point -> "point"
   | Void -> "void"
-  | Pointer _ as t -> "pointer " ^ string_of_typ(t)
+  | Pointer (_ as t) -> "pointer " ^ string_of_typ(t)
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
