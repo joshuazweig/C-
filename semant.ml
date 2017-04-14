@@ -151,7 +151,7 @@ let check (globals, functions) =
 
       (* Definitely need to change this to support things which return lvalues,
        * e.g. dereferencing *)
-      | Assign(var, e) as ex -> print_endline "Assignment"; let lt = type_of_identifier var table
+      | Assign(var, e) as ex -> let lt = type_of_identifier var table
                                 and rt = expr table e in
         check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
 				     " = " ^ string_of_typ rt ^ " in " ^ 
@@ -182,7 +182,7 @@ let check (globals, functions) =
 
     (* Verify a statement or throw an exception *)
     let rec stmt table in_loop = function
-        Block (vl, sl) -> print_endline "In a block"; let rec check_block block_table = function
+        Block (vl, sl) -> let rec check_block block_table = function
            [Return _ as s] -> stmt block_table in_loop s
          | Return _ :: _ -> raise (Failure "nothing may follow a return")
          | (Block (_, _) as b) :: ss -> stmt block_table in_loop b; check_block
@@ -201,9 +201,6 @@ let check (globals, functions) =
           let new_table = List.fold_left (fun m (t, n) -> StringMap.add n t
             m) table vl in
           
-          List.iter (fun (s, _) -> print_endline s) (StringMap.bindings new_table);
-          print_endline "----------------";
-
           check_block new_table sl
             (* check the block with new lookup table *)
 

@@ -1,0 +1,14 @@
+int main() {
+    int x;
+    {
+         int y;
+         {
+             int z;
+             z = 3;
+         }
+         y = 4;
+    }
+    x = 5;
+    printf("%d\n", x+y+z);
+    return 0;
+}
