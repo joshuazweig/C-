@@ -74,34 +74,21 @@ let translate (globals, functions) =
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
        value, if appropriate, and remember their values in the "locals" map *)
-    let local_vars =
-      let add_formal m (t, n) p = L.set_value_name n p;
-	let local = L.build_alloca (ltype_of_typ t) n builder in
-	ignore (L.build_store p local builder);
-	StringMap.add n local m in
-
-      let add_local m (t, n) =
-	let local_var = L.build_alloca (ltype_of_typ t) n builder
-	in StringMap.add n local_var m in
-
-      let formals = List.fold_left2 add_formal StringMap.empty fdecl.A.formals
-          (Array.to_list (L.params the_function)) in
-      List.fold_left add_local formals fdecl.A.locals in
 
     (* Return the value for a variable or formal argument *)
-    let lookup n = try StringMap.find n local_vars
+    let lookup n table = try StringMap.find n table
                    with Not_found -> StringMap.find n global_vars
     in
 
     (* Construct code for an expression; return its value *)
-    let rec expr builder = function
+    let rec expr table builder = function
 	     A.Literal i -> L.const_int i32_t i
       | A.String s -> L.build_global_stringptr s "fmts" builder 
       | A.Noexpr -> L.const_int i32_t 0
-      | A.Id s -> L.build_load (lookup s) s builder
+      | A.Id s -> L.build_load (lookup s table) s builder
       | A.Binop (e1, op, e2) ->
-	  let e1' = expr builder e1
-	  and e2' = expr builder e2 in
+	  let e1' = expr table builder e1
+	  and e2' = expr table builder e2 in
 	  (match op with
 	    A.Add     -> L.build_add
 	  | A.Sub     -> L.build_sub
@@ -117,23 +104,23 @@ let translate (globals, functions) =
 	  | A.Geq     -> L.build_icmp L.Icmp.Sge
 	  ) e1' e2' "tmp" builder
       | A.Unop(op, e) ->
-	  let e' = expr builder e in
+	  let e' = expr table builder e in
 	  (match op with
 	    A.Neg     -> L.build_neg
           | A.Not     -> L.build_not) e' "tmp" builder
-      | A.Assign (s, e) -> let e' = expr builder e in
-	                   ignore (L.build_store e' (lookup s) builder); e'
+      | A.Assign (s, e) -> let e' = expr table builder e in
+	                   ignore (L.build_store e' (lookup s table) builder); e'
       | A.Call ("print", [e]) | A.Call ("printb", [e]) ->
-	  L.build_call printf_func [| int_format_str ; (expr builder e) |]
+	  L.build_call printf_func [| int_format_str ; (expr table builder e) |]
 	    "printf" builder
       | A.Call ("printf", act) ->
-          let actuals = List.rev (List.map (expr builder)
+          let actuals = List.rev (List.map (expr table builder)
           (List.rev act)) in
           let result = "" in  (* printf is void function *)
           L.build_call printf_func (Array.of_list actuals) result builder
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
-	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
+	 let actuals = List.rev (List.map (expr table builder) (List.rev act)) in
 	 let result = (match fdecl.A.typ with A.Void -> ""
                                             | _ -> f ^ "_result") in
          L.build_call fdef (Array.of_list actuals) result builder
@@ -148,22 +135,32 @@ let translate (globals, functions) =
 	
     (* Build the code for the given statement; return the builder for
        the statement's successor *)
-    let rec stmt builder = function
-	A.Block (vl, sl) -> List.fold_left stmt builder sl
-      | A.Expr e -> ignore (expr builder e); builder
+    let rec stmt table builder = function
+	A.Block (vl, sl) -> 
+    (* first declare variables *)        
+    let new_table =
+      let add_local m (t, n) =
+	let local_var = L.build_alloca (ltype_of_typ t) n builder
+	  in StringMap.add n local_var m 
+        in
+      List.fold_left add_local table vl
+      in
+      List.fold_left (stmt new_table) builder sl
+
+      | A.Expr e -> ignore (expr table builder e); builder
       | A.Return e -> ignore (match fdecl.A.typ with
 	                 A.Void -> L.build_ret_void builder
-	    | _ -> L.build_ret (expr builder e) builder); builder
+	    | _ -> L.build_ret (expr table builder e) builder); builder
       | A.If (predicate, then_stmt, else_stmt) ->
-         let bool_val = expr builder predicate in
+         let bool_val = expr table builder predicate in
 	 let merge_bb = L.append_block context "merge" the_function in
 
 	 let then_bb = L.append_block context "then" the_function in
-	 add_terminal (stmt (L.builder_at_end context then_bb) then_stmt)
+	 add_terminal (stmt table (L.builder_at_end context then_bb) then_stmt)
 	   (L.build_br merge_bb);
 
 	 let else_bb = L.append_block context "else" the_function in
-	 add_terminal (stmt (L.builder_at_end context else_bb) else_stmt)
+	 add_terminal (stmt table (L.builder_at_end context else_bb) else_stmt)
 	   (L.build_br merge_bb);
 
 	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
@@ -174,22 +171,35 @@ let translate (globals, functions) =
 	  ignore (L.build_br pred_bb builder);
 
 	  let body_bb = L.append_block context "while_body" the_function in
-	  add_terminal (stmt (L.builder_at_end context body_bb) body)
+	  add_terminal (stmt table (L.builder_at_end context body_bb) body)
 	    (L.build_br pred_bb);
 
 	  let pred_builder = L.builder_at_end context pred_bb in
-	  let bool_val = expr pred_builder predicate in
+	  let bool_val = expr table pred_builder predicate in
 
 	  let merge_bb = L.append_block context "merge" the_function in
 	  ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
 	  L.builder_at_end context merge_bb
 
-      | A.For (e1, e2, e3, body) -> stmt builder
+      | A.For (e1, e2, e3, body) -> stmt table builder
       ( A.Block ([], [A.Expr e1 ; A.While (e2, A.Block ([], [body ; A.Expr e3])) ]))
     in
 
+    let local_vars =
+      let add_formal m (t, n) p = L.set_value_name n p;
+	let local = L.build_alloca (ltype_of_typ t) n builder in
+	ignore (L.build_store p local builder);
+	StringMap.add n local m in
+
+      let add_local m (t, n) =
+	let local_var = L.build_alloca (ltype_of_typ t) n builder
+	in StringMap.add n local_var m in
+
+      let formals = List.fold_left2 add_formal StringMap.empty fdecl.A.formals
+          (Array.to_list (L.params the_function)) in
+      List.fold_left add_local formals fdecl.A.locals in
     (* Build the code for each statement in the function *)
-    let builder = stmt builder (A.Block ([], fdecl.A.body)) in
+    let builder = stmt local_vars builder (A.Block ([], fdecl.A.body)) in
 
     (* Add a return if the last block falls off the end *)
     add_terminal builder (match fdecl.A.typ with
