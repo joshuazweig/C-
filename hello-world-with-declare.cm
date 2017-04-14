@@ -1,0 +1,10 @@
+//declare global just for shits
+int y;
+
+int main() {
+   char *x;
+   x = "hello world";
+   printf("%s\n", x);
+   return 0;
+}
+
