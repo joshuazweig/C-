@@ -1,0 +1,12 @@
+int foo() {}
+
+void bar() {}
+
+int printf() {} /* Should not be able to define printf */
+
+void baz() {}
+
+int main()
+{
+  return 0;
+}

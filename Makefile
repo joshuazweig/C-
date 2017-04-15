@@ -5,9 +5,14 @@ cmod.native:
 	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 \
 		cmod.native
 
-.PHONY: scanprint
-scanprint:
+.PHONY: test_grammar
+test_grammar:
 	ocamllex scannerprint.mll
+	python tests/grammar_tests/testAllPretty.py
+
+.PHONE: test_compiler_travis
+test_compiler_travis:
+	./testall.sh -v
 
 
 spec_add: spec_add.c
@@ -19,7 +24,7 @@ clean :
 	rm -rf testall.log *.diff cmod scanner.ml parser.ml parser.mli
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o 
 	rm -rf *.err *.ll *.diff *.out
-	-rm -f scannerprint.ml
+	-rm -f scannerprint.ml *.tmp
+	rm -f *.exe *.s 
 .PHONY : all
-all : clean cmod.native scanprint spec_add.o
-
+all : clean cmod.native spec_add.o
