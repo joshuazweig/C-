@@ -28,8 +28,8 @@ let check (globals, functions) =
   
   (* Raise an exception of the given rvalue type cannot be assigned to
      the given lvalue type *)
-  let check_assign lvaluet rvaluet err =
-     if lvaluet = rvaluet then lvaluet else raise err
+  let check_assign lvaluet rvaluet err = lvaluet
+     (*if lvaluet = rvaluet then lvaluet else raise err*)
   in
    
   (**** Checking Global Variables ****)

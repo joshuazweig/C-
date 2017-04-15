@@ -1,0 +1,11 @@
+int main()
+{
+	stone x;
+  stone y;
+  stone z;
+  
+  y = "01";
+  z = "10";
+  x = y + z;
+	return 0;
+}

@@ -9,5 +9,5 @@ basename=`echo $1 | sed 's/.*\\///
 #Replace with your llvm compiler 
 /usr/local/opt/llvm\@3.8/bin/llc-3.8 ${basename}.ll > ${basename}.s
 
-cc -o ${basename}.exe ${basename}.s spec_add.o /usr/lib/libcrypto.0.9.8.dylib
+cc -o ${basename}.exe ${basename}.s special_arith.o /usr/lib/libcrypto.0.9.8.dylib
 ./${basename}.exe

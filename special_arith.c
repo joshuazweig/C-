@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h> 
+#include <openssl/bn.h>
 
 struct stone {
     /* actually a linked list of ints */
@@ -19,8 +21,27 @@ struct mint {
 * come to a conclusion on a library 
 */
 
+//construct
+void* stone_char_func(void *buf, void *bn)
+{
+  BIGNUM *c = BN_bin2bn((const unsigned char*) buf, strlen(buf), bn);
+  //BN_print_fp(stdout, c);
+  //printf("\n");
+  return c;
+}
+
 //Add
-void* stone_add_func(void *a, void *b);
+void* stone_add_func(void *r, void *a, void *b)
+{
+  BN_print_fp(stderr, a);
+  printf("\n");
+  BN_print_fp(stderr, b);
+  printf("\n");
+  BN_add(r, a, b);
+  BN_print_fp(stderr, r);
+  return r;
+
+}
 
 //Multiply
 void* stone_mult_func(void *a, void *b);

@@ -61,8 +61,11 @@ let translate (globals, functions) =
   let mint_add_func_t = L.function_type mint_pointer [| mint_pointer ; mint_pointer |] in 
   let mint_add_func = L.declare_function "mint_add_func" mint_add_func_t the_module in 
 
-  let stone_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
+  let stone_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer ; obj_pointer |] in 
   let stone_add_func = L.declare_function "stone_add_func" stone_add_func_t the_module in 
+
+  let stone_char_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
+  let stone_char_func = L.declare_function "stone_char_func" stone_char_func_t the_module in 
 
   let point_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let point_add_func = L.declare_function "point_add_func" point_add_func_t the_module in 
@@ -179,8 +182,9 @@ let translate (globals, functions) =
           | A.Stone -> 
               ((match op with
               A.Add -> 
-                L.build_call stone_add_func [| e1' ; e2' |] "stone_add_func" builder
-                
+                let ptr = L.build_call stone_create_func [| |] "stone_create_func" builder in 
+                L.build_call stone_add_func [| ptr ; e1' ; e2' |] "stone_add_func" builder
+
               ), A.Stone) 
           | A.Point ->
               ((match op with
@@ -196,13 +200,16 @@ let translate (globals, functions) =
       	     A.Neg     -> L.build_neg
             | A.Not     -> L.build_not) e' "tmp" builder, t
 
-      | A.Assign (s, e) -> let (e', t) = expr builder e and
+       | A.Assign (s, e) -> let (e', t) = expr builder e and
                               (* if t string, otherwise is behavior normal?*)
                             (*snd lookup is type of thing*)
-                           ltype = (snd (lookup s)) in (match ltype with
-                           | A.Stone -> let ptr = 
-                                          L.build_call stone_create_func [| |] "stone_create_func" builder in 
-                                        L.build_store ptr (fst (lookup s)) builder; (ptr, t)
+                           ltype = (snd (lookup s)) in (match (ltype, t) with
+                           | (A.Stone, A.Pointer(A.Char)) -> 
+                              let ptr = 
+                                L.build_call stone_create_func [| |] "stone_create_func" builder in 
+                                let res = 
+                                  L.build_call stone_char_func [| e' ; ptr |] "stone_char_func" builder in 
+                                  ignore(L.build_store ptr (fst (lookup s)) builder); (ptr, t)
 
                            | _ -> ignore (L.build_store e' (fst (lookup s)) builder); (e', t) )
                        
