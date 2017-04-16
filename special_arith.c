@@ -24,36 +24,71 @@ struct mint {
 //construct
 void* stone_char_func(void *buf, void *bn)
 {
-  BIGNUM *c = BN_bin2bn((const unsigned char*) buf, strlen(buf), bn);
+  //printf("%s\n", (const unsigned char*) buf);
+  //printf("Length : %d\n", strlen(buf));
+  BIGNUM *c = BN_bin2bn((unsigned char*) buf, strlen(buf), bn);
+  
   //BN_print_fp(stdout, c);
-  //printf("\n");
+  //printf("%s\n", BN_bn2dec(c));
+  
   return c;
 }
 
 //Add
 void* stone_add_func(void *r, void *a, void *b)
 {
-  BN_print_fp(stderr, a);
-  printf("\n");
-  BN_print_fp(stderr, b);
-  printf("\n");
+  //BN_print_fp(stderr, a);
+  //printf("\n");
+  //BN_print_fp(stderr, b);
+  //printf("\n");
   BN_add(r, a, b);
-  BN_print_fp(stderr, r);
+
+  //BN_print_fp(stderr, r);
+  //printf("\n");
+
   return r;
 
 }
 
 //Multiply
-void* stone_mult_func(void *a, void *b);
+void* stone_mult_func(void *r, void *a, void *b)
+{
+  BN_CTX* ctx = BN_CTX_new();
+  BN_mul(r, a, b, ctx);
+  BN_CTX_free(ctx);
+
+  return r;
+}
 
 //Divide
-void* stone_div_func(void *a, void *b);
+void* stone_div_func(void *r, void *a, void *b)
+{
+  BN_CTX* ctx = BN_CTX_new();
+  BN_div(r, NULL, a, b, ctx);
+  BN_CTX_free(ctx);
+
+  return r;
+}
 
 //Mod 
-void* stone_mod_func(void *a, void *b);
+void* stone_mod_func(void *r, void *a, void *b)
+{
+  BN_CTX* ctx = BN_CTX_new();
+  BN_mod(r, a, b, ctx);
+  BN_CTX_free(ctx);
+
+  return r;
+}
 
 //Exponent
-void* stone_exp_func(void *a, void *b);
+void* stone_pow_func(void *r, void *a, void *p)
+{
+  BN_CTX* ctx = BN_CTX_new();
+  BN_exp(r, a, p, ctx);
+  BN_CTX_free(ctx);
+
+  return r;
+}
 
 /*
 * Mint

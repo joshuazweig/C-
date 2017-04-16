@@ -64,6 +64,19 @@ let translate (globals, functions) =
   let stone_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer ; obj_pointer |] in 
   let stone_add_func = L.declare_function "stone_add_func" stone_add_func_t the_module in 
 
+  let stone_mult_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer ; obj_pointer |] in 
+  let stone_mult_func = L.declare_function "stone_mult_func" stone_mult_func_t the_module in
+
+  let stone_div_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer ; obj_pointer |] in 
+  let stone_div_func = L.declare_function "stone_div_func" stone_div_func_t the_module in
+
+  let stone_pow_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer ; obj_pointer |] in 
+  let stone_pow_func = L.declare_function "stone_pow_func" stone_pow_func_t the_module in
+
+  let stone_mod_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer ; obj_pointer |] in 
+  let stone_mod_func = L.declare_function "stone_mod_func" stone_mod_func_t the_module in
+
+
   let stone_char_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let stone_char_func = L.declare_function "stone_char_func" stone_char_func_t the_module in 
 
@@ -184,6 +197,27 @@ let translate (globals, functions) =
               A.Add -> 
                 let ptr = L.build_call stone_create_func [| |] "stone_create_func" builder in 
                 L.build_call stone_add_func [| ptr ; e1' ; e2' |] "stone_add_func" builder
+              | A.Mult -> 
+                let ptr = L.build_call stone_create_func [| |] "stone_create_func" builder in 
+                L.build_call stone_mult_func [| ptr ; e1' ; e2' |] "stone_mult_func" builder
+              | A.Div -> 
+                let ptr = L.build_call stone_create_func [| |] "stone_create_func" builder in 
+                L.build_call stone_div_func [| ptr ; e1' ; e2' |] "stone_div_func" builder
+              | A.Pow -> 
+                let ptr = L.build_call stone_create_func [| |] "stone_create_func" builder in 
+                L.build_call stone_pow_func [| ptr ; e1' ; e2' |] "stone_pow_func" builder
+              | A.Mod -> 
+                let ptr = L.build_call stone_create_func [| |] "stone_create_func" builder in 
+                L.build_call stone_mod_func [| ptr ; e1' ; e2' |] "stone_mod_func" builder
+              (*| A.Sub ->
+              | A.Equal -> 
+              | A.Neq -> 
+              | A.Less -> 
+              | A.Leq -> 
+              | A.Greater ->
+              | A.Geq ->
+              | A.And ->
+              | A.Or -> *)
 
               ), A.Stone) 
           | A.Point ->
