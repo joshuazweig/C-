@@ -58,11 +58,32 @@ let translate (globals, functions) =
 
   (* Declare other linked to / "built in" functions *)
   (* Function returns an 8 byte pointer, taking in two 8 byte pointers as arguments *)
-  let mint_add_func_t = L.function_type mint_pointer [| mint_pointer ; mint_pointer |] in 
+  let mint_add_func_t = L.function_type mint_type [| mint_pointer ; mint_pointer |] in 
   let mint_add_func = L.declare_function "mint_add_func" mint_add_func_t the_module in 
 
-  let stone_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
+  let mint_to_stone_func_t = L.function_type mint_type [| mint_pointer ; obj_pointer |] in
+  let mint_to_stone_func = L.declare_function "mint_to_stone_func" mint_to_stone_func_t the_module in
+
+  let stone_char_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
+  let stone_char_func = L.declare_function "stone_char_func" stone_char_func_t the_module in 
+
+  let stone_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer ; obj_pointer |] in 
   let stone_add_func = L.declare_function "stone_add_func" stone_add_func_t the_module in 
+
+  let stone_mult_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer ; obj_pointer |] in 
+  let stone_mult_func = L.declare_function "stone_mult_func" stone_mult_func_t the_module in
+
+  let stone_div_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer ; obj_pointer |] in 
+  let stone_div_func = L.declare_function "stone_div_func" stone_div_func_t the_module in
+
+  let stone_pow_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer ; obj_pointer |] in 
+  let stone_pow_func = L.declare_function "stone_pow_func" stone_pow_func_t the_module in
+
+  let stone_mod_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer ; obj_pointer |] in 
+  let stone_mod_func = L.declare_function "stone_mod_func" stone_mod_func_t the_module in
+
+  let stone_print_func_t = L.function_type i32_t [| obj_pointer |] in 
+  let stone_print_func = L.declare_function "stone_print_func" stone_print_func_t the_module in
 
   let point_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let point_add_func = L.declare_function "point_add_func" point_add_func_t the_module in 
@@ -133,7 +154,7 @@ let translate (globals, functions) =
           
           (* last would have been point type but now controlled by bit in construct3 *)
 
-      (*| A.Construct3 (e1, e2, e3) ->
+      | A.Construct3 (e1, e2, e3) ->
         let (e1', t1) = expr builder e1
         and (e2', t2) = expr builder e2
         and (e3', t3) = expr builder e3 in 
@@ -144,12 +165,12 @@ let translate (globals, functions) =
             let struct_p3 = L.build_insertvalue struct_p2 e2' 1 "sp2" builder in
             let struct_p4 = L.build_insertvalue struct_p3 e3' 2 "sp3" builder in
             (L.build_insertvalue struct_p4 (L.const_int i1_t 0) 3 "sp4" builder, A.Point))
-      *)
+      
       | A.Binop (e1, op, e2) ->
     	  let (e1', t1) = expr builder e1
     	  and (e2', t2) = expr builder e2 in (* must t1 == t2 for all binop? if so, t2 can be _ *)
-        (match t1 with
-           A.Int -> 
+        (match (t1, t2) with
+           (A.Int, A.Int) -> 
               ((match op with
                 A.Add     -> L.build_add
               | A.Sub     -> L.build_sub
@@ -164,7 +185,7 @@ let translate (globals, functions) =
               | A.Greater -> L.build_icmp L.Icmp.Sgt
               | A.Geq     -> L.build_icmp L.Icmp.Sge
               ) e1' e2' "tmp" builder, A.Int) 
-          | A.Mint ->
+          | (A.Mint, A.Mint) ->
               ((match op with
               A.Add -> 
                 let ptr1 = L.build_alloca mint_type "e1" builder and
@@ -175,14 +196,48 @@ let translate (globals, functions) =
                 L.build_call mint_add_func [| ptr1 ; ptr2 |] "mint_add_func" builder
                   
               ), A.Mint)
+
+            (*Raise mint to stone*)
+          | (A.Mint, A.Stone) ->
+              ((match op with
+                (* In semant, check that this is only op possible *)
+                A.Pow -> 
+                  let ptr = L.build_alloca mint_type "e1" builder in
+                  let s = L.build_store e1' ptr builder in 
+
+                  L.build_call mint_to_stone_func [| ptr ; e2' |] "mint_to_stone_func" builder
+
+              ), A.Mint)
               
-          | A.Stone -> 
+          | (A.Stone, A.Stone) -> 
               ((match op with
               A.Add -> 
-                L.build_call stone_add_func [| e1' ; e2' |] "stone_add_func" builder
-                
+                let ptr = L.build_call stone_create_func [| |] "stone_create_func" builder in 
+                L.build_call stone_add_func [| ptr ; e1' ; e2' |] "stone_add_func" builder
+              | A.Mult -> 
+                let ptr = L.build_call stone_create_func [| |] "stone_create_func" builder in 
+                L.build_call stone_mult_func [| ptr ; e1' ; e2' |] "stone_mult_func" builder
+              | A.Div -> 
+                let ptr = L.build_call stone_create_func [| |] "stone_create_func" builder in 
+                L.build_call stone_div_func [| ptr ; e1' ; e2' |] "stone_div_func" builder
+              | A.Pow -> 
+                let ptr = L.build_call stone_create_func [| |] "stone_create_func" builder in 
+                L.build_call stone_pow_func [| ptr ; e1' ; e2' |] "stone_pow_func" builder
+              | A.Mod -> 
+                let ptr = L.build_call stone_create_func [| |] "stone_create_func" builder in 
+                L.build_call stone_mod_func [| ptr ; e1' ; e2' |] "stone_mod_func" builder
+              (*| A.Sub ->
+              | A.Equal -> 
+              | A.Neq -> 
+              | A.Less -> 
+              | A.Leq -> 
+              | A.Greater ->
+              | A.Geq ->
+              | A.And ->
+              | A.Or -> *)
+
               ), A.Stone) 
-          | A.Point ->
+          | (A.Point, A.Point) ->
               ((match op with
               A.Add -> 
                 L.build_call point_add_func [| e1' ; e2' |] "point_add_func" builder
@@ -196,26 +251,28 @@ let translate (globals, functions) =
       	     A.Neg     -> L.build_neg
             | A.Not     -> L.build_not) e' "tmp" builder, t
 
-      | A.Assign (s, e) -> let (e', t) = expr builder e and
+       | A.Assign (s, e) -> let (e', t) = expr builder e and
                               (* if t string, otherwise is behavior normal?*)
                             (*snd lookup is type of thing*)
-                           ltype = (snd (lookup s)) in (match ltype with
-                           | A.Stone -> let ptr = 
-                                          L.build_call stone_create_func [| |] "stone_create_func" builder in 
-                                        L.build_store ptr (fst (lookup s)) builder; (ptr, t)
+                           ltype = (snd (lookup s)) in (match (ltype, t) with
+                           | (A.Stone, A.Pointer(A.Char)) -> 
+                              let ptr = 
+                                L.build_call stone_create_func [| |] "stone_create_func" builder in 
+                                let res = 
+                                  L.build_call stone_char_func [| e' ; ptr |] "stone_char_func" builder in 
+                                  ignore(L.build_store ptr (fst (lookup s)) builder); (ptr, t)
 
                            | _ -> ignore (L.build_store e' (fst (lookup s)) builder); (e', t) )
                        
 
-      | A.Call ("print", [e]) | A.Call ("printb", [e]) ->
-	       (L.build_call printf_func [| int_format_str ; fst (expr builder e) |]  "printf" builder, A.Void)
-      
       | A.Call ("printf", act) ->
           let actuals, types = List.split (List.rev (List.map (expr builder)
           (List.rev act))) in
           let result = "" in  (* printf is void function *)
           (L.build_call printf_func (Array.of_list actuals) result builder, 
             A.Pointer(Char))
+     | A.Call("print_stone", [e]) -> let (e', t) = expr builder e in 
+          (L.build_call stone_print_func [| e' |] "stone_print_func" builder, t); 
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
 	 let actuals, types = List.split (List.rev (List.map (expr builder) (List.rev act))) in

@@ -15,8 +15,8 @@ test_compiler_travis:
 	./testall.sh -v
 
 
-spec_add: spec_add.c
-	clang -c spec_add.c
+special_arith.o: special_arith.c
+	clang -I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib -c special_arith.c
 
 .PHONY: clean
 clean :
@@ -27,4 +27,4 @@ clean :
 	-rm -f scannerprint.ml *.tmp
 	rm -f *.exe *.s 
 .PHONY : all
-all : clean cmod.native spec_add.o
+all : clean cmod.native special_arith.o

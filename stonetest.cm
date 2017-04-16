@@ -1,0 +1,14 @@
+int main()
+{
+	stone x;
+  stone y;
+  stone z;
+  
+  y = "hello";
+  z = "there";
+  x = y + z;
+
+  print_stone(x);
+ 
+	return 0;
+}
