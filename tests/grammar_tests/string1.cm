@@ -1,0 +1,6 @@
+int main() {
+    char *arr;
+
+    arr = "Hello, I am a test string!";
+}
+

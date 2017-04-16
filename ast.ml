@@ -22,7 +22,7 @@ type expr =
   | Null
   | ModAssign of string * expr
   | String of string
-  | Ch of string (* Maybe change back to char *)
+  | Ch of char (* Maybe change back to char *)
   | Subscript of string * expr
   | Inf
 
@@ -87,7 +87,7 @@ let rec string_of_expr = function
   | Inf -> "Inf"
   | ModAssign(v, e) -> v ^ " %= " ^ string_of_expr e
   | String(s) -> s
-  | Ch (c) -> c
+  | Ch (c) -> String.make 1 c
   | Subscript(s, e) -> s ^ "[" ^ string_of_expr e ^ "]"
   | Construct2(e1, e2) -> "{" ^ string_of_expr e1 ^ ", " ^ string_of_expr e2 ^ "}"
   | Construct3(e1, e2, e3) ->
@@ -118,7 +118,7 @@ let rec string_of_typ = function
   | Curve -> "curve"
   | Point -> "point"
   | Void -> "void"
-  | Pointer _ as t -> "pointer " ^ string_of_typ(t)
+  | Pointer (_ as t) -> "pointer " ^ string_of_typ(t)
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 

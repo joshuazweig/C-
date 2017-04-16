@@ -1,0 +1,35 @@
+language: python
+sudo: required
+
+addons:
+  apt:
+    sources:
+    - avsm
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise
+    - llvm-toolchain-precise-3.8
+    packages:
+    - opam
+    - m4
+    - pkg-config
+    - make
+    - llvm-3.8
+    - llvm
+
+before_install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-ocaml.sh
+install:
+    - bash -ex .travis-ocaml.sh
+    - eval $(opam config env)
+    - opam install ocamlfind menhir
+    - opam install llvm.3.8
+    - export PATH=/usr/lib/llvm-3.8/bin:$PATH
+
+python:
+  - "2.7"
+script:
+    - make
+    - make test_grammar
+    - make test_compiler_travis
+env:
+    - OCAML_VERSION=latest OPAMYES=1
+

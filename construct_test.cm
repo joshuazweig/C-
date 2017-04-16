@@ -1,0 +1,23 @@
+int main()
+{
+	stone x;
+  stone y;
+
+  mint a;
+  mint b;
+
+  curve c;
+
+  point p;
+
+
+  a = <x, y>;
+
+  b = <x, y>;
+
+  c = <a, b>;
+
+  //p = <c, x, y>;
+  printf("Done\n");
+	return 0;
+}

@@ -1,0 +1,9 @@
+void foo(int a, int b)
+{
+}
+
+int main()
+{
+  foo(42, 1);
+  foo(42, 1, 0); /* Wrong number of arguments */
+}

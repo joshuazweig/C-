@@ -9,7 +9,7 @@ module StringMap = Map.Make(String)
 
    Check each global variable, then check each function *)
 
-let check (globals, functions) =
+let check (globals, functions) = 
 
   (* Raise an exception if the given list has a duplicate *)
   let report_duplicate exceptf list =
@@ -28,8 +28,8 @@ let check (globals, functions) =
   
   (* Raise an exception of the given rvalue type cannot be assigned to
      the given lvalue type *)
-  let check_assign lvaluet rvaluet err =
-     if lvaluet == rvaluet then lvaluet else raise err
+  let check_assign lvaluet rvaluet err = 
+     if lvaluet = rvaluet then lvaluet else raise err
   in
    
   (**** Checking Global Variables ****)
@@ -51,11 +51,14 @@ let check (globals, functions) =
     (List.map (fun fd -> fd.fname) functions);
 
   (* Function declaration for a named function *)
-  let built_in_decls =  StringMap.add "printf"
-     { typ = Void; fname = "printf"; formals = []; (* change formals
-     to be variadic? Right now, this is fixed by just not comparing formals and
-     actuals list if the name of the function is printf  *)
-       locals = []; body = [] } StringMap.empty
+  let built_in_decls =  List.fold_left (fun map (name, attr) -> StringMap.add
+  name attr map) StringMap.empty [ 
+       ("printf", { typ = Void; fname = "printf"; formals = []; 
+       (* change formals to be variadic? Right now, this is fixed by just not 
+       comparing formals and actuals list if the name of the function is printf  *)
+       locals = []; body = [] });
+       ("print_stone", { typ = Int; fname = "print_stone"; formals = [(Stone,
+       "x")]; locals = []; body = [] })] 
    in
      
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
@@ -64,7 +67,7 @@ let check (globals, functions) =
 
   let function_decl s = try StringMap.find s function_decls
        with Not_found -> if s = "main" then raise (Failure ("main function must be defined"))
-       else raise (Failure ("unrecognized function " ^ s))
+       else raise (Failure ("unrecognized function " ^ s)) 
   in
 
   let _ = function_decl "main" in (* Ensure "main" is defined *)
@@ -116,11 +119,12 @@ let check (globals, functions) =
 	(match op with
           Add | Sub when t1 = Point && t2 = Point -> Point
         | Add | Sub | Mult | Div | Pow when t1 = Int && t2 = Int -> Int
-        | Add | Sub | Mult | Div | Pow when t1 = Stone && t2 = Stone -> Stone
+        | Add | Sub | Mult | Div | Pow | Mod when t1 = Stone && t2 = Stone -> Stone
         | Add | Sub | Mult | Pow when t1 = Mint && t2 = Mint -> Mint
 	| Equal | Neq when t1 = t2 -> Int  (* might want to extend this to allow
         e.g., t1 and t2 both integer types so one can do stone=int *)
 	| Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Int
+  | Pow when t1 = Mint && t2 = Stone -> Stone
         | _ -> raise (Failure ("illegal binary operator " ^
               string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
               string_of_typ t2 ^ " in " ^ string_of_expr e))
@@ -147,7 +151,7 @@ let check (globals, functions) =
       | Construct3(e1, e2, e3) -> let t1 = expr e1 and t2 = expr e2 and t3 =
           expr e3 in
         (match (t1, t2, t3) with
-        | (Curve, Mint, Mint) -> Point
+        | (Curve, Stone, Stone) -> Point
         | _ -> raise (Failure ("illegal constructor type pair (" ^ string_of_typ t1 
         ^ "," ^ string_of_typ t2 ^ "," ^ string_of_typ t3 ^ ")")))
       | Noexpr -> Void
@@ -156,6 +160,9 @@ let check (globals, functions) =
        * e.g. dereferencing *)
       | Assign(var, e) as ex -> let lt = type_of_identifier var
                                 and rt = expr e in
+        if (lt, rt) = (Stone, Pointer(Char)) then Stone else (* maybe check that
+        the string being assigned here is only digits? or do this in codegen;
+        unclear *)
         check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
 				     " = " ^ string_of_typ rt ^ " in " ^ 
 				     string_of_expr ex))
