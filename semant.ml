@@ -51,11 +51,14 @@ let check (globals, functions) =
     (List.map (fun fd -> fd.fname) functions);
 
   (* Function declaration for a named function *)
-  let built_in_decls =  StringMap.add "printf"
-     { typ = Void; fname = "printf"; formals = []; (* change formals
-     to be variadic? Right now, this is fixed by just not comparing formals and
-     actuals list if the name of the function is printf  *)
-       locals = []; body = [] } StringMap.empty
+  let built_in_decls =  List.fold_left (fun map (name, attr) -> StringMap.add
+  name attr map) StringMap.empty [ 
+       ("printf", { typ = Void; fname = "printf"; formals = []; 
+       (* change formals to be variadic? Right now, this is fixed by just not 
+       comparing formals and actuals list if the name of the function is printf  *)
+       locals = []; body = [] });
+       ("print_stone", { typ = Int; fname = "print_stone"; formals = [(Stone,
+       "x")]; locals = []; body = [] })] 
    in
      
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
