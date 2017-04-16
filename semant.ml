@@ -28,8 +28,8 @@ let check (globals, functions) =
   
   (* Raise an exception of the given rvalue type cannot be assigned to
      the given lvalue type *)
-  let check_assign lvaluet rvaluet err = lvaluet
-     (*if lvaluet = rvaluet then lvaluet else raise err*)
+  let check_assign lvaluet rvaluet err = 
+     if lvaluet = rvaluet then lvaluet else raise err
   in
    
   (**** Checking Global Variables ****)
@@ -156,6 +156,9 @@ let check (globals, functions) =
        * e.g. dereferencing *)
       | Assign(var, e) as ex -> let lt = type_of_identifier var
                                 and rt = expr e in
+        if (lt, rt) = (Stone, Pointer(Char)) then Stone else (* maybe check that
+        the string being assigned here is only digits? or do this in codegen;
+        unclear *)
         check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
 				     " = " ^ string_of_typ rt ^ " in " ^ 
 				     string_of_expr ex))
