@@ -27,15 +27,15 @@ int main()
   bob_sec = "9";
   bob_gap = < (alice_g^bob_sec) , alice_p >;
   printf("Bob has computed gap\n");
-  /*
+  
   //Alice computes B^a mod p
   //Well need a compute function to actually get the key/do the mod
 
   //These should be the same
-  alice_shared_sec = compute(< (bob_gap^alice_sec) , alice_p >);
-  bob_shared_sec = compute(< (alice_gap^bob_sec) , alice_p >);
+  alice_shared_sec = /*compute*/(< (bob_gap^alice_sec) , alice_p >);
+  bob_shared_sec = /*compute*/(< (alice_gap^bob_sec) , alice_p >);
 
-  */
+  
 
   return 0;
 }

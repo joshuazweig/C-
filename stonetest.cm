@@ -4,11 +4,11 @@ int main()
   stone y;
   stone z;
   
-  y = "0110";
-  z = "10";
+  y = "hello";
+  z = "there";
   x = y + z;
-  x = y * z;
-  x = y^z;
-  x = y % z;
+
+  y = x + z;
+ 
 	return 0;
 }

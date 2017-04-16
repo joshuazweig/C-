@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h> 
+#include <stdlib.h> 
 #include <openssl/bn.h>
 
 struct stone {
@@ -21,6 +22,11 @@ struct mint {
 * come to a conclusion on a library 
 */
 
+int print_stone(void *a)
+{
+  BN_print_fp(stdout, a); //This is hex
+  return 0; 
+}
 //construct
 void* stone_char_func(void *buf, void *bn)
 {
@@ -28,8 +34,8 @@ void* stone_char_func(void *buf, void *bn)
   //printf("Length : %d\n", strlen(buf));
   BIGNUM *c = BN_bin2bn((unsigned char*) buf, strlen(buf), bn);
   
-  //BN_print_fp(stdout, c);
-  //printf("%s\n", BN_bn2dec(c));
+  BN_print_fp(stdout, c);
+  printf("\n");
   
   return c;
 }
@@ -37,14 +43,10 @@ void* stone_char_func(void *buf, void *bn)
 //Add
 void* stone_add_func(void *r, void *a, void *b)
 {
-  //BN_print_fp(stderr, a);
-  //printf("\n");
-  //BN_print_fp(stderr, b);
-  //printf("\n");
   BN_add(r, a, b);
 
-  //BN_print_fp(stderr, r);
-  //printf("\n");
+  BN_print_fp(stderr, r);
+  printf("\n");
 
   return r;
 
@@ -56,6 +58,8 @@ void* stone_mult_func(void *r, void *a, void *b)
   BN_CTX* ctx = BN_CTX_new();
   BN_mul(r, a, b, ctx);
   BN_CTX_free(ctx);
+
+  BN_print_fp(stderr, r);
 
   return r;
 }
@@ -95,7 +99,25 @@ void* stone_pow_func(void *r, void *a, void *p)
 */
 
 //Add 
-struct mint* mint_add_func(struct mint *a, struct mint *b);
+//TODO
+struct mint mint_add_func(struct mint *a, struct mint *b);
+/*{
+  struct mint x;
+
+  BIGNUM *n = BN_new();
+  BN_CTX* ctx = BN_CTX_new();
+
+
+  BN_mod_add(n, ((struct stone)a->val).val, ((struct stone)b->val).val, ((struct stone)a->mod).val, ctx);
+  //x = {{n}, {((struct stone)a->mod).val}}
+  //x.val = 
+
+  BN_CTX_free(ctx);
+  //printf("%s", x.mod);
+
+  return x; 
+  
+}*/
 
 //Multiply
 struct mint* mint_mult_func(struct mint *a, struct mint *b);
@@ -108,7 +130,28 @@ struct mint* mint_exp_func(struct mint *a, struct mint *b);
 
 
 //mint raised to stone 
-struct mint* mint_to_stone_func(struct mint *a, struct stone *b);
+struct mint mint_to_stone_func(struct mint *a, void *b)
+{
+  //mint has stone (val, mod) each is stone has val
+
+  BIGNUM *n = BN_new();
+  BN_CTX* ctx = BN_CTX_new();
+
+  struct stone base = a->val;
+  struct stone mod = a->mod;
+
+  BN_mod_exp(n, base.val, b, mod.val, ctx);
+
+  //What it should be 
+  /*struct mint x;
+  struct stone temp;
+  temp.val = (void *) n;
+  x.val = temp;
+  x.mod = mod;
+
+  return x;*/
+
+}
 
 
 /*

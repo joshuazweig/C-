@@ -1,7 +1,0 @@
-int main ()
-{
-	//printf(" Hello,\t Jacob!\n");
-	printf("%d\n", 3+4);
-	return 0;
-}
-

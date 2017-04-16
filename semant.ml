@@ -9,7 +9,7 @@ module StringMap = Map.Make(String)
 
    Check each global variable, then check each function *)
 
-let check (globals, functions) =
+let check (globals, functions) = 
 
   (* Raise an exception if the given list has a duplicate *)
   let report_duplicate exceptf list =
@@ -51,12 +51,14 @@ let check (globals, functions) =
     (List.map (fun fd -> fd.fname) functions);
 
   (* Function declaration for a named function *)
-  let built_in_decls =  StringMap.add "printf"
+  let built_in_decls = StringMap.add "printf"
      { typ = Void; fname = "printf"; formals = []; (* change formals
      to be variadic? Right now, this is fixed by just not comparing formals and
      actuals list if the name of the function is printf  *)
        locals = []; body = [] } StringMap.empty
-   in
+      in let built_in_decls2 = StringMap.add "print"
+
+  in
      
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
                          built_in_decls functions
@@ -64,7 +66,7 @@ let check (globals, functions) =
 
   let function_decl s = try StringMap.find s function_decls
        with Not_found -> if s = "main" then raise (Failure ("main function must be defined"))
-       else raise (Failure ("unrecognized function " ^ s))
+       else raise (Failure ("unrecognized function " ^ s)) 
   in
 
   let _ = function_decl "main" in (* Ensure "main" is defined *)
@@ -121,6 +123,7 @@ let check (globals, functions) =
 	| Equal | Neq when t1 = t2 -> Int  (* might want to extend this to allow
         e.g., t1 and t2 both integer types so one can do stone=int *)
 	| Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Int
+  | Pow when t1 = Mint && t2 = Stone -> Stone
         | _ -> raise (Failure ("illegal binary operator " ^
               string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
               string_of_typ t2 ^ " in " ^ string_of_expr e))
