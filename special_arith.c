@@ -2,7 +2,9 @@
 #include <string.h> 
 #include <stdlib.h> 
 #include <openssl/bn.h>
+#include "types.h"
 
+/*
 struct stone {
     /* actually a linked list of ints */
     // int val;
@@ -13,6 +15,7 @@ struct mint {
     struct stone mod; //should be immutable
     int a;
 };
+*/
 
 /*
 * Stone

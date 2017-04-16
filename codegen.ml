@@ -262,12 +262,12 @@ let translate (globals, functions) =
             A.Neg     -> L.build_neg e' "tmp" builder
            | A.Not     -> L.build_not e' "tmp" builder
            | A.Deref   -> L.build_load e' "tmp" builder  (* load object pointed to *)
-           (* | A.AddrOf  -> L.build_store e' (lookup ??) builder  (* create pointer to address of object -- want what is returned by L.build_alloca -- could just move stuff everytime? seems inefficient *)
+           (* | A.AddrOf  -> L.build_store e' (lookup ??) builder  *)(* create pointer to address of object -- want what is returned by L.build_alloca -- could just move stuff everytime? seems inefficient *)
            | A.Access  -> 
               if t = A.Mint then L.build_call access_mint [| e' |] "access_mint" builder
               else if t = A.Curve then L.build_call access_curve [| e' |] "access_curve" builder
               else if t = A.Point then L.build_call access_point [| e' |] "access_point" builder
-          ) *)(* e' "tmp" builder *)
+          ) 
 
        | A.Assign (s, e) -> let (e', t) = expr builder e and
                               (* if t string, otherwise is behavior normal?*)
