@@ -3,14 +3,9 @@
 #include <stdlib.h> 
 #include <openssl/bn.h>
 
-struct stone {
-    /* actually a linked list of ints */
-    // int val;
-    void *val;
-};
 struct mint {
-    struct stone val;
-    struct stone mod; //should be immutable
+    void *val;
+    void *mod; //should be immutable
     int a;
 };
 
@@ -37,17 +32,17 @@ void* stone_char_func(void *buf, void *bn)
 }
 
 //Add
-void* stone_add_func(void *r, void *a, void *b)
+void* stone_add_func(void *a, void *b)
 {
+  BIGNUM *r = BN_new();
   BN_add(r, a, b);
-
   return r;
-
 }
 
 //Multiply
-void* stone_mult_func(void *r, void *a, void *b)
+void* stone_mult_func(void *a, void *b)
 {
+  BIGNUM *r = BN_new();
   BN_CTX* ctx = BN_CTX_new();
   BN_mul(r, a, b, ctx);
   BN_CTX_free(ctx);
@@ -56,9 +51,10 @@ void* stone_mult_func(void *r, void *a, void *b)
 }
 
 //Divide
-void* stone_div_func(void *r, void *a, void *b)
+void* stone_div_func(void *a, void *b)
 {
-  BN_CTX* ctx = BN_CTX_new();
+  BIGNUM *r = BN_new();
+  BN_CTX *ctx = BN_CTX_new();
   BN_div(r, NULL, a, b, ctx);
   BN_CTX_free(ctx);
 
@@ -66,8 +62,9 @@ void* stone_div_func(void *r, void *a, void *b)
 }
 
 //Mod 
-void* stone_mod_func(void *r, void *a, void *b)
+void* stone_mod_func(void *a, void *b)
 {
+  BIGNUM *r = BN_new();
   BN_CTX* ctx = BN_CTX_new();
   BN_mod(r, a, b, ctx);
   BN_CTX_free(ctx);
@@ -76,8 +73,9 @@ void* stone_mod_func(void *r, void *a, void *b)
 }
 
 //Exponent
-void* stone_pow_func(void *r, void *a, void *p)
+void* stone_pow_func(void *a, void *p)
 {
+  BIGNUM *r = BN_new();
   BN_CTX* ctx = BN_CTX_new();
   BN_exp(r, a, p, ctx);
   BN_CTX_free(ctx);
@@ -91,7 +89,22 @@ void* stone_pow_func(void *r, void *a, void *p)
 
 //Add 
 //TODO
-struct mint mint_add_func(struct mint *a, struct mint *b);
+struct mint mint_add_func(struct mint *a, struct mint *b) {
+    BIGNUM *val = BN_new();
+    BIGNUM *t = BN_new();
+    BN_CTX *ctx = BN_CTX_new();
+    BN_add(t, a->val, b->val);
+    BN_mod(val, t, a->mod, ctx);
+    BN_free(t);
+    BN_CTX_free(ctx);
+
+    struct mint r;
+    r.val = val;
+    r.mod = a->mod; /* use a's modulus */
+    r.a = 0;
+    return r; 
+}
+
 /*{
   struct mint x;
 
@@ -111,10 +124,10 @@ struct mint mint_add_func(struct mint *a, struct mint *b);
 }*/
 
 //Multiply
-struct mint* mint_mult_func(struct mint *a, struct mint *b);
+struct mint mint_mult_func(struct mint *a, struct mint *b);
 
 //Exponent
-struct mint* mint_exp_func(struct mint *a, struct mint *b);
+struct mint mint_pow_func(struct mint *a, struct mint *b);
 
 //Equality and Inequality ops ofr mints are in LRM, 
 //but we can hold off on implemenitng

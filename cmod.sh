@@ -7,7 +7,7 @@ basename=`echo $1 | sed 's/.*\\///
 ./cmod.native < $1 > ${basename}.ll
 
 #Replace with your llvm compiler 
-/usr/local/opt/llvm\@3.8/bin/llc-3.8 ${basename}.ll > ${basename}.s
+/usr/local/opt/llvm\@3.7/bin/llc-3.7 ${basename}.ll > ${basename}.s
 
 cc -o ${basename}.exe ${basename}.s special_arith.o /usr/lib/libcrypto.0.9.8.dylib
 ./${basename}.exe

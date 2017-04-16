@@ -13,11 +13,13 @@ int main()
   y = "01110";
 
   a = "10011";
-  b = y;
+  b = "10101";
 
   m = <x, y>;
   n = <a, b>;
 
-  o = m + n;
+  printf("Hello\n");
 
+  o = m + n;
+  printf("Bye\n");
 }
