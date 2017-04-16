@@ -22,21 +22,17 @@ struct mint {
 * come to a conclusion on a library 
 */
 
-int print_stone(void *a)
+int stone_print_func(void *a)
 {
   BN_print_fp(stdout, a); //This is hex
+  printf("\n");
   return 0; 
 }
 //construct
 void* stone_char_func(void *buf, void *bn)
 {
-  //printf("%s\n", (const unsigned char*) buf);
-  //printf("Length : %d\n", strlen(buf));
   BIGNUM *c = BN_bin2bn((unsigned char*) buf, strlen(buf), bn);
-  
-  BN_print_fp(stdout, c);
-  printf("\n");
-  
+   
   return c;
 }
 
@@ -44,9 +40,6 @@ void* stone_char_func(void *buf, void *bn)
 void* stone_add_func(void *r, void *a, void *b)
 {
   BN_add(r, a, b);
-
-  BN_print_fp(stderr, r);
-  printf("\n");
 
   return r;
 
@@ -58,8 +51,6 @@ void* stone_mult_func(void *r, void *a, void *b)
   BN_CTX* ctx = BN_CTX_new();
   BN_mul(r, a, b, ctx);
   BN_CTX_free(ctx);
-
-  BN_print_fp(stderr, r);
 
   return r;
 }
@@ -130,7 +121,7 @@ struct mint* mint_exp_func(struct mint *a, struct mint *b);
 
 
 //mint raised to stone 
-struct mint mint_to_stone_func(struct mint *a, void *b)
+/*struct mint mint_to_stone_func(struct mint *a, void *b)
 {
   //mint has stone (val, mod) each is stone has val
 
@@ -143,15 +134,15 @@ struct mint mint_to_stone_func(struct mint *a, void *b)
   BN_mod_exp(n, base.val, b, mod.val, ctx);
 
   //What it should be 
-  /*struct mint x;
+  struct mint x;
   struct stone temp;
   temp.val = (void *) n;
   x.val = temp;
   x.mod = mod;
 
-  return x;*/
+  return x;
 
-}
+}*/
 
 
 /*

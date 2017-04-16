@@ -265,20 +265,14 @@ let translate (globals, functions) =
                            | _ -> ignore (L.build_store e' (fst (lookup s)) builder); (e', t) )
                        
 
-      | A.Call ("print", [e]) | A.Call ("printb", [e]) ->
-          let e', t = expr builder e in 
-          (match t with
-            A.Stone -> (L.build_call stone_print_func [| e' |] "stone_print_func" builder, t)
-	          | _ -> (L.build_call printf_func [| int_format_str ; fst (expr builder e) |]  "printf" builder, A.Void)
-          )
       | A.Call ("printf", act) ->
           let actuals, types = List.split (List.rev (List.map (expr builder)
           (List.rev act))) in
           let result = "" in  (* printf is void function *)
           (L.build_call printf_func (Array.of_list actuals) result builder, 
             A.Pointer(Char))
-    (*  | A.Call("print_stone", [e]) -> let (e', t) = expr builder e in 
-          (L.build_call stone_print_func [| e' |] "stone_print_func" builder, t); *)
+     | A.Call("print_stone", [e]) -> let (e', t) = expr builder e in 
+          (L.build_call stone_print_func [| e' |] "stone_print_func" builder, t); 
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
 	 let actuals, types = List.split (List.rev (List.map (expr builder) (List.rev act))) in
