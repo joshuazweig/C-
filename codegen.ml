@@ -145,7 +145,7 @@ let translate (globals, functions) =
           (A.Stone, A.Stone) -> 
             let struct_m = L.undef mint_type in 
             let struct_m2 = L.build_insertvalue struct_m e1' 0 "sm" builder in
-            let struct_m3 = L.build_insertvalue struct_m e2' 1 "sm2" builder in 
+            let struct_m3 = L.build_insertvalue struct_m2 e2' 1 "sm2" builder in 
             (L.build_insertvalue struct_m3 (L.const_int i32_t 0) 2 "sm3" builder, A.Mint)
           | (A.Mint, A.Mint) -> 
             let struct_c = L.undef curve_type in 
