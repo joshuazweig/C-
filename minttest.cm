@@ -14,11 +14,23 @@ int main()
 
   m = <x, p>;
   n = <y, p>;
-
+  
   print_mint(m);
   print_mint(n);
 
   o = m + n;
+  printf("print_mint\n");
+  print_mint(o);
+  
+  o = m - n;
+  printf("print_mint\n");
+  print_mint(o);
+  
+  o = m * n;
+  printf("print_mint\n");
+  print_mint(o);
+  
+  o = m ** n;
   printf("print_mint\n");
   print_mint(o);
   return 0;

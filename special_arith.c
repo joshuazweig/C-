@@ -98,11 +98,42 @@ struct mint mint_add_func(struct mint* a, struct mint* b) {
     struct mint r;
     r.val = val;
     r.mod = a->mod; /* use a's modulus */
-    printf("\n");
-    BN_print_fp(stdout, r.val);
-    printf("\n");
-    BN_print_fp(stdout, r.mod);
-    printf("\n");
+    return r; 
+}
+
+struct mint mint_sub_func(struct mint* a, struct mint* b) {
+    BIGNUM *val = BN_new();
+    BN_CTX *ctx = BN_CTX_new();
+
+    BN_mod_sub(val, a->val, b->val, a->mod, ctx);
+    BN_CTX_free(ctx);
+    struct mint r;
+    r.val = val;
+    r.mod = a->mod; /* use a's modulus */
+    return r; 
+}
+
+struct mint mint_mult_func(struct mint* a, struct mint* b) {
+    BIGNUM *val = BN_new();
+    BN_CTX *ctx = BN_CTX_new();
+
+    BN_mod_mul(val, a->val, b->val, a->mod, ctx);
+    BN_CTX_free(ctx);
+    struct mint r;
+    r.val = val;
+    r.mod = a->mod; /* use a's modulus */
+    return r; 
+}
+
+struct mint mint_pow_func(struct mint* a, struct mint* b) {
+    BIGNUM *val = BN_new();
+    BN_CTX *ctx = BN_CTX_new();
+
+    BN_mod_exp(val, a->val, b->val, a->mod, ctx); 
+    BN_CTX_free(ctx);
+    struct mint r;
+    r.val = val;
+    r.mod = a->mod; /* use a's modulus */
     return r; 
 }
 

@@ -61,6 +61,15 @@ let translate (globals, functions) =
   let mint_add_func_t = L.function_type mint_type [| mint_pointer ; mint_pointer |] in 
   let mint_add_func = L.declare_function "mint_add_func" mint_add_func_t the_module in 
 
+  let mint_sub_func_t = L.function_type mint_type [| mint_pointer ; mint_pointer |] in 
+  let mint_sub_func = L.declare_function "mint_sub_func" mint_sub_func_t the_module in 
+  
+  let mint_mult_func_t = L.function_type mint_type [| mint_pointer ; mint_pointer |] in 
+  let mint_mult_func = L.declare_function "mint_mult_func" mint_mult_func_t the_module in 
+
+  let mint_pow_func_t = L.function_type mint_type [| mint_pointer ; mint_pointer |] in 
+  let mint_pow_func = L.declare_function "mint_pow_func" mint_pow_func_t the_module in 
+
   let mint_to_stone_func_t = L.function_type mint_type [| mint_pointer ; obj_pointer |] in
   let mint_to_stone_func = L.declare_function "mint_to_stone_func" mint_to_stone_func_t the_module in
 
@@ -188,15 +197,19 @@ let translate (globals, functions) =
               | A.Geq     -> L.build_icmp L.Icmp.Sge
               ) e1' e2' "tmp" builder, A.Int) 
           | (A.Mint, A.Mint) ->
+              let ptr1 = L.build_alloca mint_type "e1" builder and
+              ptr2 = L.build_alloca mint_type "e2" builder in 
+              let s = L.build_store e1' ptr1 builder and 
+              s1 = L.build_store e2' ptr2 builder in 
               ((match op with
-              A.Add -> 
-                let ptr1 = L.build_alloca mint_type "e1" builder and
-                ptr2 = L.build_alloca mint_type "e2" builder in 
-                let s = L.build_store e1' ptr1 builder and 
-                s1 = L.build_store e2' ptr2 builder in 
-                
-                L.build_call mint_add_func [| ptr1 ; ptr2 |] "mint_add_res" builder
-                  
+                  A.Add -> 
+                    L.build_call mint_add_func [| ptr1 ; ptr2 |] "mint_add_res" builder
+                | A.Sub ->  
+                    L.build_call mint_sub_func [| ptr1 ; ptr2 |] "mint_sub_res" builder
+                | A.Mult ->  
+                    L.build_call mint_mult_func [| ptr1 ; ptr2 |] "mint_mult_res" builder
+                | A.Pow ->  
+                    L.build_call mint_pow_func [| ptr1 ; ptr2 |] "mint_pow_res" builder
               ), A.Mint)
 
             (*Raise mint to stone*)
