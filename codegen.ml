@@ -256,19 +256,26 @@ let translate (globals, functions) =
               ), A.Point) 
         )  
 
-      | A.Unop(op, e) -> (*these will also require type matching *)
+      | A.Unop(op, e) -> 
       	  let e', t = expr builder e in
-      	  (match op with
-            A.Neg     -> L.build_neg e' "tmp" builder
+      	  ((match op with
+            A.Neg     -> (match t with
+                A.Int -> L.build_neg e' "tmp" builder)
+              (* | A.Point ->   *)   (* Point inversion *)
            | A.Not     -> L.build_not e' "tmp" builder
            | A.Deref   -> L.build_load e' "tmp" builder  (* load object pointed to *)
            (* | A.AddrOf  -> L.build_store e' (lookup ??) builder  *)(* create pointer to address of object -- want what is returned by L.build_alloca -- could just move stuff everytime? seems inefficient *)
-           | A.Access  -> 
-              if t = A.Mint then L.build_call access_mint [| e' |] "access_mint" builder
-              else if t = A.Curve then L.build_call access_curve [| e' |] "access_curve" builder
-              else if t = A.Point then L.build_call access_point [| e' |] "access_point" builder
-          ) 
-
+           | A.Access  -> match t with
+               A.Mint -> L.build_call access_mint [| e' |] "access_mint" builder
+              | A.Curve -> L.build_call access_curve [| e' |] "access_curve" builder
+              | A.Point -> L.build_call access_point [| e' |] "access_point" builder
+          ), (match op with
+            A.Neg -> t
+            | A.Not -> t
+            | A.Deref -> (match t with
+                A.Pointer x -> x)
+            | A.AddrOf -> A.Pointer t
+            | A.Access -> A.Pointer A.Stone)) 
        | A.Assign (s, e) -> let (e', t) = expr builder e and
                               (* if t string, otherwise is behavior normal?*)
                             (*snd lookup is type of thing*)
