@@ -26,7 +26,7 @@ let translate (globals, functions) =
   and i1_t   = L.i1_type   context
   and void_t = L.void_type context in
   let obj_pointer = L.pointer_type (L.i8_type context) in  (* void pointer, 8 bytes *)
-  let mint_type = L.struct_type context  [| obj_pointer ; obj_pointer ; i32_t |] in (* struct of two void pointers *)
+  let mint_type = L.struct_type context  [| obj_pointer ; obj_pointer |] in (* struct of two void pointers *)
   let curve_type = L.struct_type context [| mint_type ; mint_type |] in (* cruve defined by two modints *)
   let point_type = L.struct_type context [| curve_type ; obj_pointer ; obj_pointer; i1_t |] in(* curve + two stones *)
   let mint_pointer = L.pointer_type mint_type in
@@ -145,8 +145,7 @@ let translate (globals, functions) =
           (A.Stone, A.Stone) -> 
             let struct_m = L.undef mint_type in 
             let struct_m2 = L.build_insertvalue struct_m e1' 0 "sm" builder in
-            let struct_m3 = L.build_insertvalue struct_m2 e2' 1 "sm2" builder in 
-            (L.build_insertvalue struct_m3 (L.const_int i32_t 0) 2 "sm3" builder, A.Mint)
+            (L.build_insertvalue struct_m2 e2' 1 "sm2" builder, A.Mint) 
           | (A.Mint, A.Mint) -> 
             let struct_c = L.undef curve_type in 
             let struct_c2 = L.build_insertvalue struct_c e1' 0 "sc" builder in 

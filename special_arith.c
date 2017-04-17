@@ -6,7 +6,6 @@
 struct mint {
     void *val;
     void *mod; //should be immutable
-    int a;
 };
 
 /*
@@ -89,21 +88,26 @@ void* stone_pow_func(void *a, void *p)
 
 //Add 
 //TODO
-struct mint mint_add_func(struct mint *a, struct mint *b) {
+struct mint mint_add_func(struct mint* a, struct mint* b) {
     BIGNUM *val = BN_new();
-    BIGNUM *t = BN_new();
     BN_CTX *ctx = BN_CTX_new();
-    BN_add(t, a->val, b->val);
-    BN_mod(val, t, a->mod, ctx);
-    BN_free(t);
-    BN_CTX_free(ctx);
 
+    //BN_mod_add_quick(val, v1, v2, v3);
+    BN_mod_add(val, a->val, b->val, a->mod, ctx);
+    BN_CTX_free(ctx);
     struct mint r;
     r.val = val;
     r.mod = a->mod; /* use a's modulus */
-    r.a = 0;
+    printf("\n");
+    BN_print_fp(stdout, r.val);
+    printf("\n");
+    BN_print_fp(stdout, r.mod);
+    printf("\n");
     return r; 
 }
+
+/* testing function */
+
 
 /*{
   struct mint x;

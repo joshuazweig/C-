@@ -2,24 +2,18 @@ int main()
 {
   stone x;
   stone y;
-  stone a;
-  stone b;
+  stone p;
 
   mint m;
   mint n;
   mint o;
 
-  x = "10001";
-  y = "01110";
+  x = "171"; //decimal value 3225393
+  y = "356"; //decimal value 3355958
+  p = "11"; //decimal value 12593
 
-  a = "10011";
-  b = "10101";
-
-  m = <x, y>;
-  n = <a, b>;
-
-  printf("Hello\n");
+  m = <x, p>;
+  n = <y, p>;
 
   o = m + n;
-  printf("Bye\n");
 }
