@@ -4,11 +4,11 @@ int main()
     int x;
     int y;
 
-    x = 87;
+    x = 4;
     y = 0;
 
-    printf("%d\n", !x);  //0
-    printf("%d\n", !y);  //1
+    printf("%d\n", !x);  
+    printf("%d\n", !y); 
 
     return 0;
 }
