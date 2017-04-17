@@ -1,0 +1,13 @@
+int main () {
+    stone s1;
+    stone s2;
+    stone s3;
+    stone s4;
+
+    s1 = "7";
+    s2 = "13";
+
+    print_stone(s1);
+    print_stone(s2);
+}
+
