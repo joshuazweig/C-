@@ -262,7 +262,7 @@ let translate (globals, functions) =
             A.Neg     -> (match t with
                 A.Int -> L.build_neg e' "tmp" builder)
               (* | A.Point ->   *)   (* Point inversion *)
-           | A.Not     -> L.build_not e' "tmp" builder
+           | A.Not     -> L.build_icmp L.Icmp.Eq (L.const_null (ltype_of_typ t)) e' "tmp" builder (* L.build_not e' "tmp" builder *)
            | A.Deref   -> L.build_load e' "tmp" builder  (* load object pointed to *)
            (* | A.AddrOf  -> L.build_store e' (lookup ??) builder  *)(* create pointer to address of object -- want what is returned by L.build_alloca -- could just move stuff everytime? seems inefficient *)
            | A.Access  -> match t with
