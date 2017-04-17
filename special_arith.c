@@ -6,7 +6,7 @@
 
 /*
 struct stone {
-    /* actually a linked list of ints */
+    // actually a linked list of ints 
     // int val;
     void *val;
 };
@@ -154,6 +154,17 @@ struct mint* mint_exp_func(struct mint *a, struct mint *b);
 * define the headers and functions in the same way as above
 */
 
+//Point inversion
+struct point invert_point_func(struct point *p)
+{
+  struct point inv_p;
+  inv_p.c = p->c;
+  inv_p.x = p->x;
+  inv_p.y = -(p->y); //invert
+  inv_p.inf = p->inf;  // not infinity
+
+  return inv_p;
+}
 
 
 

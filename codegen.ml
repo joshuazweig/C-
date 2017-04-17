@@ -261,7 +261,7 @@ let translate (globals, functions) =
       	  ((match op with
             A.Neg     -> (match t with
                 A.Int -> L.build_neg e' "tmp" builder)
-              (* | A.Point ->   *)   (* Point inversion *)
+             (*  | A.Point -> L.build_call invert_point_func [| e' |] "invert_point_func" builder   *)  (* Point inversion *)
            | A.Not     -> L.build_icmp L.Icmp.Eq (L.const_null (ltype_of_typ t)) e' "tmp" builder  (* Still need to test on Pointer types *)
            | A.Deref   -> L.build_load e' "tmp" builder  (* load object pointed to *)
            (* | A.AddrOf  -> L.build_store e' (lookup ??) builder  *)(* create pointer to address of object -- want what is returned by L.build_alloca -- could just move stuff everytime? seems inefficient *)
