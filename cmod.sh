@@ -1,13 +1,27 @@
 #!/bin/sh
 
+LLC="/usr/local/opt/llvm@3.8/bin/llc-3.8"
+CRYPTO="/usr/lib/libcrypto.0.9.8.dylib"
+TEST="$1"
+
+while getopts "v:" c; do
+    case $c in
+        v) # Use Travis Paths
+            LLC="/usr/lib/llvm-3.8/bin/llc"
+            CRYPTO="/usr/lib/x86_64-linux-gnu/libcrypto.so.0.9.8"
+            TEST="$2"
+            ;;
+    esac
+done
+
 #Requires you have LLI variable set (I reccomend in your bash profile) to your LLI
 #may need to chmod this script to 755
-basename=`echo $1 | sed 's/.*\\///
+basename=`echo "$TEST" | sed 's/.*\\///
                              s/.cm//'`
-./cmod.native < $1 > ${basename}.ll
+./cmod.native < "$TEST" > ${basename}.ll
 
 #Replace with your llvm compiler 
-/usr/local/opt/llvm\@3.8/bin/llc-3.8 ${basename}.ll > ${basename}.s
+"$LLC" ${basename}.ll > ${basename}.s
 
-cc -o ${basename}.exe ${basename}.s special_arith.o /usr/lib/libcrypto.0.9.8.dylib
+cc -o ${basename}.exe ${basename}.s special_arith.o "$CRYPTO"
 ./${basename}.exe
