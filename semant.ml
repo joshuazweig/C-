@@ -58,6 +58,8 @@ let check (globals, functions) =
        comparing formals and actuals list if the name of the function is printf  *)
        locals = []; body = [] });
        ("print_stone", { typ = Int; fname = "print_stone"; formals = [(Stone,
+       "x")]; locals = []; body = [] });
+       ("print_mint", { typ = Int; fname = "print_mint"; formals = [(Mint,
        "x")]; locals = []; body = [] })] 
    in
      

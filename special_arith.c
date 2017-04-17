@@ -108,6 +108,14 @@ struct mint mint_add_func(struct mint* a, struct mint* b) {
 
 /* testing function */
 
+int mint_print_func(struct mint a) {
+    printf("Value:  ");
+    BN_print_fp(stdout, a.val);
+    printf("\nModulus:");
+    BN_print_fp(stdout, a.mod);
+    printf("\n");
+    return 0;
+}
 
 /*{
   struct mint x;

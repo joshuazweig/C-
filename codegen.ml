@@ -85,6 +85,9 @@ let translate (globals, functions) =
   let stone_print_func_t = L.function_type i32_t [| obj_pointer |] in 
   let stone_print_func = L.declare_function "stone_print_func" stone_print_func_t the_module in
 
+  let mint_print_func_t = L.function_type i32_t [| mint_type |] in 
+  let mint_print_func = L.declare_function "mint_print_func" mint_print_func_t the_module in
+  
   let point_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let point_add_func = L.declare_function "point_add_func" point_add_func_t the_module in 
 
@@ -267,6 +270,8 @@ let translate (globals, functions) =
             A.Pointer(Char))
      | A.Call("print_stone", [e]) -> let (e', t) = expr builder e in 
           (L.build_call stone_print_func [| e' |] "stone_print_func" builder, t); 
+     | A.Call("print_mint", [e]) -> let (e', t) = expr builder e in 
+          (L.build_call mint_print_func [| e' |] "mint_print_func" builder, t); 
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
 	 let actuals, types = List.split (List.rev (List.map (expr builder) (List.rev act))) in
