@@ -28,7 +28,8 @@ let translate (globals, functions) =
   let obj_pointer = L.pointer_type (L.i8_type context) in  (* void pointer, 8 bytes *)
   let mint_type = L.struct_type context  [| obj_pointer ; obj_pointer |] in (* struct of two void pointers *)
   let curve_type = L.struct_type context [| mint_type ; mint_type |] in (* cruve defined by two modints *)
-  let point_type = L.struct_type context [| curve_type ; obj_pointer ; obj_pointer; i1_t |] in(* curve + two stones *)
+  let point_type = L.struct_type context [| curve_type ; obj_pointer ;
+  obj_pointer; i8_t |] in(* curve + two stones *)
   let mint_pointer = L.pointer_type mint_type in
   (* Must consider best way to implement points wrt Inf *)
   (* maybe define diff points for inf and normal to enforce that 
@@ -103,8 +104,16 @@ let translate (globals, functions) =
   let point_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let point_add_func = L.declare_function "point_add_func" point_add_func_t the_module in 
 
-  let stone_create_func_t = L.function_type obj_pointer [| |] in 
-  let stone_create_func = L.declare_function "BN_new" stone_create_func_t the_module in 
+  let point_sub_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
+  let point_sub_func = L.declare_function "point_sub_func" point_sub_func_t the_module in 
+
+  (* stone * point, i.e. add point to itself stone many times *)
+  let point_mult_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
+  let point_mult_func = L.declare_function "point_mult_func" point_mult_func_t the_module in 
+
+  let stone_create_func_t = L.function_type obj_pointer [| ltype_of_typ
+  (A.Pointer(Char)) |] in 
+  let stone_create_func = L.declare_function "stone_create_func" stone_create_func_t the_module in 
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -184,7 +193,7 @@ let translate (globals, functions) =
       
       | A.Binop (e1, op, e2) ->
     	  let (e1', t1) = expr builder e1
-    	  and (e2', t2) = expr builder e2 in (* must t1 == t2 for all binop? if so, t2 can be _ *)
+    	  and (e2', t2) = expr builder e2 in
         (match (t1, t2) with
            (A.Int, A.Int) -> 
               ((match op with
@@ -258,9 +267,16 @@ let translate (globals, functions) =
           | (A.Point, A.Point) ->
               ((match op with
               A.Add -> 
-                L.build_call point_add_func [| e1' ; e2' |] "point_add_func" builder
-
+                L.build_call point_add_func [| e1' ; e2' |] "point_add_res" builder
+            | A.Sub -> 
+                L.build_call point_sub_func [| e1' ; e2' |] "point_sub_res" builder
               ), A.Point) 
+         | (A.Stone, A.Point) ->
+              ((match op with
+              A.Mult ->
+                  L.build_call point_mult_func [| e1' ; e2' |] "point_mult_res"
+                  builder
+              ), A.Point)
         )  
 
       | A.Unop(op, e) -> (*these will also require type matching *)
@@ -275,9 +291,10 @@ let translate (globals, functions) =
                            ltype = (snd (lookup s)) in (match (ltype, t) with
                            | (A.Stone, A.Pointer(A.Char)) -> 
                               let ptr = 
-                                L.build_call stone_create_func [| |] "stone_create_func" builder in 
-                                let res = 
-                                  L.build_call stone_char_func [| e' ; ptr |] "stone_char_func" builder in 
+                                L.build_call stone_create_func [|e' |] "stone_create_func" builder in 
+                                 (*let res = 
+                                  L.build_call stone_char_func [| e' ; ptr |]
+                                  "stone_char_func" builder in *)
                                   ignore(L.build_store ptr (fst (lookup s)) builder); (ptr, t)
 
                            | _ -> ignore (L.build_store e' (fst (lookup s)) builder); (e', t) )

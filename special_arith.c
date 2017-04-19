@@ -8,6 +8,18 @@ struct mint {
     void *mod; //should be immutable
 };
 
+struct curve {
+    struct mint a;
+    struct mint b;
+};
+
+struct point {
+    struct curve E;
+    void *x;
+    void *y;
+    char inf;
+};
+
 /*
 * Stone
 * @Michael We will need to implement these based on the bignum
@@ -23,12 +35,19 @@ int stone_print_func(void *a)
   return 0; 
 }
 //construct
-void* stone_char_func(void *buf, void *bn)
+
+void *stone_create_func(char *str) {
+    BIGNUM *r = BN_new();
+    BN_dec2bn(&r, str);
+    return r;
+}
+
+/*void* stone_char_func(void *buf, void *bn)
 {
-  BIGNUM *c = BN_bin2bn((unsigned char*) buf, strlen(buf), bn);
+  BIGNUM *c = BN_dec2bn((unsigned char*) buf, strlen(buf), bn);
    
   return c;
-}
+}*/
 
 //Add
 void* stone_add_func(void *a, void *b)
@@ -90,6 +109,23 @@ void* stone_pow_func(void *a, void *p)
   return r;
 }
 
+/*struct point point_add_func(struct point P, struct point Q) {
+    struct point R;
+    R.E = P.E;
+    if (P.inf) {
+        R.x = Q.x;
+        R.y = Q.y;
+        R.inf = Q.inf;
+    } else if (Q.inf) {
+        R.x = P.x;
+        R.y = P.y;
+        R.inf = P.inf;
+    } else {
+        
+    }
+}*/
+
+
 /*
 * Mint
 */
@@ -150,6 +186,7 @@ struct mint mint_pow_func(struct mint* a, struct mint* b) {
 }
 
 
+
 /* testing function */
 
 int mint_print_func(struct mint a) {
@@ -195,8 +232,4 @@ int mint_print_func(struct mint a) {
 * thats your expertise so ill leave it to you to 
 * define the headers and functions in the same way as above
 */
-
-
-
-
 
