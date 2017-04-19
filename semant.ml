@@ -126,7 +126,7 @@ let check (globals, functions) =
 	| Equal | Neq when t1 = t2 -> Int  (* might want to extend this to allow
         e.g., t1 and t2 both integer types so one can do stone=int *)
 	| Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Int
-  | Pow when t1 = Mint && t2 = Stone -> Stone
+        | Pow when t1 = Mint && t2 = Stone -> Mint
         | _ -> raise (Failure ("illegal binary operator " ^
               string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
               string_of_typ t2 ^ " in " ^ string_of_expr e))

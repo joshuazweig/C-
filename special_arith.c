@@ -38,6 +38,14 @@ void* stone_add_func(void *a, void *b)
   return r;
 }
 
+//Subtract
+void* stone_sub_func(void *a, void *b)
+{
+  BIGNUM *r = BN_new();
+  BN_sub(r, a, b);
+  return r;
+}
+
 //Multiply
 void* stone_mult_func(void *a, void *b)
 {
@@ -125,17 +133,22 @@ struct mint mint_mult_func(struct mint* a, struct mint* b) {
     return r; 
 }
 
-struct mint mint_pow_func(struct mint* a, struct mint* b) {
+struct mint mint_to_stone_func(struct mint *a, void *b) {
     BIGNUM *val = BN_new();
     BN_CTX *ctx = BN_CTX_new();
 
-    BN_mod_exp(val, a->val, b->val, a->mod, ctx); 
+    BN_mod_exp(val, a->val, b, a->mod, ctx); 
     BN_CTX_free(ctx);
     struct mint r;
     r.val = val;
-    r.mod = a->mod; /* use a's modulus */
-    return r; 
+    r.mod = a->mod;
+    return r;
 }
+
+struct mint mint_pow_func(struct mint* a, struct mint* b) {
+    return mint_to_stone_func(a, b->val);
+}
+
 
 /* testing function */
 
@@ -147,30 +160,6 @@ int mint_print_func(struct mint a) {
     printf("\n");
     return 0;
 }
-
-/*{
-  struct mint x;
-
-  BIGNUM *n = BN_new();
-  BN_CTX* ctx = BN_CTX_new();
-
-
-  BN_mod_add(n, ((struct stone)a->val).val, ((struct stone)b->val).val, ((struct stone)a->mod).val, ctx);
-  //x = {{n}, {((struct stone)a->mod).val}}
-  //x.val = 
-
-  BN_CTX_free(ctx);
-  //printf("%s", x.mod);
-
-  return x; 
-  
-}*/
-
-//Multiply
-struct mint mint_mult_func(struct mint *a, struct mint *b);
-
-//Exponent
-struct mint mint_pow_func(struct mint *a, struct mint *b);
 
 //Equality and Inequality ops ofr mints are in LRM, 
 //but we can hold off on implemenitng

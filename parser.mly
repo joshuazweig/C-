@@ -28,9 +28,8 @@ open Ast
 %left PLUS MINUS
 %right ACCESS
 %left STAR DIVIDE MOD //star is times
-%left POW
 %right NOT NEG ADDRESSOF DEREF /* minus is neg, mod is addof, star is deref */
-//%nonassoc POW
+%nonassoc POW
 
 %start program
 %type <Ast.program> program

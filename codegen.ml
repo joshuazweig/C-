@@ -79,6 +79,9 @@ let translate (globals, functions) =
   let stone_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let stone_add_func = L.declare_function "stone_add_func" stone_add_func_t the_module in 
 
+  let stone_sub_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
+  let stone_sub_func = L.declare_function "stone_sub_func" stone_sub_func_t the_module in 
+  
   let stone_mult_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let stone_mult_func = L.declare_function "stone_mult_func" stone_mult_func_t the_module in
 
@@ -156,7 +159,9 @@ let translate (globals, functions) =
         (match (t1, t2) with
           (A.Stone, A.Stone) -> 
             let struct_m = L.undef mint_type in 
-            let struct_m2 = L.build_insertvalue struct_m e1' 0 "sm" builder in
+              let reduced_val = L.build_call stone_mod_func [| e1' ; e2' |] 
+                 "stone_mod_res" builder in
+                let struct_m2 = L.build_insertvalue struct_m (reduced_val) 0 "sm" builder in
             (L.build_insertvalue struct_m2 e2' 1 "sm2" builder, A.Mint) 
           | (A.Mint, A.Mint) -> 
             let struct_c = L.undef curve_type in 
@@ -216,18 +221,21 @@ let translate (globals, functions) =
           | (A.Mint, A.Stone) ->
               ((match op with
                 (* In semant, check that this is only op possible *)
-                A.Pow -> 
+              A.Pow -> 
                   let ptr = L.build_alloca mint_type "e1" builder in
                   let s = L.build_store e1' ptr builder in 
 
-                  L.build_call mint_to_stone_func [| ptr ; e2' |] "mint_to_stone_func" builder
+                  L.build_call mint_to_stone_func [| ptr ; e2' |]
+                  "mint_to_stone_res" builder
 
               ), A.Mint)
               
           | (A.Stone, A.Stone) -> 
               ((match op with
-              A.Add -> 
+                A.Add -> 
                 L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder
+              | A.Sub -> 
+                L.build_call stone_sub_func [| e1' ; e2' |] "stone_sub_res" builder
               | A.Mult -> 
                 L.build_call stone_mult_func [| e1' ; e2' |] "stone_mult_res" builder
               | A.Div -> 

@@ -33,5 +33,9 @@ int main()
   o = m ** n;
   printf("print_mint\n");
   print_mint(o);
+
+  o = m ** p;
+  printf("print_mint\n");
+  print_mint(o);
   return 0;
 }
