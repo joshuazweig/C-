@@ -46,6 +46,11 @@ let check (globals, functions) =
   if List.mem "access" (List.map (fun fd -> fd.fname) functions)
   then raise (Failure ("function access may not be defined")) else ();
  
+  if List.mem "scanf" (List.map (fun fd -> fd.fname) functions)
+  then raise (Failure ("function printf may not be defined")) else ();
+  
+  if List.mem "malloc" (List.map (fun fd -> fd.fname) functions)
+  then raise (Failure ("function access may not be defined")) else ();
 
   report_duplicate (fun n -> "duplicate function " ^ n)
     (List.map (fun fd -> fd.fname) functions);
