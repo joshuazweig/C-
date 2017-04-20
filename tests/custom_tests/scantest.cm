@@ -1,0 +1,10 @@
+int main() {
+    char *a;
+
+    a = malloc(10);
+    scanf(a);
+    printf("%s\n", a);
+
+    return 0;
+}
+
