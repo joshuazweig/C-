@@ -28,8 +28,8 @@ open Ast
 %left PLUS MINUS
 %right ACCESS
 %left STAR DIVIDE MOD //star is times
+%left POW
 %right NOT NEG ADDRESSOF DEREF /* minus is neg, mod is addof, star is deref */
-%nonassoc POW
 
 %start program
 %type <Ast.program> program
@@ -108,7 +108,7 @@ expr:
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr STAR   expr { Binop($1, Mult,  $3) } //star is times
   | expr DIVIDE expr { Binop($1, Div,   $3) }
-  | expr STAR STAR expr %prec POW { Binop($1, Pow,   $4) }
+  | expr POW    expr { Binop($1, Pow,   $3) }
   | expr EQ     expr { Binop($1, Equal, $3) }
   | expr NEQ    expr { Binop($1, Neq,   $3) }
   | expr LT     expr { Binop($1, Less,  $3) }

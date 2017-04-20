@@ -131,7 +131,6 @@ void* stone_pow_func(void *a, void *p)
 */
 
 //Add 
-//TODO
 struct mint mint_add_func(struct mint* a, struct mint* b) {
     BIGNUM *val = BN_new();
     BN_CTX *ctx = BN_CTX_new();
