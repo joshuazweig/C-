@@ -70,7 +70,10 @@ let check (globals, functions) =
 
        ("scanf", { typ = Void; fname = "scanf"; formals = [(Pointer(Char), "x")]; locals = []; body = [] });
 
-       ("malloc", { typ = Pointer(Char); fname = "malloc"; formals = [(Int, "x")]; locals = []; body = [] })] 
+       ("malloc", { typ = Pointer(Char); fname = "malloc"; formals = [(Int, "x")]; locals = []; body = [] });
+
+       ("print_div", { typ = Int; fname = "print_mint"; formals = [(Mint,
+       "x")]; locals = []; body = [] }) ] 
        (* Can only malloc char pointers, best way to generalize? *)
    in
      

@@ -1,0 +1,41 @@
+int main()
+{
+  stone alice_g;
+  stone alice_p;
+  stone alice_div;
+
+  stone bob_sec;
+
+  mint bob_gap;
+  mint alice_gap;
+  char *alice_gap_input;
+
+  char *alice_p_input;
+  char *alice_g_input;
+
+  bob_sec = "5";
+
+  alice_p_input = malloc(100);
+  alice_g_input = malloc(100);
+
+  scanf(alice_p_input);
+  scanf(alice_g_input);
+
+  alice_p = alice_p_input;
+  alice_g = alice_g_input;
+
+  bob_gap = < (alice_g^bob_sec) , alice_p >;
+
+  //Send and recieve gaps
+  print_div(bob_gap); 
+  alice_gap_input = malloc(100);
+  scanf(alice_gap_input);
+  alice_div = alice_gap_input;
+
+  alice_gap = <alice_div, alice_p>;
+
+  print_div(alice_gap^bob_sec);
+
+  return 0;
+
+}

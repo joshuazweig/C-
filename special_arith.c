@@ -197,6 +197,12 @@ int mint_print_func(struct mint a) {
     return 0;
 }
 
+int mint_div_print_func(struct mint a) {
+  BN_print_fp(stdout, a.val);
+  printf("\n");
+
+  return 0;
+}
 //Equality and Inequality ops ofr mints are in LRM, 
 //but we can hold off on implemenitng
 
