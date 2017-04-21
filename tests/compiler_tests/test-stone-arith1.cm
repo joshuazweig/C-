@@ -3,11 +3,18 @@ int main () {
     stone s2;
     stone s3;
     stone s4;
+    stone s5;
 
     s1 = "7";
     s2 = "13";
+    s3 = "16";
+    s4 = "20";
+    s5 = "123";
 
     print_stone(s1);
     print_stone(s2);
+    print_stone(s3);
+    print_stone(s4);
+    print_stone(s5);
 }
 
