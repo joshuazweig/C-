@@ -36,11 +36,11 @@ int main()
   printf("print_mint\n");
   print_mint(o);
   
-  o = m ** n;
+  o = m ^ n;
   printf("print_mint\n");
   print_mint(o);
 
-  o = m ** z;
+  o = m ^ z;
   printf("print_mint\n");
   print_mint(o);
   return 0;

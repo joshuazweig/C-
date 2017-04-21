@@ -66,7 +66,7 @@ let check (globals, functions) =
        ("print_stone", { typ = Int; fname = "print_stone"; formals = [(Stone,
        "x")]; locals = []; body = [] });
        ("print_mint", { typ = Int; fname = "print_mint"; formals = [(Mint,
-       "x")]; locals = []; body = [] })] 
+       "x")]; locals = []; body = [] });
 
        ("scanf", { typ = Void; fname = "scanf"; formals = [(Pointer(Char), "x")]; locals = []; body = [] });
 
