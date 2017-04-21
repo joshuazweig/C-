@@ -46,6 +46,11 @@ let check (globals, functions) =
   if List.mem "access" (List.map (fun fd -> fd.fname) functions)
   then raise (Failure ("function access may not be defined")) else ();
  
+  if List.mem "scanf" (List.map (fun fd -> fd.fname) functions)
+  then raise (Failure ("function scanf may not be defined")) else ();
+  
+  if List.mem "malloc" (List.map (fun fd -> fd.fname) functions)
+  then raise (Failure ("function malloc may not be defined")) else ();
 
   report_duplicate (fun n -> "duplicate function " ^ n)
     (List.map (fun fd -> fd.fname) functions);
@@ -57,10 +62,16 @@ let check (globals, functions) =
        (* change formals to be variadic? Right now, this is fixed by just not 
        comparing formals and actuals list if the name of the function is printf  *)
        locals = []; body = [] });
+
        ("print_stone", { typ = Int; fname = "print_stone"; formals = [(Stone,
        "x")]; locals = []; body = [] });
        ("print_mint", { typ = Int; fname = "print_mint"; formals = [(Mint,
        "x")]; locals = []; body = [] })] 
+
+       ("scanf", { typ = Void; fname = "scanf"; formals = [(Pointer(Char), "x")]; locals = []; body = [] });
+
+       ("malloc", { typ = Pointer(Char); fname = "malloc"; formals = [(Int, "x")]; locals = []; body = [] })] 
+       (* Can only malloc char pointers, best way to generalize? *)
    in
      
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)

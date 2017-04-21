@@ -57,6 +57,12 @@ let translate (globals, functions) =
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
 
+  let read_t = L.function_type i32_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in 
+  let read_func = L.declare_function "scanf" read_t the_module in 
+
+  let malloc_t = L.function_type (L.pointer_type i8_t) [| i32_t |] in
+  let malloc_func = L.declare_function "malloc" malloc_t the_module in
+
   (* Declare other linked to / "built in" functions *)
   (* Function returns an 8 byte pointer, taking in two 8 byte pointers as arguments *)
   let mint_add_func_t = L.function_type mint_type [| mint_pointer ; mint_pointer |] in 
@@ -131,6 +137,7 @@ let translate (globals, functions) =
     let builder = L.builder_at_end context (L.entry_block the_function) in
 
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
+    let char_format_str = L.build_global_stringptr "%s" "fmt2" builder in 
 
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
@@ -306,16 +313,23 @@ let translate (globals, functions) =
           let result = "" in  (* printf is void function *)
           (L.build_call printf_func (Array.of_list actuals) result builder, 
             A.Pointer(Char))
-     | A.Call("print_stone", [e]) -> let (e', t) = expr builder e in 
+      | A.Call("print_stone", [e]) -> let (e', t) = expr builder e in 
           (L.build_call stone_print_func [| e' |] "stone_print_func" builder, t); 
      | A.Call("print_mint", [e]) -> let (e', t) = expr builder e in 
-          (L.build_call mint_print_func [| e' |] "mint_print_func" builder, t); 
+          (L.build_call mint_print_func [| e' |] "mint_print_func" builder, t);       
+      | A.Call("scanf", [e]) -> 
+          let (e', t) = expr builder e in 
+            ignore(L.build_call read_func [| char_format_str ; e' |] "scanf" builder ); 
+            (e' , t) 
+      | A.Call("malloc", [e]) -> 
+          let (e', t) = expr builder e in
+          (L.build_call malloc_func [| e' |] "malloc" builder, t)
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
-	 let actuals, types = List.split (List.rev (List.map (expr builder) (List.rev act))) in
-	 let result = (match fdecl.A.typ with A.Void -> ""
+	         let actuals, types = List.split (List.rev (List.map (expr builder) (List.rev act))) in
+	         let result = (match fdecl.A.typ with A.Void -> ""
                                             | _ -> f ^ "_result") in
-         (L.build_call fdef (Array.of_list actuals) result builder, fdecl.A.typ)
+          (L.build_call fdef (Array.of_list actuals) result builder, fdecl.A.typ)
 
     in
 
