@@ -20,7 +20,7 @@ basename=`echo "$TEST" | sed 's/.*\\///
                              s/.cm//'`
 ./cmod.native < "$TEST" > ${basename}.ll
 
-#Replace with your llvm compiler 
+
 "$LLC" ${basename}.ll > ${basename}.s
 
 cc -o ${basename}.exe ${basename}.s special_arith.o "$CRYPTO"

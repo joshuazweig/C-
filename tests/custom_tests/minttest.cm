@@ -2,22 +2,46 @@ int main()
 {
   stone x;
   stone y;
-  stone a;
-  stone b;
+  stone z;
+  stone p;
 
   mint m;
   mint n;
   mint o;
 
-  x = "10001";
-  y = "01110";
+  x = "15352395";
+  y = "-1123053158"; 
+  z = "-1";
+  p = "65537"; 
 
-  a = "10011";
-  b = y;
+  // some arithmetic with negative exponents seems off?
+  // also, if you "mod" a negative bignum, the result is still negative. don't 
+  // think we want this behavior
 
-  m = <x, y>;
-  n = <a, b>;
+  m = <x, p>;
+  n = <z, p>;
+  
+  print_mint(m);
+  print_mint(n);
 
   o = m + n;
+  printf("print_mint\n");
+  print_mint(o);
+  
+  o = m - n;
+  printf("print_mint\n");
+  print_mint(o);
+  
+  o = m * n;
+  printf("print_mint\n");
+  print_mint(o);
+  
+  o = m ^ n;
+  printf("print_mint\n");
+  print_mint(o);
 
+  o = m ^ z;
+  printf("print_mint\n");
+  print_mint(o);
+  return 0;
 }

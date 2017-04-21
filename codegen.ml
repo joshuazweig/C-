@@ -26,9 +26,10 @@ let translate (globals, functions) =
   and i1_t   = L.i1_type   context
   and void_t = L.void_type context in
   let obj_pointer = L.pointer_type (L.i8_type context) in  (* void pointer, 8 bytes *)
-  let mint_type = L.struct_type context  [| obj_pointer ; obj_pointer ; i32_t |] in (* struct of two void pointers *)
+  let mint_type = L.struct_type context  [| obj_pointer ; obj_pointer |] in (* struct of two void pointers *)
   let curve_type = L.struct_type context [| mint_type ; mint_type |] in (* cruve defined by two modints *)
-  let point_type = L.struct_type context [| curve_type ; obj_pointer ; obj_pointer; i1_t |] in(* curve + two stones *)
+  let point_type = L.struct_type context [| curve_type ; obj_pointer ;
+  obj_pointer; i8_t |] in(* curve + two stones *)
   let mint_pointer = L.pointer_type mint_type in
   (* Must consider best way to implement points wrt Inf *)
   (* maybe define diff points for inf and normal to enforce that 
@@ -67,35 +68,58 @@ let translate (globals, functions) =
   let mint_add_func_t = L.function_type mint_type [| mint_pointer ; mint_pointer |] in 
   let mint_add_func = L.declare_function "mint_add_func" mint_add_func_t the_module in 
 
+  let mint_sub_func_t = L.function_type mint_type [| mint_pointer ; mint_pointer |] in 
+  let mint_sub_func = L.declare_function "mint_sub_func" mint_sub_func_t the_module in 
+  
+  let mint_mult_func_t = L.function_type mint_type [| mint_pointer ; mint_pointer |] in 
+  let mint_mult_func = L.declare_function "mint_mult_func" mint_mult_func_t the_module in 
+
+  let mint_pow_func_t = L.function_type mint_type [| mint_pointer ; mint_pointer |] in 
+  let mint_pow_func = L.declare_function "mint_pow_func" mint_pow_func_t the_module in 
+
   let mint_to_stone_func_t = L.function_type mint_type [| mint_pointer ; obj_pointer |] in
   let mint_to_stone_func = L.declare_function "mint_to_stone_func" mint_to_stone_func_t the_module in
 
   let stone_char_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let stone_char_func = L.declare_function "stone_char_func" stone_char_func_t the_module in 
 
-  let stone_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer ; obj_pointer |] in 
+  let stone_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let stone_add_func = L.declare_function "stone_add_func" stone_add_func_t the_module in 
 
-  let stone_mult_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer ; obj_pointer |] in 
+  let stone_sub_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
+  let stone_sub_func = L.declare_function "stone_sub_func" stone_sub_func_t the_module in 
+  
+  let stone_mult_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let stone_mult_func = L.declare_function "stone_mult_func" stone_mult_func_t the_module in
 
-  let stone_div_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer ; obj_pointer |] in 
+  let stone_div_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let stone_div_func = L.declare_function "stone_div_func" stone_div_func_t the_module in
 
-  let stone_pow_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer ; obj_pointer |] in 
+  let stone_pow_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let stone_pow_func = L.declare_function "stone_pow_func" stone_pow_func_t the_module in
 
-  let stone_mod_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer ; obj_pointer |] in 
+  let stone_mod_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let stone_mod_func = L.declare_function "stone_mod_func" stone_mod_func_t the_module in
 
   let stone_print_func_t = L.function_type i32_t [| obj_pointer |] in 
   let stone_print_func = L.declare_function "stone_print_func" stone_print_func_t the_module in
 
+  let mint_print_func_t = L.function_type i32_t [| mint_type |] in 
+  let mint_print_func = L.declare_function "mint_print_func" mint_print_func_t the_module in
+  
   let point_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let point_add_func = L.declare_function "point_add_func" point_add_func_t the_module in 
 
-  let stone_create_func_t = L.function_type obj_pointer [| |] in 
-  let stone_create_func = L.declare_function "BN_new" stone_create_func_t the_module in 
+  let point_sub_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
+  let point_sub_func = L.declare_function "point_sub_func" point_sub_func_t the_module in 
+
+  (* stone * point, i.e. add point to itself stone many times *)
+  let point_mult_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
+  let point_mult_func = L.declare_function "point_mult_func" point_mult_func_t the_module in 
+
+  let stone_create_func_t = L.function_type obj_pointer [| ltype_of_typ
+  (A.Pointer(Char)) |] in 
+  let stone_create_func = L.declare_function "stone_create_func" stone_create_func_t the_module in 
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -151,9 +175,10 @@ let translate (globals, functions) =
         (match (t1, t2) with
           (A.Stone, A.Stone) -> 
             let struct_m = L.undef mint_type in 
-            let struct_m2 = L.build_insertvalue struct_m e1' 0 "sm" builder in
-            let struct_m3 = L.build_insertvalue struct_m e2' 1 "sm2" builder in 
-            (L.build_insertvalue struct_m3 (L.const_int i32_t 0) 2 "sm3" builder, A.Mint)
+              let reduced_val = L.build_call stone_mod_func [| e1' ; e2' |] 
+                 "stone_mod_res" builder in
+                let struct_m2 = L.build_insertvalue struct_m (reduced_val) 0 "sm" builder in
+            (L.build_insertvalue struct_m2 e2' 1 "sm2" builder, A.Mint) 
           | (A.Mint, A.Mint) -> 
             let struct_c = L.undef curve_type in 
             let struct_c2 = L.build_insertvalue struct_c e1' 0 "sc" builder in 
@@ -175,7 +200,7 @@ let translate (globals, functions) =
       
       | A.Binop (e1, op, e2) ->
     	  let (e1', t1) = expr builder e1
-    	  and (e2', t2) = expr builder e2 in (* must t1 == t2 for all binop? if so, t2 can be _ *)
+    	  and (e2', t2) = expr builder e2 in
         (match (t1, t2) with
            (A.Int, A.Int) -> 
               ((match op with
@@ -193,46 +218,48 @@ let translate (globals, functions) =
               | A.Geq     -> L.build_icmp L.Icmp.Sge
               ) e1' e2' "tmp" builder, A.Int) 
           | (A.Mint, A.Mint) ->
+              let ptr1 = L.build_alloca mint_type "e1" builder and
+              ptr2 = L.build_alloca mint_type "e2" builder in 
+              let s = L.build_store e1' ptr1 builder and 
+              s1 = L.build_store e2' ptr2 builder in 
               ((match op with
-              A.Add -> 
-                let ptr1 = L.build_alloca mint_type "e1" builder and
-                ptr2 = L.build_alloca mint_type "e2" builder in 
-                let s = L.build_store e1' ptr1 builder and 
-                s1 = L.build_store e2' ptr2 builder in 
-                
-                L.build_call mint_add_func [| ptr1 ; ptr2 |] "mint_add_func" builder
-                  
+                  A.Add -> 
+                    L.build_call mint_add_func [| ptr1 ; ptr2 |] "mint_add_res" builder
+                | A.Sub ->  
+                    L.build_call mint_sub_func [| ptr1 ; ptr2 |] "mint_sub_res" builder
+                | A.Mult ->  
+                    L.build_call mint_mult_func [| ptr1 ; ptr2 |] "mint_mult_res" builder
+                | A.Pow ->  
+                    L.build_call mint_pow_func [| ptr1 ; ptr2 |] "mint_pow_res" builder
               ), A.Mint)
 
             (*Raise mint to stone*)
           | (A.Mint, A.Stone) ->
               ((match op with
                 (* In semant, check that this is only op possible *)
-                A.Pow -> 
+              A.Pow -> 
                   let ptr = L.build_alloca mint_type "e1" builder in
                   let s = L.build_store e1' ptr builder in 
 
-                  L.build_call mint_to_stone_func [| ptr ; e2' |] "mint_to_stone_func" builder
+                  L.build_call mint_to_stone_func [| ptr ; e2' |]
+                  "mint_to_stone_res" builder
 
               ), A.Mint)
               
           | (A.Stone, A.Stone) -> 
               ((match op with
-              A.Add -> 
-                let ptr = L.build_call stone_create_func [| |] "stone_create_func" builder in 
-                L.build_call stone_add_func [| ptr ; e1' ; e2' |] "stone_add_func" builder
+                A.Add -> 
+                L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder
+              | A.Sub -> 
+                L.build_call stone_sub_func [| e1' ; e2' |] "stone_sub_res" builder
               | A.Mult -> 
-                let ptr = L.build_call stone_create_func [| |] "stone_create_func" builder in 
-                L.build_call stone_mult_func [| ptr ; e1' ; e2' |] "stone_mult_func" builder
+                L.build_call stone_mult_func [| e1' ; e2' |] "stone_mult_res" builder
               | A.Div -> 
-                let ptr = L.build_call stone_create_func [| |] "stone_create_func" builder in 
-                L.build_call stone_div_func [| ptr ; e1' ; e2' |] "stone_div_func" builder
+                L.build_call stone_div_func [| e1' ; e2' |] "stone_div_res" builder
               | A.Pow -> 
-                let ptr = L.build_call stone_create_func [| |] "stone_create_func" builder in 
-                L.build_call stone_pow_func [| ptr ; e1' ; e2' |] "stone_pow_func" builder
+                L.build_call stone_pow_func [| e1' ; e2' |] "stone_pow_res" builder
               | A.Mod -> 
-                let ptr = L.build_call stone_create_func [| |] "stone_create_func" builder in 
-                L.build_call stone_mod_func [| ptr ; e1' ; e2' |] "stone_mod_func" builder
+                L.build_call stone_mod_func [| e1' ; e2' |] "stone_mod_res" builder
               (*| A.Sub ->
               | A.Equal -> 
               | A.Neq -> 
@@ -247,9 +274,16 @@ let translate (globals, functions) =
           | (A.Point, A.Point) ->
               ((match op with
               A.Add -> 
-                L.build_call point_add_func [| e1' ; e2' |] "point_add_func" builder
-
+                L.build_call point_add_func [| e1' ; e2' |] "point_add_res" builder
+            | A.Sub -> 
+                L.build_call point_sub_func [| e1' ; e2' |] "point_sub_res" builder
               ), A.Point) 
+         | (A.Stone, A.Point) ->
+              ((match op with
+              A.Mult ->
+                  L.build_call point_mult_func [| e1' ; e2' |] "point_mult_res"
+                  builder
+              ), A.Point)
         )  
 
       | A.Unop(op, e) -> (*these will also require type matching *)
@@ -264,9 +298,10 @@ let translate (globals, functions) =
                            ltype = (snd (lookup s)) in (match (ltype, t) with
                            | (A.Stone, A.Pointer(A.Char)) -> 
                               let ptr = 
-                                L.build_call stone_create_func [| |] "stone_create_func" builder in 
-                                let res = 
-                                  L.build_call stone_char_func [| e' ; ptr |] "stone_char_func" builder in 
+                                L.build_call stone_create_func [|e' |] "stone_create_func" builder in 
+                                 (*let res = 
+                                  L.build_call stone_char_func [| e' ; ptr |]
+                                  "stone_char_func" builder in *)
                                   ignore(L.build_store ptr (fst (lookup s)) builder); (ptr, t)
 
                            | _ -> ignore (L.build_store e' (fst (lookup s)) builder); (e', t) )
@@ -280,7 +315,8 @@ let translate (globals, functions) =
             A.Pointer(Char))
       | A.Call("print_stone", [e]) -> let (e', t) = expr builder e in 
           (L.build_call stone_print_func [| e' |] "stone_print_func" builder, t); 
-      
+     | A.Call("print_mint", [e]) -> let (e', t) = expr builder e in 
+          (L.build_call mint_print_func [| e' |] "mint_print_func" builder, t);       
       | A.Call("scanf", [e]) -> 
           let (e', t) = expr builder e in 
             ignore(L.build_call read_func [| char_format_str ; e' |] "scanf" builder ); 
