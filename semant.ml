@@ -169,6 +169,7 @@ let check (globals, functions) =
        * e.g. dereferencing *)
       | Assign(var, e) as ex -> let lt = type_of_identifier var table
                                 and rt = expr table e in
+        if (lt, rt) = (Stone, Pointer(Char)) then Stone else
         check_assign lt rt (Failure ("illegal assignment " ^ string_of_typ lt ^
 				     " = " ^ string_of_typ rt ^ " in " ^ 
 				     string_of_expr ex))
