@@ -24,7 +24,7 @@ for filename in os.listdir(cwd):
                 for line in diff:
                     sys.stdout.write(line)
                     exitCode = 1
-rmout = 'rm ' + relTestLoc + '*.tmp'
-os.system(rmout)
+#rmout = 'rm ' + relTestLoc + '*.tmp'
+#os.system(rmout)
 
 sys.exit(exitCode)

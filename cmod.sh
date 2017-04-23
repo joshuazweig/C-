@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LLC="/usr/local/opt/llvm@3.7/bin/llc-3.7"
+LLC="/usr/local/opt/llvm@3.8/bin/llc-3.8"
 CRYPTO="/usr/lib/libcrypto.0.9.8.dylib"
 TEST="$1"
 
