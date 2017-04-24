@@ -35,6 +35,15 @@ struct stone *access_c(struct curve c) {
 	return z;
 }
 
+// takes a curve and an index (0-3)
+// 0, 1 return indices 0/1 for mint 1
+// 2, 3 return indices 0/1 for mint 2
+struct stone access_curve(struct curve c, int index)	{
+	struct stone *a = access_c(c);
+	printf("ACCESS: index %d gives %d\n", index, *((int *)a[index].val));
+	return a[index];
+}
+
 struct stone *access_p(struct point p) {
 	struct stone *c = access_c(p.c);
 
@@ -105,8 +114,11 @@ int main() {
 	struct stone reduced_mint_1 = access_mint(m, 1);
 
 	
-	// printf("***Testing curve {<12, 29>, <13, 31>}\n");
-	// struct stone *reduced_curve = access_curve(c1);
+	printf("***Testing curve {<12, 29>, <13, 31>}\n");
+	struct stone reduced_curve_0 = access_curve(c1, 0);
+	struct stone reduced_curve_1 = access_curve(c1, 1);
+	struct stone reduced_curve_2 = access_curve(c1, 2);
+	struct stone reduced_curve_3 = access_curve(c1, 3);
 
 	// printf("***Testing point {<12, 29>, <13, 31>}, 53, 37\n");
 	// struct stone *reduced_point = access_point(p);
