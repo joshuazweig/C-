@@ -2,17 +2,25 @@
 #include <stdlib.h>
 #include "types.h"
 
-struct stone *access_mint(struct mint x) {
+struct stone *access_m(struct mint x) {
 
 	struct stone *a = (struct stone *) malloc(2 * sizeof(struct stone));
 	a[0] = x.val;
 	a[1] = x.mod;
 
-	// printf("REDUCED MINT: %d, %d\n", *((int *)a[0].val), *((int *)a[1].val));
+	printf("REDUCED MINT: %d, %d\n", *((int *)a[0].val), *((int *)a[1].val));
 	return a;
 }
 
-struct stone *access_curve(struct curve c) {
+// takes a mint and an int (0 or 1), 
+// returning val for idx 0 and mod for idx 1
+struct stone access_mint(struct mint x, int index)	{
+	struct stone *a = access_m(x);
+	printf("ACCESS: index %d gives %d\n", index, *((int *)a[index].val));
+	return a[index];
+}
+
+struct stone *access_c(struct curve c) {
 	struct stone *a = access_m(c.a);
 	struct stone *b = access_m(c.b);
 
@@ -27,7 +35,7 @@ struct stone *access_curve(struct curve c) {
 	return z;
 }
 
-struct stone *access_point(struct point p) {
+struct stone *access_p(struct point p) {
 	struct stone *c = access_c(p.c);
 
 	struct stone *a = (struct stone *) malloc(6 * sizeof(struct stone));
@@ -91,17 +99,18 @@ int main() {
     p.inf = 0;  // not infinity
 
 	// test access
-/*
+
 	printf("***Testing mint <12, 29>\n");
-	struct stone *reduced_mint = access_mint(m);
+	struct stone reduced_mint_0 = access_mint(m, 0);
+	struct stone reduced_mint_1 = access_mint(m, 1);
 
 	
-	printf("***Testing curve {<12, 29>, <13, 31>}\n");
-	struct stone *reduced_curve = access_curve(c1);
+	// printf("***Testing curve {<12, 29>, <13, 31>}\n");
+	// struct stone *reduced_curve = access_curve(c1);
 
-	printf("***Testing point {<12, 29>, <13, 31>}, 53, 37\n");
-	struct stone *reduced_point = access_point(p);
-*/
+	// printf("***Testing point {<12, 29>, <13, 31>}, 53, 37\n");
+	// struct stone *reduced_point = access_point(p);
+
 
 
 	return 0;
