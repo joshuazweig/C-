@@ -56,6 +56,7 @@ let translate (globals, functions) =
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
 
+
   (* Declare other linked to / "built in" functions *)
   (* Function returns an 8 byte pointer, taking in two 8 byte pointers as arguments *)
   let mint_add_func_t = L.function_type mint_type [| mint_pointer ; mint_pointer |] in 
@@ -90,6 +91,19 @@ let translate (globals, functions) =
 
   let stone_create_func_t = L.function_type obj_pointer [| |] in 
   let stone_create_func = L.declare_function "BN_new" stone_create_func_t the_module in 
+
+  let access_mint_t = L.function_type obj_pointer [| mint_type |] in
+    let access_mint = L.declare_function "access_mint" access_mint_t the_module in
+
+  let access_curve_t = L.function_type obj_pointer [| curve_type |] in
+    let access_curve = L.declare_function "access_curve" access_curve_t the_module in
+
+  let access_point_t = L.function_type obj_pointer [| point_type |] in
+    let access_point = L.declare_function "access_point" access_point_t the_module in
+
+  let invert_point_func_t = L.function_type point_type [| point_type |] in
+    let invert_point_func = L.declare_function "invert_point_func" invert_point_func_t the_module in
+
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -245,12 +259,26 @@ let translate (globals, functions) =
               ), A.Point) 
         )  
 
-      | A.Unop(op, e) -> (*these will also require type matching *)
+      | A.Unop(op, e) -> 
       	  let e', t = expr builder e in
-      	  (match op with
-      	     A.Neg     -> L.build_neg
-            | A.Not     -> L.build_not) e' "tmp" builder, t
-
+      	  ((match op with
+            A.Neg     -> (match t with
+                A.Int -> L.build_neg e' "tmp" builder
+               | A.Point -> L.build_call invert_point_func [| e' |] "invert_point_func" builder )  (* Point inversion *)
+           | A.Not     -> L.build_icmp L.Icmp.Eq (L.const_null (ltype_of_typ t)) e' "tmp" builder  (* Still need to test on Pointer types *)
+           | A.Deref   -> L.build_load e' "tmp" builder  (* load object pointed to *)
+           | A.AddrOf  -> L.build_store e' (L.build_alloca (ltype_of_typ (A.Pointer t)) "tmp" builder) builder  (* create pointer to address of object -- want what is returned by L.build_alloca -- could just move stuff everytime? seems inefficient *)
+           | A.Access  -> match t with
+               A.Mint -> L.build_call access_mint [| e' |] "access_mint" builder
+              | A.Curve -> L.build_call access_curve [| e' |] "access_curve" builder
+              | A.Point -> L.build_call access_point [| e' |] "access_point" builder
+          ), (match op with
+            A.Neg -> t
+            | A.Not -> t
+            | A.Deref -> (match t with
+                A.Pointer x -> x)
+            | A.AddrOf -> A.Pointer t
+            | A.Access -> A.Pointer A.Stone)) 
        | A.Assign (s, e) -> let (e', t) = expr builder e and
                               (* if t string, otherwise is behavior normal?*)
                             (*snd lookup is type of thing*)
@@ -263,7 +291,6 @@ let translate (globals, functions) =
                                   ignore(L.build_store ptr (fst (lookup s)) builder); (ptr, t)
 
                            | _ -> ignore (L.build_store e' (fst (lookup s)) builder); (e', t) )
-                       
 
       | A.Call ("printf", act) ->
           let actuals, types = List.split (List.rev (List.map (expr builder)
@@ -294,41 +321,48 @@ let translate (globals, functions) =
     let rec stmt builder = function
 	     A.Block sl -> List.fold_left stmt builder sl
       | A.Expr e -> ignore (expr builder e); builder
+     (* | A.Break ->
+      | A.Continue -> 
+      | A.NullStmt ->*)
       | A.Return e -> ignore (match fdecl.A.typ with
 	                 A.Void -> L.build_ret_void builder
-	    | _ -> L.build_ret (fst (expr builder e)) builder); builder
+	               | _ -> L.build_ret (fst (expr builder e)) builder); builder
       | A.If (predicate, then_stmt, else_stmt) ->
-         let bool_val = fst(expr builder predicate) in
-	 let merge_bb = L.append_block context "merge" the_function in
+           let bool_val = fst(expr builder predicate) in
+	         let merge_bb = L.append_block context "merge" the_function in
 
-	 let then_bb = L.append_block context "then" the_function in
-	 add_terminal (stmt (L.builder_at_end context then_bb) then_stmt)
-	   (L.build_br merge_bb);
+        	 let then_bb = L.append_block context "then" the_function in
+        	 add_terminal (stmt (L.builder_at_end context then_bb) then_stmt)
+        	   (L.build_br merge_bb);
 
-	 let else_bb = L.append_block context "else" the_function in
-	 add_terminal (stmt (L.builder_at_end context else_bb) else_stmt)
-	   (L.build_br merge_bb);
+        	 let else_bb = L.append_block context "else" the_function in
+        	 add_terminal (stmt (L.builder_at_end context else_bb) else_stmt)
+        	   (L.build_br merge_bb);
 
-	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
-	 L.builder_at_end context merge_bb
+        	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
+        	 L.builder_at_end context merge_bb
 
       | A.While (predicate, body) ->
-	  let pred_bb = L.append_block context "while" the_function in
-	  ignore (L.build_br pred_bb builder);
+      	  let pred_bb = L.append_block context "while" the_function in
+      	  ignore (L.build_br pred_bb builder);
 
-	  let body_bb = L.append_block context "while_body" the_function in
-	  add_terminal (stmt (L.builder_at_end context body_bb) body)
-	    (L.build_br pred_bb);
+      	  let body_bb = L.append_block context "while_body" the_function in
+      	  add_terminal (stmt (L.builder_at_end context body_bb) body)
+      	    (L.build_br pred_bb);
 
-	  let pred_builder = L.builder_at_end context pred_bb in
-	  let bool_val = fst (expr pred_builder predicate) in
+      	  let pred_builder = L.builder_at_end context pred_bb in
+      	  let bool_val = fst (expr pred_builder predicate) in
 
-	  let merge_bb = L.append_block context "merge" the_function in
-	  ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
-	  L.builder_at_end context merge_bb
+
+      	  let merge_bb = L.append_block context "merge" the_function in
+      	  ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
+      	  L.builder_at_end context merge_bb
+
+    (*  | A.DoWhile (body, predicate) ->   (* Need to UPDATE (while to do while) !!! *)
+*)
 
       | A.For (e1, e2, e3, body) -> stmt builder
-	    ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] )
+	       ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] )
     in
 
     (* Build the code for each statement in the function *)
