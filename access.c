@@ -85,10 +85,10 @@ int main() {
 	y.val = &f;
 
 	struct point p;
-	p.c = c1;
-	p.x = x;
-	p.y = y;
-	p.inf = 0;  // not infinity
+    p.c = c1;
+    p.x = x;
+    p.y = y;
+    p.inf = 0;  // not infinity
 
 	// test access
 /*
