@@ -10,13 +10,16 @@ test_grammar:
 	ocamllex scannerprint.mll
 	python tests/grammar_tests/testAllPretty.py
 
-.PHONE: test_compiler_travis
+.PHONY: test_compiler_travis
 test_compiler_travis:
 	./testall.sh -v
 
 
 special_arith.o: special_arith.c
 	clang -I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib -c special_arith.c
+
+access.o: access.c
+	clang -c access.c
 
 .PHONY: clean
 clean :
@@ -27,4 +30,4 @@ clean :
 	-rm -f scannerprint.ml *.tmp
 	rm -f *.exe *.s 
 .PHONY : all
-all : clean cmod.native special_arith.o
+all : clean cmod.native special_arith.o access.o
