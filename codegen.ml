@@ -25,6 +25,8 @@ let translate (globals, functions) =
   and i8_t   = L.i8_type   context
   and i1_t   = L.i1_type   context
   and void_t = L.void_type context in
+  let br_block = ref (L.block_of_value (L.const_int i32_t 0)) in
+  let cont_block = ref (L.block_of_value (L.const_int i32_t 0)) in
   let obj_pointer = L.pointer_type (L.i8_type context) in  (* void pointer, 8 bytes *)
   let mint_type = L.struct_type context  [| obj_pointer ; obj_pointer ; i32_t |] in (* struct of two void pointers *)
   let curve_type = L.struct_type context [| mint_type ; mint_type |] in (* cruve defined by two modints *)
@@ -55,9 +57,6 @@ let translate (globals, functions) =
   (* Declare printf(), which the print built-in function will call *)
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
-
-  let (br_block) = ref (L.block_of_value (L.const_int i32_t 0)) in
-  let (cont_block) = ref (L.block_of_value (L.const_int i32_t 0)) in
 
   (* Declare other linked to / "built in" functions *)
   (* Function returns an 8 byte pointer, taking in two 8 byte pointers as arguments *)
@@ -328,7 +327,12 @@ let translate (globals, functions) =
 
 	  let merge_bb = L.append_block context "merge" the_function in
 	  ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
-	  L.builder_at_end context merge_bb
+	  L.builder_at_end context merge_bb 
+
+(*    let cont_block := ref body_bb in
+    let br_block := ref merge_bb in
+
+    let _ = cont_block := body_bb; br_block := merge_bb; *)
 
       | A.For (e1, e2, e3, body) -> stmt builder
 	    ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] )
