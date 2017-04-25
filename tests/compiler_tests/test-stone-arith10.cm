@@ -1,0 +1,22 @@
+int main () {
+    stone s1;
+    stone s2;
+    stone s3;
+    stone s4;
+
+    s1 = "7";
+    s2 = "8";
+
+    s3 = s1 + s1 * s2 + s2;
+    print_stone(s3);
+
+    s3 = s1 * s1 ^ s2 * s2;
+    print_stone(s3);
+
+    s1 = "100";
+    s2 = "10";
+    s3 = "2";
+
+    s4 = s1 - s2 - s3;
+    print_stone(s4);
+}

@@ -1,0 +1,16 @@
+int main () {
+    stone s1;
+    stone s2;
+    stone s3;
+    stone s4;
+
+    s1 = "4261379284712349123746192345";
+    s2 = "2348178942317623416767421766";
+    s3 = s1 * s2;
+    s4 = s2 * s1;
+
+    print_stone(s1);
+    print_stone(s2);
+    print_stone(s3);
+    print_stone(s4);
+}
