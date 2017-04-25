@@ -63,6 +63,9 @@ let translate (globals, functions) =
   let malloc_t = L.function_type (L.pointer_type i8_t) [| i32_t |] in
   let malloc_func = L.declare_function "malloc" malloc_t the_module in
 
+  let free_t = L.function_type void_t [| L.pointer_type i8_t |] in
+  let free_func = L.declare_function "free" free_t the_module in
+
   (* Declare other linked to / "built in" functions *)
   (* Function returns an 8 byte pointer, taking in two 8 byte pointers as arguments *)
   let mint_add_func_t = L.function_type mint_type [| mint_pointer ; mint_pointer |] in 
@@ -311,6 +314,11 @@ let translate (globals, functions) =
       | A.Call("malloc", [e]) -> 
           let (e', t) = expr table builder e in
           (L.build_call malloc_func [| e' |] "malloc" builder, t)
+      | A.Call("free", [e]) -> 
+          let (e', t) = expr table builder e in
+          (*ignore(L.build_call free_func [| e' |] "free" builder);
+          (e', t) (*is this right to return?*)*)
+          (L.build_free e' builder, Void)
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
 	         let actuals, types = List.split (List.rev (List.map (expr table builder) (List.rev act))) in

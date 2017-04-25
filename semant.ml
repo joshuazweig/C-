@@ -53,6 +53,9 @@ let check (globals, functions) =
   if List.mem "malloc" (List.map (fun fd -> fd.fname) functions)
   then raise (Failure ("function malloc may not be defined")) else ();
 
+  if List.mem "free" (List.map (fun fd -> fd.fname) functions)
+  then raise (Failure ("function free may not be defined")) else ();
+
   report_duplicate (fun n -> "duplicate function " ^ n)
     (List.map (fun fd -> fd.fname) functions);
 
@@ -71,7 +74,10 @@ let check (globals, functions) =
        ("scanf", { typ = Void; fname = "scanf"; formals = [(Pointer(Char), "x")]; 
        locals = []; body = [] });
        ("malloc", { typ = Pointer(Char); fname = "malloc"; formals = [(Int, "x")];
-       locals = []; body = [] })] 
+       locals = []; body = [] });
+       ("free", { typ = Void; fname = "free"; formals = [(Pointer(Char), "x")];
+       locals = []; body = [] })
+       ] 
        (* Can only malloc char pointers, best way to generalize? *)
    in
      
