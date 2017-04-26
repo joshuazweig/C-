@@ -42,6 +42,11 @@ void *stone_create_func(char *str) {
     return r;
 }
 
+int stone_free_func(void *a){
+  BN_free(a);
+  return 0;
+}
+
 //Add
 void* stone_add_func(void *a, void *b)
 {

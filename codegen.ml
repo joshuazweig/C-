@@ -120,9 +120,11 @@ let translate (globals, functions) =
   let point_mult_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let point_mult_func = L.declare_function "point_mult_func" point_mult_func_t the_module in 
 
-  let stone_create_func_t = L.function_type obj_pointer [| ltype_of_typ
-  (A.Pointer(Char)) |] in 
+  let stone_create_func_t = L.function_type obj_pointer [| ltype_of_typ (A.Pointer(Char)) |] in 
   let stone_create_func = L.declare_function "stone_create_func" stone_create_func_t the_module in 
+
+  let bn_free_t = L.function_type i32_t [| L.pointer_type i8_t |] in (* bn free func *)
+  let stone_free_func = L.declare_function "stone_free_func" bn_free_t the_module in 
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -208,13 +210,13 @@ let translate (globals, functions) =
               | A.Geq     -> L.build_icmp L.Icmp.Sge
               ) e1' e2' "tmp" builder, A.Int) 
           | (A.Mint, A.Mint) ->
-              (*let ptr1 = L.build_alloca mint_type "e1" builder and
+              let ptr1 = L.build_alloca mint_type "e1" builder and
               ptr2 = L.build_alloca mint_type "e2" builder in 
               let s = L.build_store e1' ptr1 builder and 
-              s1 = L.build_store e2' ptr2 builder in *)
+              s1 = L.build_store e2' ptr2 builder in 
               ((match op with
                   A.Add -> 
-                    L.build_call mint_add_func [| e1' ; e2' |] "mint_add_res" builder (*??*)
+                    L.build_call mint_add_func [| e1' ; e2' |] "mint_add_res" builder (*?? can i just this?*)
                 | A.Sub ->  
                     L.build_call mint_sub_func [| ptr1 ; ptr2 |] "mint_sub_res" builder
                 | A.Mult ->  
@@ -239,7 +241,18 @@ let translate (globals, functions) =
           | (A.Stone, A.Stone) -> 
               ((match op with
                 A.Add -> 
-                L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder
+                StringMap.iter (fun k v -> 
+                          if v = (e1', A.Stone) then ignore(L.build_call stone_free_func [| e1' |] "res" builder)
+                          else if v = (e2', A.Stone) then ignore(L.build_call stone_free_func [| e2' |] "res" builder) 
+                          else ignore((L.const_int i1_t 0))) table in 
+
+                L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder   
+                (*ignore (if StringMap.mem e1' table then (* check if e1' is a value in the map *)
+                          L.build_call stone_free_func [| e1' |] "res" builder
+                        else if StringMap.mem e2' table then 
+                          L.build_call stone_free_func [| e2' |] "res" builder)*)
+                
+
               | A.Sub -> 
                 L.build_call stone_sub_func [| e1' ; e2' |] "stone_sub_res" builder
               | A.Mult -> 
