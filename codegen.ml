@@ -241,12 +241,15 @@ let translate (globals, functions) =
           | (A.Stone, A.Stone) -> 
               ((match op with
                 A.Add -> 
-                StringMap.iter (fun k v -> 
-                          if v = (e1', A.Stone) then ignore(L.build_call stone_free_func [| e1' |] "res" builder)
-                          else if v = (e2', A.Stone) then ignore(L.build_call stone_free_func [| e2' |] "res" builder) 
-                          else ignore((L.const_int i1_t 0))) table in 
+                ignore(StringMap.iter (fun k v -> 
+                          if v = (e1', A.Stone) then ignore(L.build_call 
+                            stone_free_func [| e1' |] "res" builder)
+                          else if v = (e2', A.Stone) then ignore(L.build_call
+                            stone_free_func [| e2' |] "res" builder)
+                          else ignore((L.const_int i1_t 0))) table); 
 
-                L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder   
+                L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" 
+                builder   
                 (*ignore (if StringMap.mem e1' table then (* check if e1' is a value in the map *)
                           L.build_call stone_free_func [| e1' |] "res" builder
                         else if StringMap.mem e2' table then 
