@@ -321,9 +321,9 @@ let translate (globals, functions) =
             A.Pointer(A.Char))
       | A.Call("print_stone", [e]) -> let (e', t) = expr table builder e in 
           (L.build_call stone_print_func [| e' |] "stone_print_func" builder, t); 
-      | A.Call("print_div", [e]) -> let (e', t) = expr builder e in 
+      | A.Call("print_div", [e]) -> let (e', t) = expr table builder e in 
           (L.build_call mint_div_print_func [| e' |] "mint_div_print_func" builder, t)
-      | A.Call("print_mint", [e]) -> let (e', t) = expr builder e in 
+      | A.Call("print_mint", [e]) -> let (e', t) = expr table builder e in 
           (L.build_call mint_print_func [| e' |] "mint_print_func" builder, t);       
       | A.Call("scanf", [e]) -> 
           let (e', t) = expr table builder e in 
