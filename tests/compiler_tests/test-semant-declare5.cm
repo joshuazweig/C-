@@ -1,0 +1,19 @@
+
+int main() {
+    int x;
+    x = 1;
+    {
+         int y;
+         y = 3;
+         {
+             int z;
+             z = 3;
+             printf("%d\n", z*y+x); // prints 10
+         }
+         y = 4;
+         printf("%d\n", y); //prints 4
+    }
+    x = 5;
+    printf("%d\n", x); // prints 5
+    return 0;
+}

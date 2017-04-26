@@ -16,7 +16,7 @@ test_compiler_travis:
 	./testall.sh -v
 
 special_arith.o: special_arith.c
-	clang -I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib -c special_arith.c
+	clang -I/usr/local/opt/openssl/include -c special_arith.c
 
 .PHONY: clean
 clean :

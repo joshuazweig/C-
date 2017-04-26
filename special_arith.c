@@ -42,12 +42,6 @@ void *stone_create_func(char *str) {
     return r;
 }
 
-/*void* stone_char_func(void *buf, void *bn)
-{
-  BIGNUM *c = BN_dec2bn((unsigned char*) buf, strlen(buf), bn);
-   
-  return c;
-}*/
 
 //Add
 void* stone_add_func(void *a, void *b)
