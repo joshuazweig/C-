@@ -1,0 +1,6 @@
+#include "myadd.cm"
+
+int main() {
+    printf("%d\n", myadd(5, 6))
+    return 0;
+}

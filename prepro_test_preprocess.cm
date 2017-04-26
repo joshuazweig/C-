@@ -1,0 +1,10 @@
+
+int myadd(int a, int b) {
+    return a + b;
+}
+
+
+int main() {
+    printf("%d\n", myadd(5, 6))
+    return 0;
+}

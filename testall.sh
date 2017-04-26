@@ -7,7 +7,7 @@
 
 # Path to the LLVM interpreter
 # LLI="lli"
-LLI="/usr/local/opt/llvm@3.8/bin/lli-3.8"
+LLI="/usr/local/opt/llvm@3.7/bin/lli-3.7"
 
 # Path to the microc compiler.  Usually "./microc.native"
 # Try "_build/microc.native" if ocamlbuild was unable to create a symbolic link.
