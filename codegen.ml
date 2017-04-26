@@ -208,13 +208,13 @@ let translate (globals, functions) =
               | A.Geq     -> L.build_icmp L.Icmp.Sge
               ) e1' e2' "tmp" builder, A.Int) 
           | (A.Mint, A.Mint) ->
-              let ptr1 = L.build_alloca mint_type "e1" builder and
+              (*let ptr1 = L.build_alloca mint_type "e1" builder and
               ptr2 = L.build_alloca mint_type "e2" builder in 
               let s = L.build_store e1' ptr1 builder and 
-              s1 = L.build_store e2' ptr2 builder in 
+              s1 = L.build_store e2' ptr2 builder in *)
               ((match op with
                   A.Add -> 
-                    L.build_call mint_add_func [| ptr1 ; ptr2 |] "mint_add_res" builder
+                    L.build_call mint_add_func [| e1' ; e2' |] "mint_add_res" builder (*??*)
                 | A.Sub ->  
                     L.build_call mint_sub_func [| ptr1 ; ptr2 |] "mint_sub_res" builder
                 | A.Mult ->  
