@@ -30,8 +30,7 @@ struct point {
 
 int stone_print_func(void *a)
 {
-  BN_print_fp(stdout, a); //This is hex
-  printf("\n");
+  printf("%s\n", BN_bn2dec(a));
   return 0; 
 }
 //construct
