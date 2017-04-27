@@ -22,6 +22,7 @@ int main()
   print_stone(alice_p);
   //Send g to Bob
   print_stone(alice_g);
+  //print_stone(alice_g);
 
   //Send and recieve gaps
   //Allice recieves first
