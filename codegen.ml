@@ -92,13 +92,13 @@ let translate (globals, functions) =
   let stone_create_func_t = L.function_type obj_pointer [| |] in 
   let stone_create_func = L.declare_function "BN_new" stone_create_func_t the_module in 
 
-  let access_mint_t = L.function_type obj_pointer [| mint_type |] in
+  let access_mint_t = L.function_type obj_pointer [| mint_type ; i32_t |] in
     let access_mint = L.declare_function "access_mint" access_mint_t the_module in
 
-  let access_curve_t = L.function_type obj_pointer [| curve_type |] in
+  let access_curve_t = L.function_type obj_pointer [| curve_type ; i32_t |] in
     let access_curve = L.declare_function "access_curve" access_curve_t the_module in
 
-  let access_point_t = L.function_type obj_pointer [| point_type |] in
+  let access_point_t = L.function_type obj_pointer [| point_type ; i32_t |] in
     let access_point = L.declare_function "access_point" access_point_t the_module in
 
   let invert_point_func_t = L.function_type point_type [| point_type |] in
@@ -264,21 +264,21 @@ let translate (globals, functions) =
       	  ((match op with
             A.Neg     -> (match t with
                 A.Int -> L.build_neg e' "tmp" builder
-               | A.Point -> L.build_call invert_point_func [| e' |] "invert_point_func" builder )  (* Point inversion *)
+               (* | A.Point -> L.build_call invert_point_func [| e' |] "invert_point_func" builder *) )  (* Point inversion *)
            | A.Not     -> L.build_icmp L.Icmp.Eq (L.const_null (ltype_of_typ t)) e' "tmp" builder  (* Still need to test on Pointer types *)
-           | A.Deref   -> L.build_load e' "tmp" builder  (* load object pointed to *)
-           | A.AddrOf  -> L.build_store e' (L.build_alloca (ltype_of_typ (A.Pointer t)) "tmp" builder) builder  (* create pointer to address of object -- want what is returned by L.build_alloca -- could just move stuff everytime? seems inefficient *)
-           | A.Access  -> match t with
+           (* | A.Deref   -> L.build_load e' "tmp" builder  *) (* load object pointed to *)
+           (* | A.AddrOf  -> fst(lookup e')  *)(*L.build_store e'  builder*)  (* (L.build_alloca (ltype_of_typ (A.Pointer t)) "tmp" builder)create pointer to address of object -- want what is returned by L.build_alloca -- could just move stuff everytime? seems inefficient *)
+           (* | A.Access  -> match t with
                A.Mint -> L.build_call access_mint [| e' |] "access_mint" builder
               | A.Curve -> L.build_call access_curve [| e' |] "access_curve" builder
-              | A.Point -> L.build_call access_point [| e' |] "access_point" builder
+              | A.Point -> L.build_call access_point [| e' |] "access_point" builder *)
           ), (match op with
             A.Neg -> t
             | A.Not -> t
-            | A.Deref -> (match t with
+            (* | A.Deref -> (match t with
                 A.Pointer x -> x)
             | A.AddrOf -> A.Pointer t
-            | A.Access -> A.Pointer A.Stone)) 
+            | A.Access -> A.Pointer A.Stone *))) 
        | A.Assign (s, e) -> let (e', t) = expr builder e and
                               (* if t string, otherwise is behavior normal?*)
                             (*snd lookup is type of thing*)
@@ -292,6 +292,12 @@ let translate (globals, functions) =
 
                            | _ -> ignore (L.build_store e' (fst (lookup s)) builder); (e', t) )
 
+       | A.Call("access", [e; i]) -> let (e', t) = expr builder e and (i', t') = expr builder i in 
+          ((match t with
+            A.Mint -> L.build_call access_mint [| e' ; i' |] "access_mint" builder
+            | A.Curve -> L.build_call access_curve [| e' ; i' |] "access_curve" builder
+            | A.Point -> L.build_call access_point [| e' ; i' |] "access_point" builder),
+            A.Stone)  
       | A.Call ("printf", act) ->
           let actuals, types = List.split (List.rev (List.map (expr builder)
           (List.rev act))) in
