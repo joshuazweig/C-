@@ -281,6 +281,12 @@ int point_print_func(struct point P) {
     return 0;
 }
 
+int curve_print_func(struct curve E) {
+    printf("a: %s\nb: %s\np: %s", BN_bn2dec(E.a.val), BN_bn2dec(E.b.val), 
+            BN_bn2dec(E.a.mod));
+    return 0;
+}
+
 //Equality and Inequality ops ofr mints are in LRM, 
 //but we can hold off on implemenitng
 
