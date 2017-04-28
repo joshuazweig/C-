@@ -90,8 +90,10 @@ void* stone_mod_func(void *a, void *b)
   BIGNUM *r = BN_new();
   BN_CTX* ctx = BN_CTX_new();
   BN_mod(r, a, b, ctx);
+  if (BN_is_negative(r)) {
+      BN_add(r, r, b);
+  }
   BN_CTX_free(ctx);
-
   return r;
 }
 
@@ -168,7 +170,9 @@ struct mint mint_mult_func(struct mint* a, struct mint* b) {
 struct mint mint_to_stone_func(struct mint *a, void *b) {
     BIGNUM *val = BN_new();
     BN_CTX *ctx = BN_CTX_new();
-
+    if (BN_is_negative((BIGNUM *)b)) {
+        BN_mod_inverse(a->val, a->val, a->mod, ctx);
+    }
     BN_mod_exp(val, a->val, b, a->mod, ctx); 
     BN_CTX_free(ctx);
     struct mint r;

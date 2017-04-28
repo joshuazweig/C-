@@ -137,6 +137,7 @@ let check (globals, functions) =
         | Add | Sub | Mult | Div | Pow when t1 = Int && t2 = Int -> Int
         | Add | Sub | Mult | Div | Pow when t1 = Stone && t2 = Stone -> Stone
         | Add | Sub | Mult | Pow when t1 = Mint && t2 = Mint -> Mint
+        | Pow when t1 = Mint && t2 = Stone -> Mint
 	| Equal | Neq when t1 = t2 -> Int  (* might want to extend this to allow
         e.g., t1 and t2 both integer types so one can do stone=int *)
 	| Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Int

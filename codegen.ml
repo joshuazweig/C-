@@ -187,7 +187,7 @@ let translate (globals, functions) =
             let struct_p4 = L.build_insertvalue struct_p3 e3' 2 "sp3" builder in
             (L.build_insertvalue struct_p4 (L.const_int i1_t 0) 3 "sp4" builder,
             A.Point) 
-          | _ ->  raise(Failure("wrong types in construct2")))  
+          | _ ->  raise(Failure("wrong types in construct3")))  
           (* impossible; semant will check this 
            * correct solution is to make a "polymorphic variant"; no one has 
            * time for that *)
@@ -347,8 +347,8 @@ let translate (globals, functions) =
           let (e', t) = expr table builder e in
           (L.build_call malloc_func [| e' |] "malloc" builder, t)
       | A.Call("free", [e]) -> 
-          let (e', t) = expr table builder e in
-          (L.build_free e' builder, Void) (*void correct?*)
+          let (e', _) = expr table builder e in
+          (L.build_free e' builder, A.Void) (*void correct?*)
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
 	         let actuals, _ = List.split (List.rev (List.map (expr table builder) (List.rev act))) in
