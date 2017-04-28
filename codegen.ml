@@ -120,8 +120,8 @@ let translate (globals, functions) =
   let stone_create_func_t = L.function_type obj_pointer [| L.pointer_type i8_t |] in 
   let stone_create_func = L.declare_function "stone_create_func" stone_create_func_t the_module in 
 
-  let bn_free_t = L.function_type i32_t [| L.pointer_type i8_t |] in (* bn free func *)
-  let stone_free_func = L.declare_function "stone_free_func" bn_free_t the_module in 
+  let stone_free_t = L.function_type i32_t [| L.pointer_type i8_t |] in (* bn free func *)
+  let stone_free_func = L.declare_function "stone_free_func" stone_free_t the_module in 
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
