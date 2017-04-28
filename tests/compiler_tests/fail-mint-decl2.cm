@@ -1,0 +1,8 @@
+int main()
+{
+  mint m;
+
+  m = <"5", "11">;
+
+  return 0;
+}

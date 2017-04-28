@@ -30,8 +30,7 @@ struct point {
 
 int stone_print_func(void *a)
 {
-  BN_print_fp(stdout, a); //This is hex
-  printf("\n");
+  printf("%s\n", BN_bn2dec(a));
   return 0; 
 }
 //construct
@@ -187,11 +186,8 @@ struct mint mint_pow_func(struct mint* a, struct mint* b) {
 /* testing function */
 
 int mint_print_func(struct mint a) {
-    printf("Value:  ");
-    BN_print_fp(stdout, a.val);
-    printf("\nModulus:");
-    BN_print_fp(stdout, a.mod);
-    printf("\n");
+    printf("%s\n", BN_bn2dec(a.val));
+    printf("%s\n", BN_bn2dec(a.mod));
     return 0;
 }
 

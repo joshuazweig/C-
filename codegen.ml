@@ -20,7 +20,7 @@ module StringMap = Map.Make(String)
 let translate (globals, functions) =
   let context = L.global_context () in
   let the_module = L.create_module context "Cmod"
-  and i64_t  = L.i64_type context (* 8 bytes *)
+  (*and i64_t  = L.i64_type context *)
   and i32_t  = L.i32_type  context
   and i8_t   = L.i8_type   context
   and i1_t   = L.i1_type   context
@@ -83,9 +83,6 @@ let translate (globals, functions) =
   let mint_to_stone_func_t = L.function_type mint_type [| mint_pointer ; obj_pointer |] in
   let mint_to_stone_func = L.declare_function "mint_to_stone_func" mint_to_stone_func_t the_module in
 
-  let stone_char_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
-  let stone_char_func = L.declare_function "stone_char_func" stone_char_func_t the_module in 
-
   let stone_add_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let stone_add_func = L.declare_function "stone_add_func" stone_add_func_t the_module in 
 
@@ -120,7 +117,7 @@ let translate (globals, functions) =
   let point_mult_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let point_mult_func = L.declare_function "point_mult_func" point_mult_func_t the_module in 
 
-  let stone_create_func_t = L.function_type obj_pointer [| ltype_of_typ (A.Pointer(Char)) |] in 
+  let stone_create_func_t = L.function_type obj_pointer [| L.pointer_type i8_t |] in 
   let stone_create_func = L.declare_function "stone_create_func" stone_create_func_t the_module in 
 
   let bn_free_t = L.function_type i32_t [| L.pointer_type i8_t |] in (* bn free func *)
@@ -141,7 +138,6 @@ let translate (globals, functions) =
     let (the_function, _) = StringMap.find fdecl.A.fname function_decls in
     let builder = L.builder_at_end context (L.entry_block the_function) in
 
-    let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
     let char_format_str = L.build_global_stringptr "%s" "fmt2" builder in 
 
     (* Construct the function's "locals": formal arguments and locally
@@ -155,13 +151,14 @@ let translate (globals, functions) =
 
     (* Construct code for an expression; return its value *)
     let rec expr table builder = function
-	     A.Literal i -> (L.const_int i32_t i, A.Int) (*we dont want too big of int in here, maybe declare stone literals as strings*)
+	A.Literal i -> (L.const_int i32_t i, A.Int) 
+        (*we dont want too big of int in here, maybe declare stone literals as strings*)
       | A.String s -> (L.build_global_stringptr s "fmts" builder, A.Pointer(A.Char)) 
       | A.Noexpr -> (L.const_int i32_t 0, A.Void)
       | A.Id s ->
         let binding = lookup s table in
           (L.build_load (fst binding) s builder, snd binding)
-    | A.Construct2 (e1, e2) -> 
+      | A.Construct2 (e1, e2) -> 
         let (e1', t1) = expr table builder e1
         and (e2', t2) = expr table builder e2 in 
         (match (t1, t2) with
@@ -174,9 +171,9 @@ let translate (globals, functions) =
           | (A.Mint, A.Mint) -> 
             let struct_c = L.undef curve_type in 
             let struct_c2 = L.build_insertvalue struct_c e1' 0 "sc" builder in 
-            (L.build_insertvalue struct_c2 e2' 1 "sc2" builder, A.Curve))
-          
-          (* last would have been point type but now controlled by bit in construct3 *)
+            (L.build_insertvalue struct_c2 e2' 1 "sc2" builder, A.Curve)
+          | _ ->  raise(Failure("wrong types in construct2")))  
+          (* impossible; semant will check this *)
 
       | A.Construct3 (e1, e2, e3) ->
         let (e1', t1) = expr table builder e1
@@ -188,8 +185,12 @@ let translate (globals, functions) =
             let struct_p2 = L.build_insertvalue struct_p e1' 0 "sp" builder in 
             let struct_p3 = L.build_insertvalue struct_p2 e2' 1 "sp2" builder in
             let struct_p4 = L.build_insertvalue struct_p3 e3' 2 "sp3" builder in
-            (L.build_insertvalue struct_p4 (L.const_int i1_t 0) 3 "sp4" builder, A.Point))
-      
+            (L.build_insertvalue struct_p4 (L.const_int i1_t 0) 3 "sp4" builder,
+            A.Point) 
+          | _ ->  raise(Failure("wrong types in construct2")))  
+          (* impossible; semant will check this 
+           * correct solution is to make a "polymorphic variant"; no one has 
+           * time for that *)
       | A.Binop (e1, op, e2) ->
     	  let (e1', t1) = expr table builder e1
     	  and (e2', t2) = expr table builder e2 in
@@ -208,12 +209,14 @@ let translate (globals, functions) =
               | A.Leq     -> L.build_icmp L.Icmp.Sle
               | A.Greater -> L.build_icmp L.Icmp.Sgt
               | A.Geq     -> L.build_icmp L.Icmp.Sge
+              | _ as o -> raise(Failure("Illegal operator " ^  A.string_of_op o
+              ^ " in int * int binop"))
               ) e1' e2' "tmp" builder, A.Int) 
           | (A.Mint, A.Mint) ->
               let ptr1 = L.build_alloca mint_type "e1" builder and
               ptr2 = L.build_alloca mint_type "e2" builder in 
-              let s = L.build_store e1' ptr1 builder and 
-              s1 = L.build_store e2' ptr2 builder in 
+              let _ = L.build_store e1' ptr1 builder and 
+              _ = L.build_store e2' ptr2 builder in 
               ((match op with
                   A.Add -> 
                     L.build_call mint_add_func [| e1' ; e2' |] "mint_add_res" builder (*?? can i just this?*)
@@ -223,6 +226,8 @@ let translate (globals, functions) =
                     L.build_call mint_mult_func [| ptr1 ; ptr2 |] "mint_mult_res" builder
                 | A.Pow ->  
                     L.build_call mint_pow_func [| ptr1 ; ptr2 |] "mint_pow_res" builder
+                | _ as o -> raise(Failure("Illegal operator " ^  A.string_of_op o
+                 ^ " in mint * mint binop"))
               ), A.Mint)
 
             (*Raise mint to stone*)
@@ -231,10 +236,12 @@ let translate (globals, functions) =
                 (* In semant, check that this is only op possible *)
               A.Pow -> 
                   let ptr = L.build_alloca mint_type "e1" builder in
-                  let s = L.build_store e1' ptr builder in 
+                  let _ = L.build_store e1' ptr builder in 
 
                   L.build_call mint_to_stone_func [| ptr ; e2' |]
                   "mint_to_stone_res" builder
+           | _ as o -> raise(Failure("Illegal operator " ^  A.string_of_op o
+              ^ " in mint * stone binop"))
 
               ), A.Mint)
               
@@ -265,6 +272,8 @@ let translate (globals, functions) =
                 L.build_call stone_pow_func [| e1' ; e2' |] "stone_pow_res" builder
               | A.Mod -> 
                 L.build_call stone_mod_func [| e1' ; e2' |] "stone_mod_res" builder
+              | _ as o -> raise(Failure("Illegal operator " ^  A.string_of_op o
+              ^ " in stone * stone binop"))
               (*| A.Sub ->
               | A.Equal -> 
               | A.Neq -> 
@@ -282,20 +291,28 @@ let translate (globals, functions) =
                 L.build_call point_add_func [| e1' ; e2' |] "point_add_res" builder
             | A.Sub -> 
                 L.build_call point_sub_func [| e1' ; e2' |] "point_sub_res" builder
+            | _ as o -> raise(Failure("Illegal operator " ^  A.string_of_op o
+              ^ " in point * point binop"))
               ), A.Point) 
          | (A.Stone, A.Point) ->
               ((match op with
               A.Mult ->
                   L.build_call point_mult_func [| e1' ; e2' |] "point_mult_res"
                   builder
+              | _ as o -> raise(Failure("Illegal operator " ^  A.string_of_op o
+              ^ " in stone * point binop"))
               ), A.Point)
+        | _ ->
+                raise(Failure("illegal binop type " ^ A.string_of_typ t1 ^
+                A.string_of_op op ^ A.string_of_typ t2))
         )  
 
       | A.Unop(op, e) -> (*these will also require type matching *)
       	  let e', t = expr table builder e in
       	  (match op with
       	     A.Neg     -> L.build_neg
-            | A.Not     -> L.build_not) e' "tmp" builder, t
+            | A.Not     -> L.build_not
+            | _ -> raise(Failure("not implemented yet"))) e' "tmp" builder, t
 
        | A.Assign (s, e) -> let (e', t) = expr table builder e and
                               (* if t string, otherwise is behavior normal?*)
@@ -313,11 +330,11 @@ let translate (globals, functions) =
                        
 
       | A.Call ("printf", act) ->
-          let actuals, types = List.split (List.rev (List.map (expr table builder)
+          let actuals, _ = List.split (List.rev (List.map (expr table builder)
           (List.rev act))) in
           let result = "" in  (* printf is void function *)
           (L.build_call printf_func (Array.of_list actuals) result builder, 
-            A.Pointer(Char))
+            A.Pointer(A.Char))
       | A.Call("print_stone", [e]) -> let (e', t) = expr table builder e in 
           (L.build_call stone_print_func [| e' |] "stone_print_func" builder, t); 
      | A.Call("print_mint", [e]) -> let (e', t) = expr table builder e in 
@@ -334,10 +351,11 @@ let translate (globals, functions) =
           (L.build_free e' builder, Void) (*void correct?*)
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
-	         let actuals, types = List.split (List.rev (List.map (expr table builder) (List.rev act))) in
+	         let actuals, _ = List.split (List.rev (List.map (expr table builder) (List.rev act))) in
 	         let result = (match fdecl.A.typ with A.Void -> ""
                                             | _ -> f ^ "_result") in
           (L.build_call fdef (Array.of_list actuals) result builder, fdecl.A.typ)
+      | _ -> raise(Failure("illegal expression"))
 
     in
 
@@ -397,6 +415,7 @@ let translate (globals, functions) =
 
       | A.For (e1, e2, e3, body) -> stmt table builder
       ( A.Block ([], [A.Expr e1 ; A.While (e2, A.Block ([], [body ; A.Expr e3])) ] ))
+      | _ -> raise(Failure("illegal statement"))
     in
 
     let local_vars =
