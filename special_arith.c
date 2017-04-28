@@ -41,6 +41,16 @@ void *stone_create_func(char *str) {
     return r;
 }
 
+struct point point_create_func(struct curve E, void *a, void *b) {
+    struct point R;
+    R.E = E;
+    R.x = a;
+    R.y = b;
+    R.inf = 0;
+    return R;
+}
+
+
 int stone_free_func(void *a){
   BN_free(a);
   return 0;
@@ -108,7 +118,8 @@ void* stone_pow_func(void *a, void *p)
   return r;
 }
 
-/*struct point point_add_func(struct point P, struct point Q) {
+
+struct point point_add_func(struct point P, struct point Q) {
     struct point R;
     R.E = P.E;
     if (P.inf) {
@@ -119,11 +130,76 @@ void* stone_pow_func(void *a, void *p)
         R.x = P.x;
         R.y = P.y;
         R.inf = P.inf;
-    } else {
-        
-    }
-}*/
+    } else { /* neither points are inf */
+        BIGNUM *xval = BN_new();
+        BIGNUM *yval = BN_new();
+        BN_CTX *ctx = BN_CTX_new();
 
+        BIGNUM *lambda = BN_new();
+        BIGNUM *t1 = BN_new();
+        BIGNUM *t2 = BN_new();
+
+        // calculate lambda
+        BN_sub(t1, Q.y, P.y);
+        BN_sub(t2, Q.x, P.x);
+        if (BN_is_zero(t2)) {
+            if (BN_is_zero(t1)) {
+                /* same point, double it 
+                 * calculate lambda this way */
+                BN_mod_sqr(t1, P.x, P.E.a.mod, ctx);
+                BN_mod_add(t2, t1, t1, P.E.a.mod, ctx); /* t2 = 2 t1 */
+                BN_mod_add(t2, t1, t1, P.E.a.mod, ctx); /* t1 = t1 + t2 = 3t1 */
+                BN_mod_add(t1, t1, t2, P.E.a.mod, ctx);
+                BN_mod_add(t1, t1, P.E.a.val, P.E.a.mod, ctx);
+
+                BN_mod_add(t2, P.y, P.y, P.E.a.mod, ctx); /* t2 = 2 P.y */
+                BN_mod_inverse(t2, t2, P.E.a.mod, ctx);
+
+                BN_mod_mul(lambda, t1, t2, P.E.a.mod, ctx);
+
+            } else {
+                /* additive inverses, return inf 
+                 * Fill coords with junk values from P */
+                R.x = P.x;
+                R.y = P.y;
+                R.inf = 1;
+                BN_free(t1);
+                BN_free(t2);
+                BN_CTX_free(ctx);
+                return R;
+            }
+        } else {
+            // finish calculating lambda for "normal" case
+            BN_mod_inverse(t2, t2, P.E.a.mod, ctx);
+            BN_mod_mul(lambda, t1, t2, P.E.a.mod, ctx);
+        }
+
+        //calculate xval
+        BN_mod_sqr(t1, lambda, P.E.a.mod, ctx);
+        BN_mod_sub(t1, t1, P.x, P.E.a.mod, ctx); 
+        BN_mod_sub(xval, t1, Q.x, P.E.a.mod, ctx); 
+       
+        //calculate yval     
+        BN_mod_sub(t1, P.x, xval, P.E.a.mod, ctx);
+        BN_mod_mul(t1, lambda, t1, P.E.a.mod, ctx);
+        BN_mod_sub(yval, t1, P.y, P.E.a.mod, ctx);
+
+        //put in values
+        R.x = xval;
+        R.y = yval;
+        R.inf = P.inf;
+
+        BN_free(t1);
+        BN_free(t2);
+        BN_CTX_free(ctx);
+    }
+    return R;
+}
+
+struct point point_sub_func(struct point P, struct point Q) {
+    ((BIGNUM *) Q.y)->neg = !((BIGNUM *) Q.y)->neg;
+    return point_add_func(P, Q);
+}
 
 /*
 * Mint
@@ -174,6 +250,8 @@ struct mint mint_to_stone_func(struct mint *a, void *b) {
         BN_mod_inverse(a->val, a->val, a->mod, ctx);
     }
     BN_mod_exp(val, a->val, b, a->mod, ctx); 
+    /* BN_mod_exp takes the absolute value of b. 
+     * This is why this works */
     BN_CTX_free(ctx);
     struct mint r;
     r.val = val;
@@ -190,8 +268,16 @@ struct mint mint_pow_func(struct mint* a, struct mint* b) {
 /* testing function */
 
 int mint_print_func(struct mint a) {
-    printf("%s\n", BN_bn2dec(a.val));
-    printf("%s\n", BN_bn2dec(a.mod));
+    printf("<%s, %s>\n", BN_bn2dec(a.val), BN_bn2dec(a.mod));
+    return 0;
+}
+
+int point_print_func(struct point P) {
+    //mint_print_func(P.E.a);
+    //mint_print_func(P.E.b);
+    printf("<%s, %s>\n", BN_bn2dec(P.x), BN_bn2dec(P.y));
+    //stone_print_func(P.x);
+    //stone_print_func(P.y);
     return 0;
 }
 
