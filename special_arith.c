@@ -41,6 +41,10 @@ void *stone_create_func(char *str) {
     return r;
 }
 
+int stone_free_func(void *a){
+  BN_free(a);
+  return 0;
+}
 
 //Add
 void* stone_add_func(void *a, void *b)
@@ -190,35 +194,10 @@ int mint_print_func(struct mint a) {
 //Equality and Inequality ops ofr mints are in LRM, 
 //but we can hold off on implemenitng
 
-
-//mint raised to stone 
-/*struct mint mint_to_stone_func(struct mint *a, void *b)
-{
-  //mint has stone (val, mod) each is stone has val
-
-  BIGNUM *n = BN_new();
-  BN_CTX* ctx = BN_CTX_new();
-
-  struct stone base = a->val;
-  struct stone mod = a->mod;
-
-  BN_mod_exp(n, base.val, b, mod.val, ctx);
-
-  //What it should be 
-  struct mint x;
-  struct stone temp;
-  temp.val = (void *) n;
-  x.val = temp;
-  x.mod = mod;
-
-  return x;
-
-}*/
-
-
 /*
 * @Michael other stuff that is left is point/curve ops
 * thats your expertise so ill leave it to you to 
 * define the headers and functions in the same way as above
 */
+
 
