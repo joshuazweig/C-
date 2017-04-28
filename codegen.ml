@@ -219,7 +219,7 @@ let translate (globals, functions) =
               _ = L.build_store e2' ptr2 builder in 
               ((match op with
                   A.Add -> 
-                    L.build_call mint_add_func [| e1' ; e2' |] "mint_add_res" builder (*?? can i just this?*)
+                    L.build_call mint_add_func [| ptr1 ; ptr2 |] "mint_add_res" builder (*?? can i just this?*)
                 | A.Sub ->  
                     L.build_call mint_sub_func [| ptr1 ; ptr2 |] "mint_sub_res" builder
                 | A.Mult ->  
