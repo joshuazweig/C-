@@ -241,20 +241,20 @@ let translate (globals, functions) =
           | (A.Stone, A.Stone) -> 
               ((match op with
                 A.Add -> 
-                let call = L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder in 
+                (*let call = L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder in 
                     let _ = ignore(StringMap.iter (fun k v -> 
                           if v != (e1', A.Stone) then ignore(L.build_call 
                             stone_free_func [| e1' |] "res" builder)
                           else if v != (e2', A.Stone) then ignore(L.build_call
                             stone_free_func [| e2' |] "res" builder)
                           else ignore((L.const_int i1_t 0))) table) in
-                call
+                call*)
                 (*ignore (if StringMap.mem e1' table then (* check if e1' is a value in the map *)
                           L.build_call stone_free_func [| e1' |] "res" builder
                         else if StringMap.mem e2' table then 
                           L.build_call stone_free_func [| e2' |] "res" builder)*)
                 
-
+                L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder
               | A.Sub -> 
                 L.build_call stone_sub_func [| e1' ; e2' |] "stone_sub_res" builder
               | A.Mult -> 
@@ -331,9 +331,7 @@ let translate (globals, functions) =
           (L.build_call malloc_func [| e' |] "malloc" builder, t)
       | A.Call("free", [e]) -> 
           let (e', t) = expr table builder e in
-          (*ignore(L.build_call free_func [| e' |] "free" builder);
-          (e', t) (*is this right to return?*)*)
-          (L.build_free e' builder, Void)
+          (L.build_free e' builder, Void) (*void correct?*)
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
 	         let actuals, types = List.split (List.rev (List.map (expr table builder) (List.rev act))) in
