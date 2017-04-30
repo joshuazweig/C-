@@ -20,9 +20,12 @@ int main()
 
   scanf(alice_p_input);
   scanf(alice_g_input);
+  //printf("%s\n %s \n", alice_p_input, alice_g_input);
 
   alice_p = alice_p_input;
   alice_g = alice_g_input;
+  //print_stone(alice_p);
+  //print_stone(alice_g);
 
   bob_gap = < (alice_g^bob_sec) , alice_p >;
 

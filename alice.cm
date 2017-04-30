@@ -26,7 +26,7 @@ int main()
 
   //Send and recieve gaps
   //Allice recieves first
-  bob_gap_input = malloc(100);
+  bob_gap_input = malloc(100); //free this! 
   scanf(bob_gap_input);
   bob_div = bob_gap_input;
   print_div(alice_gap);
