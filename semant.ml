@@ -218,8 +218,8 @@ let check (globals, functions) =
             (* check for void type *)
 
           report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
-            ((List.map snd vl) @ (List.map fst (StringMap.bindings table)));
-            (* check for duplicate names *)
+            ((List.map snd vl) );
+            (* check for duplicate names in that scope *)
 
           let new_table = List.fold_left (fun m (t, n) -> StringMap.add n t
             m) table vl in
