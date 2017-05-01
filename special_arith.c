@@ -38,10 +38,14 @@ int stone_print_func(void *a)
 void *stone_create_func(char *str) {
     BIGNUM *r = BN_new();
     BN_dec2bn(&r, str);
+    fprintf(stderr, "Creating %p\n", r);
+
     return r;
 }
 
 int stone_free_func(void *a){
+  fprintf(stderr, "Freeing  %p\n", a);
+
   BN_free(a);
   return 0;
 }
