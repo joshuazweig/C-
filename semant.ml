@@ -29,7 +29,7 @@ let check (globals, functions) =
   
   (* Raise an exception of the given rvalue type cannot be assigned to
      the given lvalue type *)
-  let check_assign lvaluet rvaluet err =
+  let check_assign lvaluet rvaluet err = 
      if lvaluet = rvaluet then lvaluet else raise err
   in
    
@@ -186,17 +186,21 @@ let check (globals, functions) =
         | _ -> raise (Failure ("illegal use of %= with types " ^ string_of_typ
         lt ^ " and " ^ string_of_typ rt ^ " in " ^ string_of_expr ex)))
       | Call(fname, actuals) as call -> let fd = function_decl fname in
-         if List.length actuals != List.length fd.formals then
-           if fname = "printf" then () else (*variadic fix*)
-           raise (Failure ("expecting " ^ string_of_int
-             (List.length fd.formals) ^ " arguments in " ^ string_of_expr call))
+         if fname = "printf" 
+           then
+               let _ = List.iter (fun e -> ignore(expr table e)) actuals in Void
          else
-           List.iter2 (fun (ft, _) e -> let et = expr table e in
-              ignore (check_assign ft et
+           if List.length actuals != List.length fd.formals 
+             then
+             raise (Failure ("expecting " ^ string_of_int
+               (List.length fd.formals) ^ " arguments in " ^ string_of_expr call))
+           else
+               let _ = List.iter2 (fun (ft, _) e -> let et = expr table e in
+                ignore (check_assign ft et
                 (Failure ("illegal actual argument found " ^ string_of_typ et ^
                 " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
-             fd.formals actuals;
-           fd.typ
+               fd.formals actuals in
+         fd.typ
     in
 
     let check_int_expr table e = if expr table e != Int
