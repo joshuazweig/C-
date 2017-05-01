@@ -1,0 +1,10 @@
+int main()
+{
+	stone x;
+	stone y;
+
+	x = "10";
+
+	y = x + x + x + x + x + x + x + x + x + x + x + x + x + x + x + x;
+	print_stone(y);
+}

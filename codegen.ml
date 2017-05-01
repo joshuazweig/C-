@@ -249,6 +249,7 @@ let translate (globals, functions) =
               ((match op with
                 A.Add -> 
                 let call = L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder in 
+                (*let x = L.build_call stone_free_func [| e1' |] "res" builder in *)
                     (*let _ = ignore(StringMap.iter (fun k v -> 
                           if v != (e1', A.Stone) then ignore(L.build_call 
                             stone_free_func [| e1' |] "res" builder)
@@ -256,17 +257,22 @@ let translate (globals, functions) =
                             stone_free_func [| e2' |] "res" builder)
                           else ignore((L.const_int i1_t 0))) table) in
                     *) 
-                    (*let found k l = StringMap.fold (fun k' v' ->
-                          k' || v' = k) false l in 
-                      found 
-
-                    *)
+                    let tups = StringMap.bindings table in 
+                      let (keys, vals) = List.split tups in
+                        let exists k l =
+                          List.fold_left(fun a x -> 
+                            if x == k then true else a)
+                            false l in 
+                        let _ = if exists (e1', A.Stone) vals = false then 
+                          ignore(L.build_call stone_free_func [| e1' |] "res" builder)
+                        else if exists (e2', A.Stone) vals = false then
+                          ignore(L.build_call stone_free_func [| e2' |] "res" builder)
+                        else ignore(L.const_int i1_t 0) 
+                      in 
+                 (*let exists = StringMap.for_all check table || 
+                                StringMap.for_all check table in *)
 
                 call
-                (*ignore (if StringMap.mem e1' table then (* check if e1' is a value in the map *)
-                          L.build_call stone_free_func [| e1' |] "res" builder
-                        else if StringMap.mem e2' table then 
-                          L.build_call stone_free_func [| e2' |] "res" builder)*)
                 
                 (*L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder*)
               | A.Sub -> 
