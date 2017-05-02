@@ -41,12 +41,21 @@ void *stone_create_func(char *str) {
     return r;
 }
 
-struct point point_create_func(struct curve E, void *a, void *b) {
-    struct point R;
-    R.E = E;
-    R.x = a;
-    R.y = b;
-    R.inf = 0;
+struct curve *curve_create_func(struct mint a, struct mint b) {
+    struct curve *E;
+    E = (struct curve *)malloc(sizeof(struct curve));
+    E->a = a;
+    E->b = b;
+    return E;
+}
+
+struct point *point_create_func(struct curve *E, void *a, void *b) {
+    struct point *R;
+    R = (struct point *)malloc(sizeof(struct point));
+    R->E = *E;
+    R->x = a;
+    R->y = b;
+    R->inf = 0;
     return R;
 }
 
@@ -119,17 +128,18 @@ void* stone_pow_func(void *a, void *p)
 }
 
 
-struct point point_add_func(struct point P, struct point Q) {
-    struct point R;
-    R.E = P.E;
-    if (P.inf) {
-        R.x = Q.x;
-        R.y = Q.y;
-        R.inf = Q.inf;
-    } else if (Q.inf) {
-        R.x = P.x;
-        R.y = P.y;
-        R.inf = P.inf;
+struct point *point_add_func(struct point *P, struct point *Q) {
+    struct point *R;
+    R = (struct point *)malloc(sizeof(struct point));
+    R->E = P->E;
+    if (P->inf) {
+        R->x = Q->x;
+        R->y = Q->y;
+        R->inf = Q->inf;
+    } else if (Q->inf) {
+        R->x = P->x;
+        R->y = P->y;
+        R->inf = P->inf;
     } else { /* neither points are inf */
         BIGNUM *xval = BN_new();
         BIGNUM *yval = BN_new();
@@ -140,29 +150,29 @@ struct point point_add_func(struct point P, struct point Q) {
         BIGNUM *t2 = BN_new();
 
         // calculate lambda
-        BN_sub(t1, Q.y, P.y);
-        BN_sub(t2, Q.x, P.x);
+        BN_sub(t1, Q->y, P->y);
+        BN_sub(t2, Q->x, P->x);
         if (BN_is_zero(t2)) {
             if (BN_is_zero(t1)) {
                 /* same point, double it 
                  * calculate lambda this way */
-                BN_mod_sqr(t1, P.x, P.E.a.mod, ctx);
-                BN_mod_add(t2, t1, t1, P.E.a.mod, ctx); /* t2 = 2 t1 */
-                BN_mod_add(t2, t1, t1, P.E.a.mod, ctx); /* t1 = t1 + t2 = 3t1 */
-                BN_mod_add(t1, t1, t2, P.E.a.mod, ctx);
-                BN_mod_add(t1, t1, P.E.a.val, P.E.a.mod, ctx);
+                BN_mod_sqr(t1, P->x, P->E.a.mod, ctx);
+                BN_mod_add(t2, t1, t1, P->E.a.mod, ctx); /* t2 = 2 t1 */
+                BN_mod_add(t2, t1, t1, P->E.a.mod, ctx); /* t1 = t1 + t2 = 3t1 */
+                BN_mod_add(t1, t1, t2, P->E.a.mod, ctx);
+                BN_mod_add(t1, t1, P->E.a.val, P->E.a.mod, ctx);
 
-                BN_mod_add(t2, P.y, P.y, P.E.a.mod, ctx); /* t2 = 2 P.y */
-                BN_mod_inverse(t2, t2, P.E.a.mod, ctx);
+                BN_mod_add(t2, P->y, P->y, P->E.a.mod, ctx); /* t2 = 2 P.y */
+                BN_mod_inverse(t2, t2, P->E.a.mod, ctx);
 
-                BN_mod_mul(lambda, t1, t2, P.E.a.mod, ctx);
+                BN_mod_mul(lambda, t1, t2, P->E.a.mod, ctx);
 
             } else {
                 /* additive inverses, return inf 
                  * Fill coords with junk values from P */
-                R.x = P.x;
-                R.y = P.y;
-                R.inf = 1;
+                R->x = P->x;
+                R->y = P->y;
+                R->inf = 1;
                 BN_free(t1);
                 BN_free(t2);
                 BN_CTX_free(ctx);
@@ -170,24 +180,24 @@ struct point point_add_func(struct point P, struct point Q) {
             }
         } else {
             // finish calculating lambda for "normal" case
-            BN_mod_inverse(t2, t2, P.E.a.mod, ctx);
-            BN_mod_mul(lambda, t1, t2, P.E.a.mod, ctx);
+            BN_mod_inverse(t2, t2, P->E.a.mod, ctx);
+            BN_mod_mul(lambda, t1, t2, P->E.a.mod, ctx);
         }
 
         //calculate xval
-        BN_mod_sqr(t1, lambda, P.E.a.mod, ctx);
-        BN_mod_sub(t1, t1, P.x, P.E.a.mod, ctx); 
-        BN_mod_sub(xval, t1, Q.x, P.E.a.mod, ctx); 
+        BN_mod_sqr(t1, lambda, P->E.a.mod, ctx);
+        BN_mod_sub(t1, t1, P->x, P->E.a.mod, ctx); 
+        BN_mod_sub(xval, t1, Q->x, P->E.a.mod, ctx); 
        
         //calculate yval     
-        BN_mod_sub(t1, P.x, xval, P.E.a.mod, ctx);
-        BN_mod_mul(t1, lambda, t1, P.E.a.mod, ctx);
-        BN_mod_sub(yval, t1, P.y, P.E.a.mod, ctx);
+        BN_mod_sub(t1, P->x, xval, P->E.a.mod, ctx);
+        BN_mod_mul(t1, lambda, t1, P->E.a.mod, ctx);
+        BN_mod_sub(yval, t1, P->y, P->E.a.mod, ctx);
 
         //put in values
-        R.x = xval;
-        R.y = yval;
-        R.inf = P.inf;
+        R->x = xval;
+        R->y = yval;
+        R->inf = P->inf;
 
         BN_free(t1);
         BN_free(t2);
@@ -196,8 +206,8 @@ struct point point_add_func(struct point P, struct point Q) {
     return R;
 }
 
-struct point point_sub_func(struct point P, struct point Q) {
-    ((BIGNUM *) Q.y)->neg = !((BIGNUM *) Q.y)->neg;
+struct point *point_sub_func(struct point *P, struct point *Q) {
+    ((BIGNUM *) Q->y)->neg = !((BIGNUM *) Q->y)->neg;
     return point_add_func(P, Q);
 }
 
@@ -272,18 +282,18 @@ int mint_print_func(struct mint a) {
     return 0;
 }
 
-int point_print_func(struct point P) {
+int point_print_func(struct point *P) {
     //mint_print_func(P.E.a);
     //mint_print_func(P.E.b);
-    printf("<%s, %s>\n", BN_bn2dec(P.x), BN_bn2dec(P.y));
+    printf("<%s, %s>\n", BN_bn2dec(P->x), BN_bn2dec(P->y));
     //stone_print_func(P.x);
     //stone_print_func(P.y);
     return 0;
 }
 
-int curve_print_func(struct curve E) {
-    printf("a: %s\nb: %s\np: %s", BN_bn2dec(E.a.val), BN_bn2dec(E.b.val), 
-            BN_bn2dec(E.a.mod));
+int curve_print_func(struct curve *E) {
+    printf("a: %s\nb: %s\np: %s\n", BN_bn2dec(E->a.val), BN_bn2dec(E->b.val), 
+            BN_bn2dec(E->a.mod));
     return 0;
 }
 

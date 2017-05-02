@@ -23,13 +23,14 @@ let translate (globals, functions) =
   (*and i64_t  = L.i64_type context *)
   and i32_t  = L.i32_type  context
   and i8_t   = L.i8_type   context
-  and i1_t   = L.i1_type   context
   and void_t = L.void_type context in
   let obj_pointer = L.pointer_type (L.i8_type context) in  (* void pointer, 8 bytes *)
   let mint_type = L.struct_type context  [| obj_pointer ; obj_pointer |] in (* struct of two void pointers *)
   let curve_type = L.struct_type context [| mint_type ; mint_type |] in (* cruve defined by two modints *)
   let point_type = L.struct_type context [| curve_type ; obj_pointer ;
   obj_pointer; i8_t |] in(* curve + two stones *)
+  let point_ptr = L.pointer_type point_type in
+  let curve_ptr = L.pointer_type curve_type in
   let mint_pointer = L.pointer_type mint_type in
   (* Must consider best way to implement points wrt Inf *)
   (* maybe define diff points for inf and normal to enforce that 
@@ -107,27 +108,31 @@ let translate (globals, functions) =
   let mint_print_func_t = L.function_type i32_t [| mint_type |] in 
   let mint_print_func = L.declare_function "mint_print_func" mint_print_func_t the_module in
   
-  let point_print_func_t = L.function_type i32_t [| point_type |] in 
+  let point_print_func_t = L.function_type i32_t [| point_ptr |] in 
   let point_print_func = L.declare_function "point_print_func" point_print_func_t the_module in
 
-  let curve_print_func_t = L.function_type i32_t [| curve_type |] in 
+  let curve_print_func_t = L.function_type i32_t [| curve_ptr |] in 
   let curve_print_func = L.declare_function "curve_print_func" curve_print_func_t the_module in
 
-  let point_add_func_t = L.function_type point_type [| point_type ; point_type |] in 
+  let point_add_func_t = L.function_type point_ptr [| point_ptr ; point_ptr |] in 
   let point_add_func = L.declare_function "point_add_func" point_add_func_t the_module in 
 
-  let point_sub_func_t = L.function_type point_type [| point_type ; point_type |] in 
+  let point_sub_func_t = L.function_type point_ptr [| point_ptr ; point_ptr |] in 
   let point_sub_func = L.declare_function "point_sub_func" point_sub_func_t the_module in 
 
   (* stone * point, i.e. add point to itself stone many times *)
-  let point_mult_func_t = L.function_type point_type [| point_type ; point_type |] in 
-  let point_mult_func = L.declare_function "point_mult_func" point_mult_func_t the_module in 
+  let point_mult_func_t = L.function_type point_type [| obj_pointer ; point_ptr |] in 
+  let point_mult_func = L.declare_function "point_mult_func" point_mult_func_t
+  the_module in 
 
   let stone_create_func_t = L.function_type obj_pointer [| L.pointer_type i8_t |] in 
   let stone_create_func = L.declare_function "stone_create_func" stone_create_func_t the_module in 
 
-  let point_create_func_t = L.function_type point_type 
-    [| curve_type ; obj_pointer ; obj_pointer |] in
+  let curve_create_func_t = L.function_type curve_ptr [| mint_type ; mint_type |] in 
+  let curve_create_func = L.declare_function "curve_create_func" curve_create_func_t the_module in 
+  
+  let point_create_func_t = L.function_type point_ptr 
+    [| curve_ptr ; obj_pointer ; obj_pointer |] in
   let point_create_func = L.declare_function "point_create_func" 
     point_create_func_t the_module in 
   
@@ -180,9 +185,11 @@ let translate (globals, functions) =
                 let struct_m2 = L.build_insertvalue struct_m (reduced_val) 0 "sm" builder in
             (L.build_insertvalue struct_m2 e2' 1 "sm2" builder, A.Mint) 
           | (A.Mint, A.Mint) -> 
-            let struct_c = L.undef curve_type in 
+            (L.build_call curve_create_func [| e1' ; e2' |] "curve_create_res"
+            builder, A.Pointer(A.Curve))
+            (*let struct_c = L.undef curve_type in 
             let struct_c2 = L.build_insertvalue struct_c e1' 0 "sc" builder in 
-            (L.build_insertvalue struct_c2 e2' 1 "sc2" builder, A.Curve)
+            (L.build_insertvalue struct_c2 e2' 1 "sc2" builder, A.Curve)*)
           | _ ->  raise(Failure("wrong types in construct2")))  
           (* impossible; semant will check this *)
 
@@ -191,15 +198,16 @@ let translate (globals, functions) =
         and (e2', t2) = expr table builder e2
         and (e3', t3) = expr table builder e3 in 
         (match (t1, t2, t3) with
-          (A.Curve, A.Stone, A.Stone) -> (*only construct 3?*)
-            (*  (L.build_call point_create_func [| e1' ; e2' ; e3' |] 
-                 "point_create_res" builder, A.Point)*)
+          (A.Pointer(A.Curve), A.Stone, A.Stone) -> (*only construct 3?*)
+              (L.build_call point_create_func [| e1' ; e2' ; e3' |] 
+                 "point_create_res" builder, A.Point)
+              (*
             let struct_p = L.undef point_type in
             let struct_p2 = L.build_insertvalue struct_p e1' 0 "sp" builder in 
             let struct_p3 = L.build_insertvalue struct_p2 e2' 1 "sp2" builder in
             let struct_p4 = L.build_insertvalue struct_p3 e3' 2 "sp3" builder in
             (L.build_insertvalue struct_p4 (L.const_int i8_t 0) 3 "sp4" builder,
-            A.Point)
+            A.Point)*)
           | _ ->  raise(Failure("wrong types in construct3")))  
           (* impossible; semant will check this 
            * correct solution is to make a "polymorphic variant"; no one has 
@@ -298,16 +306,16 @@ let translate (globals, functions) =
               | A.Or -> *)
 
               ), A.Stone) 
-          | (A.Point, A.Point) ->
+          | (A.Pointer(A.Point), A.Pointer(A.Point)) ->
               ((match op with
               A.Add -> 
                 L.build_call point_add_func [| e1' ; e2' |] "point_add_res" builder
             | A.Sub -> 
                 L.build_call point_sub_func [| e1' ; e2' |] "point_sub_res" builder
             | _ as o -> raise(Failure("Illegal operator " ^  A.string_of_op o
-              ^ " in point * point binop"))
+              ^ " in point* * point* binop"))
               ), A.Point) 
-         | (A.Stone, A.Point) ->
+         | (A.Stone, A.Pointer(A.Point)) ->
               ((match op with
               A.Mult ->
                   L.build_call point_mult_func [| e1' ; e2' |] "point_mult_res"
@@ -315,7 +323,7 @@ let translate (globals, functions) =
               | _ as o -> raise(Failure("Illegal operator " ^  A.string_of_op o
               ^ " in stone * point binop"))
               ), A.Point)
-        | _ ->
+         | _ ->
                 raise(Failure("illegal binop type " ^ A.string_of_typ t1 ^
                 A.string_of_op op ^ A.string_of_typ t2))
         )  

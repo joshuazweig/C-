@@ -71,9 +71,10 @@ let check (globals, functions) =
        "x")]; locals = []; body = [] });
        ("print_mint", { typ = Int; fname = "print_mint"; formals = [(Mint,
        "x")]; locals = []; body = [] });
-       ("print_point", { typ = Int; fname = "print_point"; formals = [(Point,
-       "P")]; locals = []; body = [] });
-       ("print_curve", { typ = Int; fname = "print_curve"; formals = [(Curve,
+       ("print_point", { typ = Int; fname = "print_point"; formals =
+           [(Pointer(Point), "P")]; locals = []; body = [] });
+       ("print_curve", { typ = Int; fname = "print_curve"; formals =
+           [(Pointer(Curve),
        "E")]; locals = []; body = [] });
        ("scanf", { typ = Void; fname = "scanf"; formals = [(Pointer(Char), "x")]; 
        locals = []; body = [] });
@@ -137,7 +138,8 @@ let check (globals, functions) =
         string_of_expr e))
       | Binop(e1, op, e2) as e -> let t1 = expr table e1 and t2 = expr table e2 in
 	(match op with
-          Add | Sub when t1 = Point && t2 = Point -> Point
+          Add | Sub when t1 = Pointer(Point) && t2 = Pointer(Point) ->
+              Pointer(Point)
         | Add | Sub | Mult | Div | Pow when t1 = Int && t2 = Int -> Int
         | Add | Sub | Mult | Div | Pow when t1 = Stone && t2 = Stone -> Stone
         | Add | Sub | Mult | Pow when t1 = Mint && t2 = Mint -> Mint
@@ -165,13 +167,13 @@ let check (globals, functions) =
       | Construct2(e1, e2) -> let t1 = expr table e1 and t2 = expr table e2 in
         (match (t1, t2) with
           (Stone, Stone) -> Mint
-        | (Mint, Mint)   -> Curve
+        | (Mint, Mint)   -> Pointer(Curve)
         | _ -> raise (Failure ("illegal constructor type pair (" ^ string_of_typ t1 
         ^ "," ^ string_of_typ t2 ^ ")")))
       | Construct3(e1, e2, e3) -> let t1 = expr table e1 and t2 = expr table e2
   and t3 = expr table e3 in
         (match (t1, t2, t3) with
-        | (Curve, Stone, Stone) -> Point
+        | (Pointer(Curve), Stone, Stone) -> Pointer(Point)
         | _ -> raise (Failure ("illegal constructor type pair (" ^ string_of_typ t1 
         ^ "," ^ string_of_typ t2 ^ "," ^ string_of_typ t3 ^ ")")))
       | Noexpr -> Void
@@ -199,7 +201,7 @@ let check (globals, functions) =
            List.iter2 (fun (ft, _) e -> let et = expr table e in
               ignore (check_assign ft et
                 (Failure ("illegal actual argument found " ^ string_of_typ et ^
-                " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
+                " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr call))))
              fd.formals actuals;
            fd.typ
     in
