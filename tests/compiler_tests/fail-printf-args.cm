@@ -1,0 +1,4 @@
+int main() {
+    printf("%d\n", x, f);
+    return 0;
+}
