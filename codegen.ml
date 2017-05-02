@@ -200,7 +200,7 @@ let translate (globals, functions) =
         (match (t1, t2, t3) with
           (A.Pointer(A.Curve), A.Stone, A.Stone) -> (*only construct 3?*)
               (L.build_call point_create_func [| e1' ; e2' ; e3' |] 
-                 "point_create_res" builder, A.Point)
+                 "point_create_res" builder, A.Pointer(A.Point))
               (*
             let struct_p = L.undef point_type in
             let struct_p2 = L.build_insertvalue struct_p e1' 0 "sp" builder in 
@@ -314,7 +314,7 @@ let translate (globals, functions) =
                 L.build_call point_sub_func [| e1' ; e2' |] "point_sub_res" builder
             | _ as o -> raise(Failure("Illegal operator " ^  A.string_of_op o
               ^ " in point* * point* binop"))
-              ), A.Point) 
+              ), A.Pointer(A.Point) )
          | (A.Stone, A.Pointer(A.Point)) ->
               ((match op with
               A.Mult ->
@@ -322,7 +322,7 @@ let translate (globals, functions) =
                   builder
               | _ as o -> raise(Failure("Illegal operator " ^  A.string_of_op o
               ^ " in stone * point binop"))
-              ), A.Point)
+              ), A.Pointer(A.Point))
          | _ ->
                 raise(Failure("illegal binop type " ^ A.string_of_typ t1 ^
                 A.string_of_op op ^ A.string_of_typ t2))

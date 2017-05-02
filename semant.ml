@@ -156,7 +156,7 @@ let check (globals, functions) =
 	   Neg when t = Int -> Int
          | Neg when t = Stone -> Stone
          | Neg when t = Mint -> Mint
-         | Neg when t = Point -> Point
+         | Neg when t = Pointer(Point) -> Pointer(Point)
          | Neg when t = Char -> Char
          | Not when t = Int -> Int  
          | Deref -> type_of_pointer t e

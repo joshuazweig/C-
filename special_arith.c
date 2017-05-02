@@ -127,7 +127,6 @@ void* stone_pow_func(void *a, void *p)
   return r;
 }
 
-
 struct point *point_add_func(struct point *P, struct point *Q) {
     struct point *R;
     R = (struct point *)malloc(sizeof(struct point));
@@ -208,8 +207,17 @@ struct point *point_add_func(struct point *P, struct point *Q) {
 
 struct point *point_sub_func(struct point *P, struct point *Q) {
     ((BIGNUM *) Q->y)->neg = !((BIGNUM *) Q->y)->neg;
-    return point_add_func(P, Q);
+    struct point *R;
+    R = point_add_func(P, Q);
+    /* restore neg value of Q */
+    ((BIGNUM *) Q->y)->neg = !((BIGNUM *) Q->y)->neg;
+    return R;
 }
+
+/*struct point *point_mult_func(void *k, struct point *P) {
+    ((BIGNUM *) 
+
+}*/
 
 /*
 * Mint
@@ -285,7 +293,11 @@ int mint_print_func(struct mint a) {
 int point_print_func(struct point *P) {
     //mint_print_func(P.E.a);
     //mint_print_func(P.E.b);
-    printf("<%s, %s>\n", BN_bn2dec(P->x), BN_bn2dec(P->y));
+    if (P->inf) {
+        printf("inf\n");
+    } else {
+        printf("<%s, %s>\n", BN_bn2dec(P->x), BN_bn2dec(P->y));
+    }
     //stone_print_func(P.x);
     //stone_print_func(P.y);
     return 0;
