@@ -54,6 +54,7 @@ int stone_free_func(void *a){
 void* stone_add_func(void *a, void *b)
 {
   BIGNUM *r = BN_new();
+    fprintf(stderr, "a: %p\nb: %p\n", a, b);
     fprintf(stderr, "Creating to add %p\n", r);
 
   BN_add(r, a, b);
