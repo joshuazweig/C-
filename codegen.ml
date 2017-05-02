@@ -149,14 +149,14 @@ let translate (globals, functions) =
                    with Not_found -> StringMap.find n global_vars
     in
 
-    (*let manage l1 l2 ex ex2 = 
-          let _ = if (leaf1 = 0) then 
+    let manage l1 l2 ex ex2 = 
+          let _ = if (l1 = 0) then 
               ignore(L.build_call stone_free_func [| ex |] "res" builder)
           else () in
-          let _ = if (leaf2 = 0) then
+          let _ = if (l2 = 0) then
                ignore(L.build_call stone_free_func [| ex2 |] "res" builder)
-          else () in 
-    in *)
+          else ()  
+    in 
 
     (* Construct code for an expression; return its value *)
     let rec expr table builder = function
@@ -258,7 +258,8 @@ let translate (globals, functions) =
               ((match op with
                 A.Add -> 
                 let call = L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder in    
-                 let _ = 
+                 let _ = manage leaf1 leaf2 e1' e2' in 
+                 (*let _ = 
                           if (leaf1 = 0) then 
                             ignore(L.build_call stone_free_func [| e1' |] "res" builder)
                           else () in
@@ -266,7 +267,7 @@ let translate (globals, functions) =
                           ignore(L.build_call stone_free_func [| e2' |] "res" builder)
                         else ()
                         
-                      in 
+                      in *)
                 call
                 (*L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder*)
               | A.Sub -> 
@@ -285,7 +286,7 @@ let translate (globals, functions) =
               | A.Equal -> 
               | A.Neq -> 
               | A.Less -> 
-              | A.Leq -> 
+              | A.Leq -> d
               | A.Greater ->
               | A.Geq ->
               | A.And ->
