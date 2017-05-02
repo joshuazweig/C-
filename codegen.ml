@@ -149,6 +149,15 @@ let translate (globals, functions) =
                    with Not_found -> StringMap.find n global_vars
     in
 
+    (*let manage l1 l2 ex ex2 = 
+          let _ = if (leaf1 = 0) then 
+              ignore(L.build_call stone_free_func [| ex |] "res" builder)
+          else () in
+          let _ = if (leaf2 = 0) then
+               ignore(L.build_call stone_free_func [| ex2 |] "res" builder)
+          else () in 
+    in *)
+
     (* Construct code for an expression; return its value *)
     let rec expr table builder = function
 	     A.Literal i -> (L.const_int i32_t i, (A.Int, 0))
@@ -248,33 +257,8 @@ let translate (globals, functions) =
           | (A.Stone, A.Stone) -> 
               ((match op with
                 A.Add -> 
-                let call = L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder in 
-                (*  let _ = List.iter ( fun (name, (_, t)) -> ignore(print_endline name); ignore(print_endline (A.string_of_typ t)) )
-                          (StringMap.bindings table) in *)
-
-                (*let x = L.build_call stone_free_func [| e1' |] "res" builder in *)
-                    (*let _ = ignore(StringMap.iter (fun k v -> 
-                          if v != (e1', A.Stone) then ignore(L.build_call 
-                            stone_free_func [| e1' |] "res" builder)
-                          else if v != (e2', A.Stone) then ignore(L.build_call
-                            stone_free_func [| e2' |] "res" builder)
-                          else ignore((L.const_int i1_t 0))) table) in
-                    *) 
-                    (*let tups = StringMap.bindings table in 
-                      let (keys, vals) = List.split tups in
-
-                        let exists (k1, k2) l =
-                          List.fold_left(fun a (x1, x2) -> 
-                            if x1 (*=*)= k1 then true else a)
-                            false l in 
-                        let _ = 
-                          if (exists (e1', A.Stone) vals) = false then 
-                            ignore(L.build_call stone_free_func [| e1' |] "res" builder)
-                          else () in
-                        let _ = if (exists (e2', A.Stone) vals) = false then
-                          ignore(L.build_call stone_free_func [| e2' |] "res" builder)
-                        else ()*)
-                    let _ = 
+                let call = L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder in    
+                 let _ = 
                           if (leaf1 = 0) then 
                             ignore(L.build_call stone_free_func [| e1' |] "res" builder)
                           else () in
@@ -283,11 +267,7 @@ let translate (globals, functions) =
                         else ()
                         
                       in 
-                 (*let exists = StringMap.for_all check table || 
-                                StringMap.for_all check table in *)
-
                 call
-                
                 (*L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder*)
               | A.Sub -> 
                 L.build_call stone_sub_func [| e1' ; e2' |] "stone_sub_res" builder
