@@ -38,10 +38,14 @@ int stone_print_func(void *a)
 void *stone_create_func(char *str) {
     BIGNUM *r = BN_new();
     BN_dec2bn(&r, str);
+    //fprintf(stderr, "Creating %p\n", r);
+
     return r;
 }
 
 int stone_free_func(void *a){
+  //fprintf(stderr, "Freeing  %p\n", a);
+
   BN_free(a);
   return 0;
 }
@@ -50,6 +54,9 @@ int stone_free_func(void *a){
 void* stone_add_func(void *a, void *b)
 {
   BIGNUM *r = BN_new();
+  //fprintf(stderr, "a: %p\nb: %p\n", a, b);
+  //fprintf(stderr, "Creating to add %p\n", r);
+
   BN_add(r, a, b);
   return r;
 }
@@ -180,8 +187,6 @@ struct mint mint_to_stone_func(struct mint *a, void *b) {
 struct mint mint_pow_func(struct mint* a, struct mint* b) {
     return mint_to_stone_func(a, b->val);
 }
-
-
 
 /* testing function */
 
