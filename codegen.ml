@@ -123,6 +123,9 @@ let translate (globals, functions) =
   let stone_free_t = L.function_type i32_t [| L.pointer_type i8_t |] in (* bn free func *)
   let stone_free_func = L.declare_function "stone_free_func" stone_free_t the_module in 
 
+ (* let mint_free_t = L.function_type i32_t [| mint_pointer |] in 
+  let mint_free_func = L.declare_function "mint_free_func" mint_free_t the_module in *)
+
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl m fdecl =
@@ -157,6 +160,15 @@ let translate (globals, functions) =
                ignore(L.build_call stone_free_func [| ex2 |] "res" builder)
           else ()  
     in 
+
+    (*let manage_mint l1 l2 ex ex2 = 
+          let _ = if (l1 = 0) then 
+              ignore(L.build_call mint_free_func [| ex |] "res" builder)
+          else () in
+          if (l2 = 0) then
+               ignore(L.build_call mint_free_func [| ex2 |] "res" builder)
+          else ()  
+    in     *)
 
     (* Construct code for an expression; return its value *)
     let rec expr table builder = function
