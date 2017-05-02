@@ -153,7 +153,7 @@ let translate (globals, functions) =
           let _ = if (l1 = 0) then 
               ignore(L.build_call stone_free_func [| ex |] "res" builder)
           else () in
-          let _ = if (l2 = 0) then
+          if (l2 = 0) then
                ignore(L.build_call stone_free_func [| ex2 |] "res" builder)
           else ()  
     in 
@@ -345,7 +345,7 @@ let translate (globals, functions) =
             (A.Pointer(A.Char), 0))
       | A.Call("print_stone", [e]) -> let (e', (t, _)) = expr table builder e in 
           (L.build_call stone_print_func [| e' |] "stone_print_func" builder, (t, 0)); 
-     | A.Call("print_mint", [e]) -> let (e', (t, _)) = expr table builder e in 
+      | A.Call("print_mint", [e]) -> let (e', (t, _)) = expr table builder e in 
           (L.build_call mint_print_func [| e' |] "mint_print_func" builder, (t, 0));       
       | A.Call("scanf", [e]) -> 
           let (e', (t, _)) = expr table builder e in 
