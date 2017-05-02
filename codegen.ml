@@ -259,27 +259,28 @@ let translate (globals, functions) =
                 A.Add -> 
                 let call = L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder in    
                  let _ = manage leaf1 leaf2 e1' e2' in 
-                 (*let _ = 
-                          if (leaf1 = 0) then 
-                            ignore(L.build_call stone_free_func [| e1' |] "res" builder)
-                          else () in
-                        let _ = if (leaf2 = 0) then
-                          ignore(L.build_call stone_free_func [| e2' |] "res" builder)
-                        else ()
-                        
-                      in *)
                 call
                 (*L.build_call stone_add_func [| e1' ; e2' |] "stone_add_res" builder*)
               | A.Sub -> 
-                L.build_call stone_sub_func [| e1' ; e2' |] "stone_sub_res" builder
+                let call = L.build_call stone_sub_func [| e1' ; e2' |] "stone_sub_res" builder in 
+                  let _ = manage leaf1 leaf2 e1' e2' in 
+                call
               | A.Mult -> 
-                L.build_call stone_mult_func [| e1' ; e2' |] "stone_mult_res" builder
+                let call = L.build_call stone_mult_func [| e1' ; e2' |] "stone_mult_res" builder in 
+                  let _ = manage leaf1 leaf2 e1' e2' in 
+                call
               | A.Div -> 
-                L.build_call stone_div_func [| e1' ; e2' |] "stone_div_res" builder
+                let call = L.build_call stone_div_func [| e1' ; e2' |] "stone_div_res" builder in
+                  let _ = manage leaf1 leaf2 e1' e2' in 
+                call
               | A.Pow -> 
-                L.build_call stone_pow_func [| e1' ; e2' |] "stone_pow_res" builder
+                let call = L.build_call stone_pow_func [| e1' ; e2' |] "stone_pow_res" builder in 
+                  let _ = manage leaf1 leaf2 e1' e2' in 
+                call
               | A.Mod -> 
-                L.build_call stone_mod_func [| e1' ; e2' |] "stone_mod_res" builder
+                let call = L.build_call stone_mod_func [| e1' ; e2' |] "stone_mod_res" builder in 
+                  let _ = manage leaf1 leaf2 e1' e2' in 
+                call
               | _ as o -> raise(Failure("Illegal operator " ^  A.string_of_op o
               ^ " in stone * stone binop"))
               (*| A.Sub ->
