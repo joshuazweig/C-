@@ -70,7 +70,7 @@ struct stone access_point(struct point p, int index)	{
 }
 
 
-
+/*
 int main() {
 
 	
@@ -118,7 +118,7 @@ int main() {
     p.inf = 0;  // not infinity
 
 	// test access
-/*
+
 	printf("***Testing mint <12, 29>\n");
 	struct stone reduced_mint_0 = access_mint(m, 0);
 	struct stone reduced_mint_1 = access_mint(m, 1);
@@ -137,10 +137,10 @@ int main() {
 	struct stone reduced_point_3 = access_point(p, 3);
 	struct stone reduced_point_4 = access_point(p, 4);
 	struct stone reduced_point_5 = access_point(p, 5);
-*/
+
 
 
 	return 0;
 
 }
-
+*/

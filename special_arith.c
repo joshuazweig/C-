@@ -27,8 +27,8 @@ struct mint {
 
 int stone_print_func(void *a)
 {
-  BN_print_fp(stdout, a); //This is hex
-  printf("\n");
+  printf("%s\n", BN_bn2dec(a));
+  
   return 0; 
 }
 //construct
@@ -160,7 +160,7 @@ struct point invert_point_func(struct point p)
   struct point inv_p;
   inv_p.c = p.c;
   inv_p.x = p.x;
-  inv_p.y = -(p.y); //invert
+  inv_p.y = p.y; //invert
   inv_p.inf = p.inf;  // not infinity
 
   return inv_p;

@@ -58,7 +58,9 @@ let check (globals, functions) =
        comparing formals and actuals list if the name of the function is printf  *)
        locals = []; body = [] });
        ("print_stone", { typ = Int; fname = "print_stone"; formals = [(Stone,
-       "x")]; locals = []; body = [] })] 
+       "x")]; locals = []; body = [] });
+       ("access", {typ = Stone; fname = "access"; formals = [(Mint, "m"); (Int, "i")]; 
+        locals = []; body = []});] 
    in
      
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
@@ -139,7 +141,7 @@ let check (globals, functions) =
          | Not when t = Int -> Int  
          | Deref -> type_of_pointer t e
          | AddrOf -> Pointer(t)
-         | Access when t = Mint || t = Point || t = Curve -> Pointer(Stone)
+         | Access when t = Mint || t = Point || t = Curve -> Stone
          | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
 	  		   string_of_typ t ^ " in " ^ string_of_expr ex)))
       | Construct2(e1, e2) -> let t1 = expr e1 and t2 = expr e2 in
