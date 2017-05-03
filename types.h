@@ -1,12 +1,12 @@
 // Defines all CMod Types
 
 
-struct stone {
+//struct stone {
 	/* actually a linked list of ints */
 	// int val;
-	void *val;
-};
-
+//	void *val;
+//};
+/*
 struct mint {
 	struct stone val;
 	struct stone mod; //should be immutable
@@ -24,4 +24,21 @@ struct point {
 	struct stone x;
 	struct stone y;
 	int inf;
+}; */
+
+struct mint {
+    void *val;
+    void *mod; //should be immutable
+};
+
+struct curve {
+    struct mint a;
+    struct mint b;
+};
+
+struct point {
+    struct curve E;
+    void *x;
+    void *y;
+    char inf;
 };

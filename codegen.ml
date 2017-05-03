@@ -351,6 +351,20 @@ let translate (globals, functions) =
                 A.Int -> L.build_neg e' "tmp" builder
                (* | A.Point -> L.build_call invert_point_func [| e' |] "invert_point_func" builder *) )  (* Point inversion *)
            | A.Not     -> L.build_icmp L.Icmp.Eq (L.const_null (ltype_of_typ t)) e' "tmp" builder  (* Still need to test on Pointer types *)
+           | _ -> raise(Failure("not implemented yet")) e' "tmp" builder
+           
+          ), (match op with
+            A.Neg -> (t, 0)
+            | A.Not -> (t, 0)
+            | _ -> (t, 0)
+            )) 
+        (*| A.Unop(op, e) -> 
+          let e', (t, _) = expr table builder e in
+          ((match op with
+            A.Neg     -> (match t with
+                A.Int -> L.build_neg e' "tmp" builder
+               (* | A.Point -> L.build_call invert_point_func [| e' |] "invert_point_func" builder *) )  (* Point inversion *)
+           | A.Not     -> L.build_icmp L.Icmp.Eq (L.const_null (ltype_of_typ t)) e' "tmp" builder  (* Still need to test on Pointer types *)
            | _ -> raise(Failure("not implemented yet"))) e' "tmp" builder
            (* | A.Deref   -> L.build_load e' "tmp" builder  *) (* load object pointed to *)
            (* | A.AddrOf  -> fst(lookup e')  *)(*L.build_store e'  builder*)  (* (L.build_alloca (ltype_of_typ (A.Pointer t)) "tmp" builder)create pointer to address of object -- want what is returned by L.build_alloca -- could just move stuff everytime? seems inefficient *)
@@ -365,7 +379,7 @@ let translate (globals, functions) =
             (* | A.Deref -> (match t with
                 A.Pointer x -> x)
             | A.AddrOf -> A.Pointer t
-            | A.Access -> A.Pointer A.Stone *))) 
+            | A.Access -> A.Pointer A.Stone *))) *)
 
        | A.Assign (s, e) -> let (e', (t, _)) = expr table builder e and
                               (* if t string, otherwise is behavior normal?*)
@@ -384,12 +398,12 @@ let translate (globals, functions) =
                        
 
 
-       | A.Call("access", [e; i]) -> let (e', t) = expr builder e and (i', t') = expr builder i in 
+       | A.Call("access", [e; i]) -> let (e', (t, _)) = expr table builder e and (i', (t', _)) = expr table builder i in 
           ((match t with
             A.Mint -> L.build_call access_mint [| e' ; i' |] "access_mint" builder
             | A.Curve -> L.build_call access_curve [| e' ; i' |] "access_curve" builder
             | A.Point -> L.build_call access_point [| e' ; i' |] "access_point" builder),
-            A.Stone)  
+            (A.Stone, 0))  
       | A.Call ("printf", act) ->
           let actuals, _ = List.split (List.rev (List.map (expr table builder)
           (List.rev act))) in
@@ -462,28 +476,19 @@ let translate (globals, functions) =
         	 L.builder_at_end context merge_bb
 
       | A.While (predicate, body) ->
-      	  let pred_bb = L.append_block context "while" the_function in
-      	  ignore (L.build_br pred_bb builder);
+          let pred_bb = L.append_block context "while" the_function in
+          ignore (L.build_br pred_bb builder);
 
-      	  let body_bb = L.append_block context "while_body" the_function in
-      	  add_terminal (stmt (L.builder_at_end context body_bb) body)
-      	    (L.build_br pred_bb);
+          let body_bb = L.append_block context "while_body" the_function in
+          add_terminal (stmt table (L.builder_at_end context body_bb) body)
+            (L.build_br pred_bb);
 
+          let pred_builder = L.builder_at_end context pred_bb in
+          let bool_val = fst (expr table pred_builder predicate) in
 
-	  let body_bb = L.append_block context "while_body" the_function in
-	  add_terminal (stmt table (L.builder_at_end context body_bb) body)
-	    (L.build_br pred_bb);
-
-	  let pred_builder = L.builder_at_end context pred_bb in
-	  let bool_val = fst (expr table pred_builder predicate) in
-
-
-      	  let merge_bb = L.append_block context "merge" the_function in
-      	  ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
-      	  L.builder_at_end context merge_bb
-
-    (*  | A.DoWhile (body, predicate) ->   (* Need to UPDATE (while to do while) !!! *)
-*)
+          let merge_bb = L.append_block context "merge" the_function in
+          ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
+          L.builder_at_end context merge_bb
 
 
       | A.For (e1, e2, e3, body) -> stmt table builder
