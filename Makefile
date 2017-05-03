@@ -19,7 +19,7 @@ special_arith.o: special_arith.c
 	clang -I/usr/local/opt/openssl/include -c special_arith.c
 
 access.o: access.c
-	clang -c access.c
+	clang -I/usr/local/opt/openssl/include -c access.c
 
 .PHONY: clean
 clean :

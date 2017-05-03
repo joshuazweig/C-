@@ -1,25 +1,37 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h> 
+#include <stdlib.h> 
+#include <openssl/bn.h>
 #include "types.h"
+// NEED TO LINK IN SPECIAL_ARITH
 
-struct stone *access_m(struct mint x) {
+// void *access_m(struct mint x) {
 
-	struct stone *a = (struct stone *) malloc(2 * sizeof(struct stone));
-	a[0] = x.val;
-	a[1] = x.mod;
+// 	struct stone *a = (struct stone *) malloc(2 * sizeof(struct stone));
+// 	a[0] = x.val;
+// 	a[1] = x.mod;
 
-	// printf("REDUCED MINT: %d, %d\n", *((int *)a[0].val), *((int *)a[1].val));
-	return a;
-}
+// 	// printf("REDUCED MINT: %d, %d\n", *((int *)a[0].val), *((int *)a[1].val));
+// 	return a;
+// }
 
 // takes a mint and an int (0 or 1), 
 // returning val for idx 0 and mod for idx 1
-struct stone access_mint(struct mint x, int index)	{
-	struct stone *a = access_m(x);
-	// printf("ACCESS: index %d gives %d\n", index, *((int *)a[index].val));
-	return a[index];
-}
+void *access_mint(struct mint* m, int index)	{
 
+	BIGNUM *r = BN_new();
+	if(index == 0) {
+		BN_dec2bn(&r, (char *) m->val);
+	}
+	else {
+		BN_dec2bn(&r, (char *) m->mod);
+	}
+	
+	return r;
+	
+	// printf("ACCESS: index %d gives %d\n", index, *((int *)a[index].val));
+}
+/*
 struct stone *access_c(struct curve c) {
 	struct stone *a = access_m(c.a);
 	struct stone *b = access_m(c.b);
@@ -68,7 +80,7 @@ struct stone access_point(struct point p, int index)	{
 	// printf("ACCESS: index %d gives %d\n", index, *((int *)a[index].val));
 	return a[index];
 }
-
+*/
 
 /*
 int main() {
