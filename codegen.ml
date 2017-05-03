@@ -398,7 +398,7 @@ let translate (globals, functions) =
                        
 
 
-       | A.Call("access", [e; i]) -> let (e', (t, _)) = expr table builder e and (i', (t', _)) = expr table builder i in 
+       | A.Call("access1", [e; i]) -> let (e', (t, _)) = expr table builder e and (i', (t', _)) = expr table builder i in 
           ((match t with
             A.Mint -> L.build_call access_mint [| e' ; i' |] "access_mint" builder
             | A.Curve -> L.build_call access_curve [| e' ; i' |] "access_curve" builder

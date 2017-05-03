@@ -44,7 +44,7 @@ let check (globals, functions) =
   if List.mem "printf" (List.map (fun fd -> fd.fname) functions)
   then raise (Failure ("function printf may not be defined")) else ();
   
-  if List.mem "access" (List.map (fun fd -> fd.fname) functions)
+  if List.mem "access1" (List.map (fun fd -> fd.fname) functions)
   then raise (Failure ("function access may not be defined")) else ();
  
   if List.mem "scanf" (List.map (fun fd -> fd.fname) functions)
@@ -70,7 +70,7 @@ let check (globals, functions) =
        ("print_stone", { typ = Int; fname = "print_stone"; formals = [(Stone,
        "x")]; locals = []; body = [] });
 
-       ("access", {typ = Stone; fname = "access"; formals = [(Mint, "m"); (Int, "i")]; 
+       ("access1", {typ = Stone; fname = "access1"; formals = [(Mint, "m"); (Int, "i")]; 
         locals = []; body = []}); 
 
        ("print_mint", { typ = Int; fname = "print_mint"; formals = [(Mint,

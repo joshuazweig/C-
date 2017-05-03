@@ -26,133 +26,77 @@ void *access_mint(struct mint* m, int index)	{
 	else {
 		BN_dec2bn(&r, (char *) m->mod);
 	}
+	char *bn = BN_bn2dec(r);
+	return bn;
 	
-	return r;
+	// printf("ACCESS: index %d gives %d\n", index, *((int *)a[index].val));
+}
+
+void *access_curve(struct curve* c, int index)	{
 	
-	// printf("ACCESS: index %d gives %d\n", index, *((int *)a[index].val));
-}
-/*
-struct stone *access_c(struct curve c) {
-	struct stone *a = access_m(c.a);
-	struct stone *b = access_m(c.b);
+	if(index < 2) {
+		return access_mint(&(c->a), index);
+	}
+	else {
+		return access_mint(&(c->b), index-2);
+	}
 
-
-	struct stone *z = (struct stone *) malloc(4 * sizeof(struct stone));
-	z[0] = a[0];
-	z[1] = a[1];
-	z[2] = b[0];
-	z[3] = b[1];
-
-	// printf("REDUCED CURVE: <%d, %d>, <%d, %d>\n", *((int *)z[0].val), *((int *)z[1].val), *((int *)z[2].val), *((int *)z[3].val));
-	return z;
 }
 
-// takes a curve and an index (0-3)
-// 0, 1 return indices 0/1 for mint 1
-// 2, 3 return indices 0/1 for mint 2
-struct stone access_curve(struct curve c, int index)	{
-	struct stone *a = access_c(c);
-	// printf("ACCESS: index %d gives %d\n", index, *((int *)a[index].val));
-	return a[index];
+void *access_point(struct point* p, int index)	{
+
+	if(index < 4)	{
+		return access_curve(&(p->E), index);
+	}
+	else	{
+		BIGNUM *r = BN_new();
+		if(index == 4) {
+			BN_dec2bn(&r, (char *) p->x);
+		}
+		else {
+			BN_dec2bn(&r, (char *) p->y);
+		}
+		char *bn = BN_bn2dec(r);
+		return bn;
+	}
 }
 
-struct stone *access_p(struct point p) {
-	struct stone *c = access_c(p.c);
-
-	struct stone *a = (struct stone *) malloc(6 * sizeof(struct stone));
-	a[0] = c[0];
-	a[1] = c[1];
-	a[2] = c[2];
-	a[3] = c[3];
-	a[4] = p.x;
-	a[5] = p.y;
-
-	// printf("REDUCED POINT: {<%d, %d>, <%d, %d>}, %d, %d\n", *((int *)a[0].val), *((int *)a[1].val), *((int *)a[2].val), *((int *)a[3].val), *((int *)a[4].val), *((int *)a[5].val));
-	return a;
-}
-
-// takes a point and an index (0-5)
-// 0-3 return indices 0-3 of the curve associated with p
-// 4 returns the x coord stone
-// 5 returns the y coord stone
-struct stone access_point(struct point p, int index)	{
-	struct stone *a = access_p(p);
-	// printf("ACCESS: index %d gives %d\n", index, *((int *)a[index].val));
-	return a[index];
-}
-*/
-
-/*
 int main() {
-
 	
-	int a = 12;
-	int b = 29; 
-	int c = 13;
-	int d = 31;
-	int e = 53;
-	int f = 37;
-
-	// construct 2 mints from 4 stones
-	struct stone v;
-	struct stone md;
-
-	v.val = &a;
-	md.val = &b;
-
 	struct mint m;
-	m.val = v;
-	m.mod = md;
+	m.val = "5";
+	m.mod = "31";
 
-	struct stone v1;
-	struct stone md1;
-	v1.val = &c;
-	md1.val = &d;
+	char *mintmod;
+	mintmod = access_mint(&m, 1);
+	printf("Access mint: (31=) %s\n", mintmod);
 
 	struct mint m1;
-	m1.val = v1;
-	m1.mod = md1;
+	m1.val="6";
+	m1.mod = "31";
 
-	// construct a curve from these mints
-	struct curve c1;
-	c1.a = m;
-	c1.b = m1;
+	struct curve c;
+	c.a = m;
+	c.b = m1;
 
-	// construct a point from 2 stones and this curve
-	struct stone x, y;
-	x.val = &e;
-	y.val = &f;
+	char *curveval2;
+	curveval2 = access_curve(&c, 2);
+	printf("Access curve: (6=) %s\n", curveval2);
 
 	struct point p;
-    p.c = c1;
-    p.x = x;
-    p.y = y;
-    p.inf = 0;  // not infinity
+	p.E = c;
+	p.x = "37";
+	p.y = "53";
 
-	// test access
+	char *pointx;
+	pointx = access_point(&p, 4);
+	printf("Access point: (37=) %s\n", pointx);
 
-	printf("***Testing mint <12, 29>\n");
-	struct stone reduced_mint_0 = access_mint(m, 0);
-	struct stone reduced_mint_1 = access_mint(m, 1);
-
-	
-	printf("***Testing curve {<12, 29>, <13, 31>}\n");
-	struct stone reduced_curve_0 = access_curve(c1, 0);
-	struct stone reduced_curve_1 = access_curve(c1, 1);
-	struct stone reduced_curve_2 = access_curve(c1, 2);
-	struct stone reduced_curve_3 = access_curve(c1, 3);
-
-	printf("***Testing point {<12, 29>, <13, 31>}, 53, 37\n");
-	struct stone reduced_point_0 = access_point(p, 0);
-	struct stone reduced_point_1 = access_point(p, 1);
-	struct stone reduced_point_2 = access_point(p, 2);
-	struct stone reduced_point_3 = access_point(p, 3);
-	struct stone reduced_point_4 = access_point(p, 4);
-	struct stone reduced_point_5 = access_point(p, 5);
-
-
-
-	return 0;
-
+	/*BIGNUM *r = BN_new();
+	BN_dec2bn(&r, "5");
+	char *bn = BN_bn2dec(r);
+	printf("%s\n", bn);*/
 }
-*/
+
+
+

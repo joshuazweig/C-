@@ -21,6 +21,9 @@ special_arith.o: special_arith.c
 access.o: access.c
 	clang -I/usr/local/opt/openssl/include -c access.c
 
+access: access.o
+	clang access.o -lcrypto -o access
+
 .PHONY: clean
 clean :
 	ocamlbuild -clean
