@@ -9,9 +9,8 @@ ACCEPT
       [formals_opt:]
       RPAREN
       LBRACE
-      [vdecl_list: [vdecl_list:] [vdecl: [typ: INT] ID SEMI]]
-      [stmt_list:
-        [stmt_list:]
+      [combined_list:
+        [combined_list: [combined_list:] [vdecl: [typ: INT] ID SEMI]]
         [stmt:
           [expr:
             ID

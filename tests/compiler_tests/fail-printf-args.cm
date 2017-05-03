@@ -1,4 +1,4 @@
 int main() {
-    print(5);
+    printf("%d\n", x, f);
     return 0;
 }

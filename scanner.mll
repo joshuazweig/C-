@@ -20,6 +20,7 @@ rule token = parse
 | '+'      { PLUS }
 | '-'      { MINUS }
 | '*'      { STAR }
+| '^'      { POW }
 | '/'      { DIVIDE }
 | '%'      { MOD }
 | '&'      { ADDRESSOF }

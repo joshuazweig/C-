@@ -9,12 +9,11 @@ ACCEPT
       [formals_opt:]
       RPAREN
       LBRACE
-      [vdecl_list:
-        [vdecl_list: [vdecl_list:] [vdecl: [typ: CURVE] ID SEMI]]
-        [vdecl: [typ: POINT] ID SEMI]
-      ]
-      [stmt_list:
-        [stmt_list:]
+      [combined_list:
+        [combined_list:
+          [combined_list: [combined_list:] [vdecl: [typ: CURVE] ID SEMI]]
+          [vdecl: [typ: POINT] ID SEMI]
+        ]
         [stmt:
           [expr:
             ID

@@ -12,11 +12,11 @@ test_grammar:
 
 .PHONY: test_compiler_travis
 test_compiler_travis:
+	export LLI="/usr/lib/llvm-3.8/bin/lli"
 	./testall.sh -v
 
-
 special_arith.o: special_arith.c
-	clang -I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib -c special_arith.c
+	clang -I/usr/local/opt/openssl/include -c special_arith.c
 
 access.o: access.c
 	clang -c access.c

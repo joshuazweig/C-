@@ -4,16 +4,28 @@
 #include <openssl/bn.h>
 #include "types.h"
 
+
 /*
 struct stone {
     // actually a linked list of ints 
     // int val;
-    void *val;
-};
+
 struct mint {
-    struct stone val;
-    struct stone mod; //should be immutable
-    int a;
+
+    void *val;
+    void *mod; //should be immutable
+};
+
+struct curve {
+    struct mint a;
+    struct mint b;
+};
+
+struct point {
+    struct curve E;
+    void *x;
+    void *y;
+    char inf;
 };
 */
 
@@ -28,29 +40,49 @@ struct mint {
 int stone_print_func(void *a)
 {
   printf("%s\n", BN_bn2dec(a));
-  
+
   return 0; 
 }
 //construct
-void* stone_char_func(void *buf, void *bn)
-{
-  BIGNUM *c = BN_bin2bn((unsigned char*) buf, strlen(buf), bn);
-   
-  return c;
+
+void *stone_create_func(char *str) {
+    BIGNUM *r = BN_new();
+    BN_dec2bn(&r, str);
+    //fprintf(stderr, "Creating %p\n", r);
+
+    return r;
+}
+
+int stone_free_func(void *a){
+  //fprintf(stderr, "Freeing  %p\n", a);
+
+  BN_free(a);
+  return 0;
 }
 
 //Add
-void* stone_add_func(void *r, void *a, void *b)
+void* stone_add_func(void *a, void *b)
 {
+  BIGNUM *r = BN_new();
+  //fprintf(stderr, "a: %p\nb: %p\n", a, b);
+  //fprintf(stderr, "Creating to add %p\n", r);
+
   BN_add(r, a, b);
-
   return r;
+}
 
+//Subtract
+void* stone_sub_func(void *a, void *b)
+{
+  BIGNUM *r = BN_new();
+  BN_sub(r, a, b);
+  return r;
 }
 
 //Multiply
-void* stone_mult_func(void *r, void *a, void *b)
+void* stone_mult_func(void *a, void *b)
 {
+  BIGNUM *r = BN_new();
   BN_CTX* ctx = BN_CTX_new();
   BN_mul(r, a, b, ctx);
   BN_CTX_free(ctx);
@@ -59,9 +91,10 @@ void* stone_mult_func(void *r, void *a, void *b)
 }
 
 //Divide
-void* stone_div_func(void *r, void *a, void *b)
+void* stone_div_func(void *a, void *b)
 {
-  BN_CTX* ctx = BN_CTX_new();
+  BIGNUM *r = BN_new();
+  BN_CTX *ctx = BN_CTX_new();
   BN_div(r, NULL, a, b, ctx);
   BN_CTX_free(ctx);
 
@@ -69,8 +102,9 @@ void* stone_div_func(void *r, void *a, void *b)
 }
 
 //Mod 
-void* stone_mod_func(void *r, void *a, void *b)
+void* stone_mod_func(void *a, void *b)
 {
+  BIGNUM *r = BN_new();
   BN_CTX* ctx = BN_CTX_new();
   BN_mod(r, a, b, ctx);
   BN_CTX_free(ctx);
@@ -79,8 +113,9 @@ void* stone_mod_func(void *r, void *a, void *b)
 }
 
 //Exponent
-void* stone_pow_func(void *r, void *a, void *p)
+void* stone_pow_func(void *a, void *p)
 {
+  BIGNUM *r = BN_new();
   BN_CTX* ctx = BN_CTX_new();
   BN_exp(r, a, p, ctx);
   BN_CTX_free(ctx);
@@ -88,65 +123,91 @@ void* stone_pow_func(void *r, void *a, void *p)
   return r;
 }
 
+/*struct point point_add_func(struct point P, struct point Q) {
+    struct point R;
+    R.E = P.E;
+    if (P.inf) {
+        R.x = Q.x;
+        R.y = Q.y;
+        R.inf = Q.inf;
+    } else if (Q.inf) {
+        R.x = P.x;
+        R.y = P.y;
+        R.inf = P.inf;
+    } else {
+        
+    }
+}*/
+
+
 /*
 * Mint
 */
 
 //Add 
-//TODO
-struct mint mint_add_func(struct mint *a, struct mint *b);
-/*{
-  struct mint x;
+struct mint mint_add_func(struct mint* a, struct mint* b) {
+    BIGNUM *val = BN_new();
+    BN_CTX *ctx = BN_CTX_new();
 
-  BIGNUM *n = BN_new();
-  BN_CTX* ctx = BN_CTX_new();
+    //BN_mod_add_quick(val, v1, v2, v3);
+    BN_mod_add(val, a->val, b->val, a->mod, ctx);
+    BN_CTX_free(ctx);
+    struct mint r;
+    r.val = val;
+    r.mod = a->mod; /* use a's modulus */
+    return r; 
+}
 
+struct mint mint_sub_func(struct mint* a, struct mint* b) {
+    BIGNUM *val = BN_new();
+    BN_CTX *ctx = BN_CTX_new();
 
-  BN_mod_add(n, ((struct stone)a->val).val, ((struct stone)b->val).val, ((struct stone)a->mod).val, ctx);
-  //x = {{n}, {((struct stone)a->mod).val}}
-  //x.val = 
+    BN_mod_sub(val, a->val, b->val, a->mod, ctx);
+    BN_CTX_free(ctx);
+    struct mint r;
+    r.val = val;
+    r.mod = a->mod; /* use a's modulus */
+    return r; 
+}
 
-  BN_CTX_free(ctx);
-  //printf("%s", x.mod);
+struct mint mint_mult_func(struct mint* a, struct mint* b) {
+    BIGNUM *val = BN_new();
+    BN_CTX *ctx = BN_CTX_new();
 
-  return x; 
-  
-}*/
+    BN_mod_mul(val, a->val, b->val, a->mod, ctx);
+    BN_CTX_free(ctx);
+    struct mint r;
+    r.val = val;
+    r.mod = a->mod; /* use a's modulus */
+    return r; 
+}
 
-//Multiply
-struct mint* mint_mult_func(struct mint *a, struct mint *b);
+struct mint mint_to_stone_func(struct mint *a, void *b) {
+    BIGNUM *val = BN_new();
+    BN_CTX *ctx = BN_CTX_new();
 
-//Exponent
-struct mint* mint_exp_func(struct mint *a, struct mint *b);
+    BN_mod_exp(val, a->val, b, a->mod, ctx); 
+    BN_CTX_free(ctx);
+    struct mint r;
+    r.val = val;
+    r.mod = a->mod;
+    return r;
+}
+
+struct mint mint_pow_func(struct mint* a, struct mint* b) {
+    return mint_to_stone_func(a, b->val);
+}
+
+/* testing function */
+
+int mint_print_func(struct mint a) {
+    printf("%s\n", BN_bn2dec(a.val));
+    printf("%s\n", BN_bn2dec(a.mod));
+    return 0;
+}
 
 //Equality and Inequality ops ofr mints are in LRM, 
 //but we can hold off on implemenitng
-
-
-//mint raised to stone 
-/*struct mint mint_to_stone_func(struct mint *a, void *b)
-{
-  //mint has stone (val, mod) each is stone has val
-
-  BIGNUM *n = BN_new();
-  BN_CTX* ctx = BN_CTX_new();
-
-  struct stone base = a->val;
-  struct stone mod = a->mod;
-
-  BN_mod_exp(n, base.val, b, mod.val, ctx);
-
-  //What it should be 
-  struct mint x;
-  struct stone temp;
-  temp.val = (void *) n;
-  x.val = temp;
-  x.mod = mod;
-
-  return x;
-
-}*/
-
 
 /*
 * @Michael other stuff that is left is point/curve ops
@@ -165,7 +226,4 @@ struct point invert_point_func(struct point p)
 
   return inv_p;
 }
-
-
-
 

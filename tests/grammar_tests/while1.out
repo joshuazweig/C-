@@ -9,10 +9,9 @@ ACCEPT
       [formals_opt:]
       RPAREN
       LBRACE
-      [vdecl_list: [vdecl_list:] [vdecl: [typ: INT] ID SEMI]]
-      [stmt_list:
-        [stmt_list:
-          [stmt_list:]
+      [combined_list:
+        [combined_list:
+          [combined_list: [combined_list:] [vdecl: [typ: INT] ID SEMI]]
           [stmt: [expr: ID ASSIGN [expr: LITERAL]] SEMI]
         ]
         [stmt:
@@ -22,10 +21,10 @@ ACCEPT
           RPAREN
           [stmt:
             LBRACE
-            [stmt_list:
-              [stmt_list:
-                [stmt_list:
-                  [stmt_list:]
+            [combined_list:
+              [combined_list:
+                [combined_list:
+                  [combined_list:]
                   [stmt:
                     IF
                     LPAREN
@@ -33,9 +32,9 @@ ACCEPT
                     RPAREN
                     [stmt:
                       LBRACE
-                      [stmt_list:
-                        [stmt_list:
-                          [stmt_list:]
+                      [combined_list:
+                        [combined_list:
+                          [combined_list:]
                           [stmt: [expr: ID ASSIGN [expr: LITERAL]] SEMI]
                         ]
                         [stmt: CONTINUE SEMI]
@@ -56,9 +55,9 @@ ACCEPT
                 RPAREN
                 [stmt:
                   LBRACE
-                  [stmt_list:
-                    [stmt_list:
-                      [stmt_list:]
+                  [combined_list:
+                    [combined_list:
+                      [combined_list:]
                       [stmt:
                         [expr: ID ASSIGN [expr: [expr: ID] STAR [expr: LITERAL]]]
                         SEMI

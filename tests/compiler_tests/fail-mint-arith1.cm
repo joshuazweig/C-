@@ -1,0 +1,16 @@
+int main()
+{
+  stone x;
+  stone p;
+
+  mint m;
+  mint n;
+
+  x = "7";
+  p = "21"; 
+
+  m = <x, p>;
+  n = m + 2;
+
+  return 0;
+}
