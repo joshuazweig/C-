@@ -1,3 +1,4 @@
+dist: trusty
 language: python
 sudo: required
 
@@ -27,7 +28,7 @@ install:
 python:
   - "2.7"
 script:
-    - make
+    - make all
     - make test_grammar
     - make test_compiler_travis
 env:

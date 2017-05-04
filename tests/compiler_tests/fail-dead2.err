@@ -1,1 +1,1 @@
-Fatal error: exception Failure("nothing may follow a return")
+Terminator found in the middle of a basic block!

@@ -1,0 +1,16 @@
+int main()
+{
+  stone x;
+  stone p;
+
+  mint m;
+
+  x = "15352395";
+  p = "65537"; 
+
+  m = <x + x, p>;
+
+  print_mint(m);
+
+  return 0;
+}

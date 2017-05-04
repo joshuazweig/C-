@@ -1,0 +1,9 @@
+#ifndef __MYADD_CM__
+#define __MYADD_CM__
+
+int myadd(int a, int b) {
+    return a + b;
+}
+
+#include "myadd.cm" //buildguards plz
+#endif

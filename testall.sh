@@ -7,12 +7,18 @@
 
 # Path to the LLVM interpreter
 # LLI="lli"
-LLI="/usr/local/opt/llvm@3.8/bin/lli-3.8"
+
+VER="3.8"
+LLI="/usr/local/opt/llvm@$VER/bin/lli-$VER"
 
 # Path to the microc compiler.  Usually "./microc.native"
 # Try "_build/microc.native" if ocamlbuild was unable to create a symbolic link.
 MICROC="./cmod.native"
 #MICROC="_build/microc.native"
+
+RUNSHELL="./cmod.sh"
+
+FLAG=""
 
 # Set time limit for all operations
 ulimit -t 30
@@ -65,9 +71,12 @@ Run() {
 # Report the command, run it, and expect an error
 RunFail() {
     echo $* 1>&2
+    #stderr redirects to stdout, can no longe detect this
+    #Still will always check for an error being thrown
     eval $* && {
-	SignalError "failed: $* did not report an error"
-	return 1
+	#SignalError "failed: $* did not report an error"
+	#return 1
+        return 0
     }
     return 0
 }
@@ -87,8 +96,7 @@ Check() {
     generatedfiles=""
 
     generatedfiles="$generatedfiles ${basename}.ll ${basename}.out" &&
-    Run "$MICROC" "<" $1 ">" "${basename}.ll" &&
-    Run "$LLI" "${basename}.ll" ">" "${basename}.out" &&
+    Run "$RUNSHELL" "$FLAG" $1 ">" "${basename}.out" &&
     Compare ${basename}.out ${reffile}.out ${basename}.diff
 
     # Report the status and clean up the generated files
@@ -103,6 +111,8 @@ Check() {
 	echo "###### FAILED" 1>&2
 	globalerror=$error
     fi
+
+    rm -f *.s *.ll *.exe
 }
 
 CheckFail() {
@@ -120,7 +130,7 @@ CheckFail() {
     generatedfiles=""
 
     generatedfiles="$generatedfiles ${basename}.err ${basename}.diff" &&
-    RunFail "$MICROC" "<" $1 "2>" "${basename}.err" ">>" $globallog &&
+    RunFail "$RUNSHELL" "$FLAG" "2>&1" $1 "|" "head" "-1" "|" "tee" "${basename}.err" ">>" $globallog &&
     Compare ${basename}.err ${reffile}.err ${basename}.diff
 
     # Report the status and clean up the generated files
@@ -135,6 +145,8 @@ CheckFail() {
 	echo "###### FAILED" 1>&2
 	globalerror=$error
     fi
+
+    rm -f *.s *.ll
 }
 
 while getopts kdpshv c; do
@@ -147,6 +159,7 @@ while getopts kdpshv c; do
 	    ;;
         v) # Test flag for Travis-CI
 	    LLI="/usr/lib/llvm-3.8/bin/lli"
+            FLAG="-v"
 	    ;;
     esac
 done
