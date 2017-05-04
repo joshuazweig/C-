@@ -1,0 +1,63 @@
+int main(){
+  stone a;
+  a = generate_prime(40, 4);
+  a = "1337";
+  miller_rabin_prime_test();
+  return 0;
+}
+stone generate_prime(int len, int interator){
+  stone big;
+  big = 10^len + 1;
+  int prime_found;
+  prime_found = 0;
+  while(prime_found!=0){
+    miller_rabin_prime_test(big);
+    big = big + iterator;
+  }
+  return big;
+}
+int miller_rabin_prime_test(stone odd_num){ //1 is prime, 0 if copmosite
+  int *a;
+  a = malloc(13*4);
+  int c;
+  int l;
+  *a = 2
+  *(a+1) = 3;
+  *(a+2) = 5;
+  *(a+3) = 7;
+  *(a+4) = 11;
+  *(a+5) = 13;
+  *(a+6) = 17;
+  *(a+7) = 19;
+  *(a+8) = 23;
+  *(a+9) = 29;
+  *(a+10) = 31;
+  *(a+11) = 37;
+  *(a+12) = 41;
+  int s;
+  s = factor_by_two(odd_num);
+  for(c = 0; c < 13; c = c+1){
+    int boolval;
+    boolval = 0;
+    for(c2 = 1; c2 <= s; c2 = c2+1){
+      mint a_d;
+      mint a_2rd;
+      a_d = <(*(a+c))^(odd_num/c2), odd_num>;
+      a_2rd = <(*(a+c))^((2^c2)*(odd_num/c2)), odd_num>;
+      if(a_d==<1,odd_num> && a_2rd==<-1,odd_num>)
+        return 0;
+    }
+  }
+  return 1;
+}
+int factor_by_two(stone a){
+  stone tmp;
+  tmp = a - 1;
+  int s;
+  mint c;
+  c = 0;
+  for(s = 0; c < a; s = s + 1){
+    c = 2^s;
+  }
+  return s;
+}
