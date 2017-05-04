@@ -292,6 +292,7 @@ struct point *point_mult_func(void *k, struct point *P) {
     y = stone_create_func("26");
     z = BN_bn2hex((BIGNUM *) k);
     x = hex_to_bin_help(z);
+    z = x; // free this at the end
     struct point *R;
     R = (struct point *)malloc(sizeof(struct point));
     R->E = P->E;
@@ -309,6 +310,7 @@ struct point *point_mult_func(void *k, struct point *P) {
             point_add_func_help(R, R, P);
         }
     }
+    free(z);
     return R;
 }
 
