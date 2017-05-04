@@ -121,7 +121,7 @@ let translate (globals, functions) =
   let point_sub_func = L.declare_function "point_sub_func" point_sub_func_t the_module in 
 
   (* stone * point, i.e. add point to itself stone many times *)
-  let point_mult_func_t = L.function_type point_type [| obj_pointer ; point_ptr |] in 
+  let point_mult_func_t = L.function_type point_ptr [| obj_pointer ; point_ptr |] in 
   let point_mult_func = L.declare_function "point_mult_func" point_mult_func_t
   the_module in 
 

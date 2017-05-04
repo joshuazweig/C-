@@ -140,6 +140,7 @@ let check (globals, functions) =
 	(match op with
           Add | Sub when t1 = Pointer(Point) && t2 = Pointer(Point) ->
               Pointer(Point)
+        | Mult when t1 = Stone && t2 = Pointer(Point) -> Pointer(Point)
         | Add | Sub | Mult | Div | Pow when t1 = Int && t2 = Int -> Int
         | Add | Sub | Mult | Div | Pow when t1 = Stone && t2 = Stone -> Stone
         | Add | Sub | Mult | Pow when t1 = Mint && t2 = Mint -> Mint
