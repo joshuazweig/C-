@@ -8,7 +8,7 @@
 # Path to the LLVM interpreter
 # LLI="lli"
 
-VER="3.7"
+VER="3.8"
 LLI="/usr/local/opt/llvm@$VER/bin/lli-$VER"
 
 # Path to the microc compiler.  Usually "./microc.native"
