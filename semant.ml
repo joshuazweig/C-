@@ -207,7 +207,8 @@ let check (globals, functions) =
                 ignore (check_assign ft et
                 (Failure ("illegal actual argument found " ^ string_of_typ et ^
                 " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr call))))
-             fd.formals actuals;
+             fd.formals actuals
+             in
            fd.typ
     in
 
