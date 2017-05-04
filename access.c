@@ -27,6 +27,7 @@ void *access_mint(struct mint* m, int index)	{
 		BN_dec2bn(&r, (char *) m->mod);
 	}
 	char *bn = BN_bn2dec(r);
+	BN_clear_free(r);
 	return bn;
 	
 	// printf("ACCESS: index %d gives %d\n", index, *((int *)a[index].val));
@@ -57,10 +58,12 @@ void *access_point(struct point* p, int index)	{
 			BN_dec2bn(&r, (char *) p->y);
 		}
 		char *bn = BN_bn2dec(r);
+		BN_clear_free(r);
 		return bn;
 	}
 }
 
+/*
 int main() {
 	
 	struct mint m;
@@ -92,11 +95,8 @@ int main() {
 	pointx = access_point(&p, 4);
 	printf("Access point: (37=) %s\n", pointx);
 
-	/*BIGNUM *r = BN_new();
-	BN_dec2bn(&r, "5");
-	char *bn = BN_bn2dec(r);
-	printf("%s\n", bn);*/
-}
+
+}*/
 
 
 
