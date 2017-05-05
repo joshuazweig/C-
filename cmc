@@ -1,0 +1,60 @@
+#!/bin/sh
+
+VER="3.8"
+LLC="/usr/local/opt/llvm@$VER/bin/llc-$VER"
+CRYPTO="/usr/lib/libcrypto.0.9.8.dylib"
+TEST="$2"
+
+usage() { echo "Usage: $0 [-h help] [-a ast] [-l llvm] [-c ll-file] [-s s-file] [-e exe-file] <file-name.cm>" 1>&2; exit 1; }
+
+while getopts "h:a:l:c:s:e:" c; do
+	basename=`echo "$TEST" | sed 's/.*\\///
+                             s/.cm//'`
+	# echo "$TEST"                             
+    case $c in
+        # v) # Use Travis Paths
+        #     LLC="/usr/lib/llvm-3.8/bin/llc"
+        #     CRYPTO="/usr/lib/x86_64-linux-gnu/libcrypto.so.0.9.8"
+        #     TEST="$2"
+        #     ;;
+        h) # help
+			usage
+			;;
+		a) # print the AST
+			./cmod.native -a < "$TEST"
+			;;
+		l) # compile to llvm, print to stdout
+			./cmod.native < "$TEST"
+			;;
+		c) # compile to llvm, put in .ll file
+			./cmod.native < "$TEST" > ${basename}.ll
+			;;
+		s) # translate to .s file
+			./cmod.native < "$TEST" > ${basename}.ll
+			"$LLC" ${basename}.ll > ${basename}.s
+			# rm ${basename}.ll 							# Don't keep intermediates
+			;;
+		e) # create executable
+			./cmod.native < "$TEST" > ${basename}.ll
+			"$LLC" ${basename}.ll > ${basename}.s
+			cc -o ${basename} ${basename}.s special_arith.o "$CRYPTO"
+			# rm ${basename}.s
+			# rm ${basename}.ll
+			;;
+		*) # everything else
+			usage
+			;;
+    esac
+done
+
+#Requires you have LLI variable set (I reccomend in your bash profile) to your LLI
+#may need to chmod this script to 755
+
+# DEFAULT
+# ./cmod.native < "$TEST" > ${basename}.ll
+
+
+# "$LLC" ${basename}.ll > ${basename}.s
+
+# cc -o ${basename} ${basename}.s special_arith.o "$CRYPTO"
+# ./${basename}.exe

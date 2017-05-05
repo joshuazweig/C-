@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 VER="3.8"
 LLC="/usr/local/opt/llvm@$VER/bin/llc-$VER"
 CRYPTO="/usr/lib/libcrypto.0.9.8.dylib"
