@@ -31,6 +31,7 @@ struct point {
 int stone_print_func(void *a)
 {
   printf("%s\n", BN_bn2dec(a)); 
+  fflush(stdout);
   return 0; 
 }
 //construct
@@ -192,6 +193,7 @@ int mint_print_func(struct mint a) {
 
 int mint_div_print_func(struct mint a) {
   printf("%s\n", BN_bn2dec(a.val)); 
+  fflush(stdout);
   return 0;
 }
 //Equality and Inequality ops ofr mints are in LRM, 
