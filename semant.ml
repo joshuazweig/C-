@@ -71,6 +71,11 @@ let check (globals, functions) =
        "x")]; locals = []; body = [] });
        ("print_mint", { typ = Int; fname = "print_mint"; formals = [(Mint,
        "x")]; locals = []; body = [] });
+       ("print_point", { typ = Int; fname = "print_point"; formals =
+           [(Pointer(Point), "P")]; locals = []; body = [] });
+       ("print_curve", { typ = Int; fname = "print_curve"; formals =
+           [(Pointer(Curve),
+       "E")]; locals = []; body = [] });
        ("scanf", { typ = Void; fname = "scanf"; formals = [(Pointer(Char), "x")]; 
        locals = []; body = [] });
        ("malloc", { typ = Pointer(Char); fname = "malloc"; formals = [(Int, "x")];
@@ -133,10 +138,13 @@ let check (globals, functions) =
         string_of_expr e))
       | Binop(e1, op, e2) as e -> let t1 = expr table e1 and t2 = expr table e2 in
 	(match op with
-          Add | Sub when t1 = Point && t2 = Point -> Point
+          Add | Sub when t1 = Pointer(Point) && t2 = Pointer(Point) ->
+              Pointer(Point)
+        | Mult when t1 = Stone && t2 = Pointer(Point) -> Pointer(Point)
         | Add | Sub | Mult | Div | Pow when t1 = Int && t2 = Int -> Int
         | Add | Sub | Mult | Div | Pow when t1 = Stone && t2 = Stone -> Stone
         | Add | Sub | Mult | Pow when t1 = Mint && t2 = Mint -> Mint
+        | Pow when t1 = Mint && t2 = Stone -> Mint
 	| Equal | Neq when t1 = t2 -> Int  (* might want to extend this to allow
         e.g., t1 and t2 both integer types so one can do stone=int *)
 	| Less | Leq | Greater | Geq when t1 = Int && t2 = Int -> Int
@@ -149,7 +157,7 @@ let check (globals, functions) =
 	   Neg when t = Int -> Int
          | Neg when t = Stone -> Stone
          | Neg when t = Mint -> Mint
-         | Neg when t = Point -> Point
+         | Neg when t = Pointer(Point) -> Pointer(Point)
          | Neg when t = Char -> Char
          | Not when t = Int -> Int  
          | Deref -> type_of_pointer t e
@@ -160,13 +168,13 @@ let check (globals, functions) =
       | Construct2(e1, e2) -> let t1 = expr table e1 and t2 = expr table e2 in
         (match (t1, t2) with
           (Stone, Stone) -> Mint
-        | (Mint, Mint)   -> Curve
+        | (Mint, Mint)   -> Pointer(Curve)
         | _ -> raise (Failure ("illegal constructor type pair (" ^ string_of_typ t1 
         ^ "," ^ string_of_typ t2 ^ ")")))
       | Construct3(e1, e2, e3) -> let t1 = expr table e1 and t2 = expr table e2
   and t3 = expr table e3 in
         (match (t1, t2, t3) with
-        | (Curve, Stone, Stone) -> Point
+        | (Pointer(Curve), Stone, Stone) -> Pointer(Point)
         | _ -> raise (Failure ("illegal constructor type pair (" ^ string_of_typ t1 
         ^ "," ^ string_of_typ t2 ^ "," ^ string_of_typ t3 ^ ")")))
       | Noexpr -> Void
@@ -198,9 +206,10 @@ let check (globals, functions) =
                let _ = List.iter2 (fun (ft, _) e -> let et = expr table e in
                 ignore (check_assign ft et
                 (Failure ("illegal actual argument found " ^ string_of_typ et ^
-                " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
-               fd.formals actuals in
-         fd.typ
+                " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr call))))
+             fd.formals actuals
+             in
+           fd.typ
     in
 
     let check_int_expr table e = if expr table e != Int
