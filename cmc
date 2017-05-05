@@ -22,7 +22,7 @@ help() { echo "\n \t Welcome to the C% compiler CMC!
 				-e 	executable	Creates the executable version of <file-name>.cm, simply called <file-name> to be run ./<file-name> 
 								(leaves behind the corresponding .ll and .s files as well)" 1>&2; exit 1; }
 
-while getopts "h:a:l:c:s:e:" c; do
+while getopts "h:t:a:l:c:s:e:" c; do
 	basename=`echo "$TEST" | sed 's/.*\\///
                              s/.cm//'`
 	# echo "$TEST"   
@@ -32,8 +32,14 @@ while getopts "h:a:l:c:s:e:" c; do
         h) # help
 			help
 			;;
+		t) # print tokenized program
+			ocamllex scannerprint.mll
+			ocaml scannerprint.ml < "$TEST"
+			;;
 		a) # print the AST to stdout
-			./cmod.native -a < "$TEST"
+			ocamllex scannerprint.mll
+                        ocaml scannerprint.ml < "$TEST" | menhir --interpret --interpret-show-cst parser.mly
+			# ./cmod.native -a < "$TEST"
 			;;
 		l) # compile to llvm, print to stdout
 			./cmod.native < "$TEST"
