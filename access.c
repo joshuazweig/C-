@@ -32,7 +32,7 @@ void *access_mint(struct mint* m, int index)	{
 	
 	// printf("ACCESS: index %d gives %d\n", index, *((int *)a[index].val));
 }
-
+/*
 void *access_curve(struct curve* c, int index)	{
 	
 	if(index < 2) {
@@ -61,7 +61,7 @@ void *access_point(struct point* p, int index)	{
 		BN_clear_free(r);
 		return bn;
 	}
-}
+}*/
 
 /*
 int main() {
@@ -96,7 +96,7 @@ int main() {
 	printf("Access point: (37=) %s\n", pointx);
 
 
-}*/
+}	*/
 
 
 

@@ -70,7 +70,7 @@ let check (globals, functions) =
        ("print_stone", { typ = Int; fname = "print_stone"; formals = [(Stone,
        "x")]; locals = []; body = [] });
 
-       ("access1", {typ = Stone; fname = "access1"; formals = [(Mint, "m"); (Int, "i")]; 
+       ("access1", {typ = Stone; fname = "access1"; formals = [(Mint, "m")]; (* formals = [(Mint, "m"); (Int, "i")];  *)
         locals = []; body = []}); 
 
        ("print_mint", { typ = Int; fname = "print_mint"; formals = [(Mint,
