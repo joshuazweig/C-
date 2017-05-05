@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#Requires you have LLI variable set (I reccomend in your bash profile) to your LLI
+#may need to chmod this script to 755
+
 VER="3.8"
 LLC="/usr/local/opt/llvm@$VER/bin/llc-$VER"
 CRYPTO="/usr/lib/libcrypto.0.9.8.dylib"
@@ -7,20 +10,27 @@ TEST="$2"
 
 usage() { echo "Usage: $0 [-h help] [-a ast] [-l llvm] [-c ll-file] [-s s-file] [-e exe-file] <file-name.cm>" 1>&2; exit 1; }
 
+help() { echo "\n \t Welcome to the C% compiler CMC! 
+				\n \t \t USAGE: $0 [-h help] [-a ast] [-l llvm] [-c ll-file] [-s s-file] [-e exe-file] <file-name.cm>\n 
+				\n \t \t OPTIONS:
+				-h 	help  		This option prints this message!\n
+				-a 	ast 		This option prints the ast of the program to standard out.\n
+				-l 	llvm		Compiles the <file-name.cm> to llvm and prints the result to stdout.\n
+				-c 	ll-file		Comiles <file-name.cm> to llvm and puts the result in <file-name>.ll\n
+				-s 	assembly	Comiles <file-name.cm> to llvm, translates to assembly, and puts the result in <file-name>.s 
+								(also leaves <file-name>.ll)\n
+				-e 	executable	Creates the executable version of <file-name.cm>, simply called <file-name> to be run ./<file-name> 
+								(leaves behind the corresponding .ll and .s files as well)" 1>&2; exit 1; }
+
 while getopts "h:a:l:c:s:e:" c; do
 	basename=`echo "$TEST" | sed 's/.*\\///
                              s/.cm//'`
 	# echo "$TEST"                             
     case $c in
-        # v) # Use Travis Paths
-        #     LLC="/usr/lib/llvm-3.8/bin/llc"
-        #     CRYPTO="/usr/lib/x86_64-linux-gnu/libcrypto.so.0.9.8"
-        #     TEST="$2"
-        #     ;;
         h) # help
-			usage
+			help
 			;;
-		a) # print the AST
+		a) # print the AST to stdout
 			./cmod.native -a < "$TEST"
 			;;
 		l) # compile to llvm, print to stdout
@@ -46,9 +56,6 @@ while getopts "h:a:l:c:s:e:" c; do
 			;;
     esac
 done
-
-#Requires you have LLI variable set (I reccomend in your bash profile) to your LLI
-#may need to chmod this script to 755
 
 # DEFAULT
 # ./cmod.native < "$TEST" > ${basename}.ll
