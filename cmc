@@ -26,9 +26,7 @@ help() { echo "\n \t Welcome to the C% compiler CMC!
 if getopts "h:t:a:l:c:s:e:" c; then
 	basename=`echo "$TEST" | sed 's/.*\\///
                              s/.cm//'`
-	# echo "$TEST"   
 
-	# WANT --> default to -c                          
     case $c in
         h) # help
 			help
