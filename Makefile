@@ -20,8 +20,8 @@ special_arith.o: special_arith.c
 
 cmc: 
 	mkdir bin
-	cp cmc.sh bin/cmc
-	chmod +x bin/cmc
+	cp cmc.sh ./bin/cmc
+	chmod +x ./bin/cmc
 	export PATH="${PWD}/bin:${PATH}"	
 
 .PHONY: clean
