@@ -33,6 +33,8 @@ int main()
   print_div(bob_gap); 
   alice_gap_input = malloc(100);
   scanf(alice_gap_input);
+
+  printf("SYM %s\n", alice_gap_input);
   alice_div = alice_gap_input;
 
   alice_gap = <alice_div, alice_p>;
