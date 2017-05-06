@@ -18,19 +18,22 @@ test_compiler_travis:
 special_arith.o: special_arith.c
 	clang -I/usr/local/opt/openssl/include -c special_arith.c
 
-cmc: cmc.sh
+cmc: 
 	mv cmc.sh cmc
 	chmod +x cmc
 
+cmc.sh:
+	mv cmc cmc.sh
+	chmod -x cmc.sh
+
 .PHONY: clean
-clean :
+clean : cmc.sh
 	ocamlbuild -clean
 	rm -rf testall.log *.diff cmod scanner.ml parser.ml parser.mli
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o 
 	rm -rf *.err *.ll *.diff *.out
 	-rm -f scannerprint.ml *.tmp
 	rm -f *.exe *.s 
-	mv cmc.sh cmc
-	chmod -x cmc.sh
+
 .PHONY : all
 all : clean cmod.native special_arith.o cmc
