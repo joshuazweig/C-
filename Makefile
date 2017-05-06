@@ -32,7 +32,7 @@ clean :
 	rm -rf *.err *.ll *.diff *.out
 	-rm -f scannerprint.ml *.tmp
 	rm -f *.exe *.s 
-	rm -r bin
+	rm -rf bin
 
 .PHONY : all
 all : clean cmod.native special_arith.o cmc
