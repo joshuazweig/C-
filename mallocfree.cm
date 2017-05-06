@@ -1,9 +1,0 @@
-int main()
-{
-	char *a;
-	a = malloc(100);
-	scanf(a);
-	//free(a);
-	//printf("%s\n", a);
-	//return 0;
-}
