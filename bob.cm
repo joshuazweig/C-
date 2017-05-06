@@ -13,13 +13,19 @@ int main()
   char *alice_p_input;
   char *alice_g_input;
 
-  bob_sec = "5";
+  bob_sec = "54";
 
   alice_p_input = malloc(100);
   alice_g_input = malloc(100);
 
   scanf(alice_p_input);
   scanf(alice_g_input);
+
+
+  alice_gap_input = malloc(100);
+  scanf(alice_gap_input);
+
+  alice_div = alice_gap_input;
   //printf("%s\n %s \n", alice_p_input, alice_g_input);
 
   alice_p = alice_p_input;
@@ -31,11 +37,7 @@ int main()
 
   //Send and recieve gaps
   print_div(bob_gap); 
-  alice_gap_input = malloc(100);
-  scanf(alice_gap_input);
-
-  printf("SYM %s\n", alice_gap_input);
-  alice_div = alice_gap_input;
+ 
 
   alice_gap = <alice_div, alice_p>;
 

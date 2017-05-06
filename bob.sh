@@ -1,6 +1,7 @@
 #!/bin/sh
 
 mkfifo mypipe-$$
-cat mypipe-$$ | nc localhost $1 | ./cmod.sh bob.cm > mypipe-$$
+
+cat pipe2 | nc localhost 12345 | sh cmod.sh bob.cm | tee pipe2
 
 rm mypipe-$$

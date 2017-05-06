@@ -11,8 +11,8 @@ int main()
   mint bob_gap; 
   char *bob_gap_input;
   
-  alice_p = "61";
-  alice_g = "43";
+  alice_p = "153";
+  alice_g = "161";
 
   alice_sec = "6";
 
@@ -22,6 +22,7 @@ int main()
   //Send g to Bob
   print_stone(alice_g);
   //print_stone(alice_g);
+  print_div(alice_gap);
 
   //Send and recieve gaps
   //Allice recieves first
@@ -29,7 +30,6 @@ int main()
   scanf(bob_gap_input);
   //printf("SYM: %s\n", bob_gap_input);
   bob_div = bob_gap_input;
-  print_div(alice_gap);
 
 
   bob_gap = <bob_div, alice_p>;
