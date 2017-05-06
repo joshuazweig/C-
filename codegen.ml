@@ -102,6 +102,24 @@ let translate (globals, functions) =
   let stone_mod_func_t = L.function_type obj_pointer [| obj_pointer ; obj_pointer |] in 
   let stone_mod_func = L.declare_function "stone_mod_func" stone_mod_func_t the_module in
 
+  let stone_eq_func_t = L.function_type i32_t [| obj_pointer ; obj_pointer |] in 
+  let stone_eq_func = L.declare_function "stone_eq_func" stone_eq_func_t the_module in
+
+  let stone_neq_func_t = L.function_type i32_t [| obj_pointer ; obj_pointer |] in 
+  let stone_neq_func = L.declare_function "stone_neq_func" stone_neq_func_t the_module in
+
+  let stone_leq_func_t = L.function_type i32_t [| obj_pointer ; obj_pointer |] in 
+  let stone_leq_func = L.declare_function "stone_leq_func" stone_leq_func_t the_module in
+
+  let stone_geq_func_t = L.function_type i32_t [| obj_pointer ; obj_pointer |] in 
+  let stone_geq_func = L.declare_function "stone_geq_func" stone_geq_func_t the_module in
+
+  let stone_less_func_t = L.function_type i32_t [| obj_pointer ; obj_pointer |] in 
+  let stone_less_func = L.declare_function "stone_less_func" stone_less_func_t the_module in
+
+  let stone_greater_func_t = L.function_type i32_t [| obj_pointer ; obj_pointer |] in 
+  let stone_greater_func = L.declare_function "stone_greater_func" stone_greater_func_t the_module in
+
   let stone_print_func_t = L.function_type i32_t [| obj_pointer |] in 
   let stone_print_func = L.declare_function "stone_print_func" stone_print_func_t the_module in
 
@@ -122,8 +140,7 @@ let translate (globals, functions) =
 
   (* stone * point, i.e. add point to itself stone many times *)
   let point_mult_func_t = L.function_type point_ptr [| obj_pointer ; point_ptr |] in 
-  let point_mult_func = L.declare_function "point_mult_func" point_mult_func_t
-  the_module in 
+  let point_mult_func = L.declare_function "point_mult_func" point_mult_func_t the_module in 
 
   let stone_create_func_t = L.function_type obj_pointer [| L.pointer_type i8_t |] in 
   let stone_create_func = L.declare_function "stone_create_func" stone_create_func_t the_module in 
@@ -302,6 +319,30 @@ let translate (globals, functions) =
                 call
               | A.Mod -> 
                 let call = L.build_call stone_mod_func [| e1' ; e2' |] "stone_mod_res" builder in 
+                  let _ = manage leaf1 leaf2 e1' e2' in 
+                call
+              | A.Equal -> 
+                let call = L.build_call stone_eq_func [| e1' ; e2' |] "stone_eq_res" builder in 
+                  let _ = manage leaf1 leaf2 e1' e2' in 
+                call
+              | A.Neq -> 
+                let call = L.build_call stone_neq_func [| e1' ; e2' |] "stone_neq_res" builder in 
+                  let _ = manage leaf1 leaf2 e1' e2' in 
+                call
+              | A.Less -> 
+                let call = L.build_call stone_less_func [| e1' ; e2' |] "stone_less_res" builder in 
+                  let _ = manage leaf1 leaf2 e1' e2' in 
+                call
+              | A.Leq -> 
+                let call = L.build_call stone_leq_func [| e1' ; e2' |] "stone_leq_res" builder in 
+                  let _ = manage leaf1 leaf2 e1' e2' in 
+                call
+              | A.Greater -> 
+                let call = L.build_call stone_greater_func [| e1' ; e2' |] "stone_greater_res" builder in 
+                  let _ = manage leaf1 leaf2 e1' e2' in 
+                call
+              | A.Geq -> 
+                let call = L.build_call stone_geq_func [| e1' ; e2' |] "stone_geq_res" builder in 
                   let _ = manage leaf1 leaf2 e1' e2' in 
                 call
               | _ as o -> raise(Failure("Illegal operator " ^  A.string_of_op o

@@ -134,6 +134,49 @@ void* stone_pow_func(void *a, void *p)
   return r;
 }
 
+//Comparators
+
+//0 if true, else false
+int stone_eq_func(void *a, void *b)
+{
+  return BN_cmp(a, b);
+}
+
+//O if true, else false
+int stone_neq_func(void *a, void *b)
+{
+  return !BN_cmp(a, b);
+}
+
+int stone_less_func(void *a, void *b)
+{
+  if (BN_cmp(a, b) == -1)
+    return 0;
+  return 1;
+}
+
+int stone_leq_func(void *a, void *b)
+{
+  if (BN_cmp(a, b) <= 0)
+    return 0;
+  return 1;
+
+}
+
+int stone_greater_func(void *a, void *b)
+{
+  if (BN_cmp(a, b) == 1)
+      return 0;
+    return 1;
+}
+
+int stone_geq_func(void *a, void *b)
+{
+  if (BN_cmp(a, b) >= 0)
+    return 0;
+  return 1;   
+}
+
 /* for point mult */
 
 char *hex_to_bin_help(char *hx) {
