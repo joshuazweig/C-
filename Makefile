@@ -19,8 +19,9 @@ special_arith.o: special_arith.c
 	clang -I/usr/local/opt/openssl/include -c special_arith.c
 
 cmc: 
-	cp cmc.sh ./cmc
-	chmod +x ./cmc
+	mkdir bin
+	cp cmc.sh ./bin/cmc
+	chmod +x ./bin/cmc
 
 .PHONY: clean
 clean : 
@@ -30,7 +31,7 @@ clean :
 	rm -rf *.err *.ll *.diff *.out
 	-rm -f scannerprint.ml *.tmp
 	rm -f *.exe *.s 
-	rm cmc 
+	rm -rf bin 
 
 .PHONY : all
 all : clean cmod.native special_arith.o cmc
