@@ -22,7 +22,12 @@ int main() {
     
     char *x;
     x = malloc(100);
-    while (2 == 2) {
+    int msg_len;
+    int i;
+    scanf(x);
+    msg_len = atoi(x);
+    printf("%s\n", x);
+    for (i = 0; i < msg_len; i = i + 1) {
         scanf(x);
         stone z_div;
         mint z;

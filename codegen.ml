@@ -108,6 +108,9 @@ let translate (globals, functions) =
   let mint_print_func_t = L.function_type i32_t [| mint_type |] in 
   let mint_print_func = L.declare_function "mint_print_func" mint_print_func_t the_module in
   
+  let div_print_func_t = L.function_type i32_t [| mint_type |] in 
+  let div_print_func = L.declare_function "div_print_func" div_print_func_t the_module in
+  
   let point_print_func_t = L.function_type i32_t [| point_ptr |] in 
   let point_print_func = L.declare_function "point_print_func" point_print_func_t the_module in
 
@@ -119,6 +122,9 @@ let translate (globals, functions) =
 
   let point_sub_func_t = L.function_type point_ptr [| point_ptr ; point_ptr |] in 
   let point_sub_func = L.declare_function "point_sub_func" point_sub_func_t the_module in 
+ 
+  let atoi_func_t = L.function_type i32_t [| L.pointer_type i8_t |] in
+  let atoi_func = L.declare_function "atoi" atoi_func_t the_module in
 
   (* stone * point, i.e. add point to itself stone many times *)
   let point_mult_func_t = L.function_type point_ptr [| obj_pointer ; point_ptr |] in 
@@ -365,6 +371,8 @@ let translate (globals, functions) =
           (L.build_call stone_print_func [| e' |] "stone_print_func" builder, (t, 0)); 
       | A.Call("print_mint", [e]) -> let (e', (t, _)) = expr table builder e in 
           (L.build_call mint_print_func [| e' |] "mint_print_func" builder, (t, 0));
+      | A.Call("print_div", [e]) -> let (e', (t, _)) = expr table builder e in 
+          (L.build_call div_print_func [| e' |] "div_print_func" builder, (t, 0));
       | A.Call("scanf", [e]) -> 
           let (e', (t, _)) = expr table builder e in 
             ignore(L.build_call read_func [| char_format_str ; e' |] "scanf" builder ); 
@@ -375,6 +383,9 @@ let translate (globals, functions) =
       | A.Call("free", [e]) -> 
           let (e', (t, _)) = expr table builder e in
           (L.build_free e' builder, (A.Void, 0)) (*void correct?*)
+      | A.Call("atoi", [e]) ->
+          let (e', (t, _)) = expr table builder e in
+          (L.build_call atoi_func [| e' |] "atoi_res" builder, (t, 0));
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
 	         let actuals, _ = List.split (List.rev (List.map (expr table builder) (List.rev act))) in

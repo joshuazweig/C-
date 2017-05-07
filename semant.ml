@@ -66,10 +66,13 @@ let check (globals, functions) =
        (* change formals to be variadic? Right now, this is fixed by just not 
        comparing formals and actuals list if the name of the function is printf  *)
        locals = []; body = [] });
-
+       ("atoi", { typ = Int; fname = "atoi"; formals = [(Pointer(Char),
+       "x")]; locals = []; body = [] });
        ("print_stone", { typ = Int; fname = "print_stone"; formals = [(Stone,
        "x")]; locals = []; body = [] });
        ("print_mint", { typ = Int; fname = "print_mint"; formals = [(Mint,
+       "x")]; locals = []; body = [] });
+       ("print_div", { typ = Int; fname = "print_div"; formals = [(Mint,
        "x")]; locals = []; body = [] });
        ("print_point", { typ = Int; fname = "print_point"; formals =
            [(Pointer(Point), "P")]; locals = []; body = [] });
