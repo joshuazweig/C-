@@ -111,6 +111,10 @@ let translate (globals, functions) =
   let point_print_func_t = L.function_type i32_t [| point_ptr |] in 
   let point_print_func = L.declare_function "point_print_func" point_print_func_t the_module in
 
+  let point_print_sep_func_t = L.function_type i32_t [| point_ptr |] in 
+  let point_print_sep_func = L.declare_function "point_print_sep_func"
+  point_print_sep_func_t the_module in
+  
   let curve_print_func_t = L.function_type i32_t [| curve_ptr |] in 
   let curve_print_func = L.declare_function "curve_print_func" curve_print_func_t the_module in
 
@@ -359,6 +363,8 @@ let translate (globals, functions) =
             (A.Pointer(A.Char), 0))
       | A.Call("print_point", [e]) -> let (e', (t, _)) = expr table builder e in 
           (L.build_call point_print_func [| e' |] "point_print_res" builder, (t, 0));
+      | A.Call("print_point_sep", [e]) -> let (e', (t, _)) = expr table builder e in 
+          (L.build_call point_print_sep_func [| e' |] "point_print_res" builder, (t, 0));
       | A.Call("print_curve", [e]) -> let (e', (t, _)) = expr table builder e in 
           (L.build_call curve_print_func [| e' |] "curve_print_res" builder, (t, 0));
       | A.Call("print_stone", [e]) -> let (e', (t, _)) = expr table builder e in 
