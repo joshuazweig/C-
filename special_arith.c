@@ -403,6 +403,11 @@ int point_print_func(struct point *P) {
     return 0;
 }
 
+int point_print_sep_func(struct point *P) {
+    printf("%s\n%s\n", BN_bn2dec(P->x), BN_bn2dec(P->y));
+    return 0;
+}
+
 int curve_print_func(struct curve *E) {
     printf("a: %s\nb: %s\np: %s\n", BN_bn2dec(E->a.val), BN_bn2dec(E->b.val), 
             BN_bn2dec(E->a.mod));

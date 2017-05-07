@@ -7,7 +7,6 @@ int main() {
     stone b;
     stone p;
     stone t;
-    stone u;
 
     a = "7";
     b = "26";
@@ -28,11 +27,21 @@ int main() {
     t = "23"; // bob's private key
     P = t * P;
 
-    print_point(P);// send it over
+    print_point_sep(P);// send it over
 
-    u = "13"; //magically get alice's private key
+    char *x;
+    char *y;
+
+    x = malloc(100);
+    y = malloc(100);
+    
+    scanf(x);
+    scanf(y);
+
+    a = x;
+    b = y;
+
     Q = <E, a, b>;
-    Q = u * Q;
 
     print_point(t * Q);
     return 0;

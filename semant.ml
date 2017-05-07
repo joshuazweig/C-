@@ -73,6 +73,8 @@ let check (globals, functions) =
        "x")]; locals = []; body = [] });
        ("print_point", { typ = Int; fname = "print_point"; formals =
            [(Pointer(Point), "P")]; locals = []; body = [] });
+       ("print_point_sep", { typ = Int; fname = "print_point_sep"; formals =
+           [(Pointer(Point), "P")]; locals = []; body = [] });
        ("print_curve", { typ = Int; fname = "print_curve"; formals =
            [(Pointer(Curve),
        "E")]; locals = []; body = [] });
