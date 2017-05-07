@@ -1,0 +1,19 @@
+terminal 1:
+
+gcc -o bob-in bob.c
+./bob-in | nc localhost 10003
+
+
+terminal 2:
+
+cat pipe1 | nc localhost 10002 | nc -l 10003 | ./cmod.sh bob-encrypt.c | tee pipe1
+
+
+terminal 3:
+
+cat pipe2 | nc localhost 10001 | nc -l 10002 | ./cmod.sh alce-decrypt.c | tee pipe2
+
+
+terminal 4:
+
+nc -l 10001 | ./alice-out
