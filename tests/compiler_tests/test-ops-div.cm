@@ -1,0 +1,5 @@
+int main()
+{
+  printf("%d\n", 100/2);
+  return 0;
+}

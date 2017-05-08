@@ -1,8 +1,6 @@
 int main() {
     stone a;
     stone b;
-    stone c;
-    stone d;
 
     stone a1;
     stone b1;
@@ -10,8 +8,6 @@ int main() {
 
     a = "25";
     b = "37";
-    c = "19";
-    d = "8";
 
     a1 = "7";
     b1 = "26";
@@ -26,11 +22,10 @@ int main() {
     E = <A, B>;
 
     point *P;
-    point *Q;
 
     P = <E, a, b>;
-    Q = <E, c, d>;
 
-    print_point(P+Q); // should print (59, 2)
+    print_point(P);
     return 0;
+
 }
