@@ -385,6 +385,11 @@ struct mint mint_pow_func(struct mint* a, struct mint* b) {
 
 /* testing function */
 
+int div_print_func(struct mint a) {
+    printf("%s\n", BN_bn2dec(a.val));
+    return 0;
+}
+
 int mint_print_func(struct mint a) {
     printf("<%s, %s>\n", BN_bn2dec(a.val), BN_bn2dec(a.mod));
     return 0;
