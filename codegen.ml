@@ -379,18 +379,14 @@ let translate (globals, functions) =
            | _ -> raise(Failure("not implemented yet"))) e' "tmp" builder
            (* | A.Deref   -> L.build_load e' "tmp" builder  *) (* load object pointed to *)
            (* | A.AddrOf  -> fst(lookup e')  *)(*L.build_store e'  builder*)  (* (L.build_alloca (ltype_of_typ (A.Pointer t)) "tmp" builder)create pointer to address of object -- want what is returned by L.build_alloca -- could just move stuff everytime? seems inefficient *)
-           (* | A.Access  -> match t with
-               A.Mint -> L.build_call access_mint [| e' |] "access_mint" builder
-              | A.Curve -> L.build_call access_curve [| e' |] "access_curve" builder
-              | A.Point -> L.build_call access_point [| e' |] "access_point" builder *)
+           
           ), (match op with
             A.Neg -> (t, 0)
             | A.Not -> (t, 0)
             | _ -> (t, 0)
             (* | A.Deref -> (match t with
                 A.Pointer x -> x)
-            | A.AddrOf -> A.Pointer t
-            | A.Access -> A.Pointer A.Stone *))) *)
+            | A.AddrOf -> A.Pointer t *))) *)
 
        | A.Assign (s, e) -> let (e', (t, _)) = expr table builder e and
                               (* if t string, otherwise is behavior normal?*)
@@ -409,20 +405,12 @@ let translate (globals, functions) =
                        
 
 
-       | A.Call("access_mint", [e; i]) -> let (e', (t, _)) = expr table builder e and (i', (t', _)) = expr table builder i in 
+      | A.Call("access_mint", [e; i]) -> let (e', (t, _)) = expr table builder e and (i', (t', _)) = expr table builder i in 
           (L.build_call access_mint [| e' ; i' |] "access_mint" builder, (A.Stone, 0));
-       | A.Call("access_curve", [e; i]) -> let (e', (t, _)) = expr table builder e and (i', (t', _)) = expr table builder i in 
+      | A.Call("access_curve", [e; i]) -> let (e', (t, _)) = expr table builder e and (i', (t', _)) = expr table builder i in 
           (L.build_call access_curve [| e' ; i' |] "access_curve" builder, (A.Stone, 0));
-       | A.Call("access_point", [e; i]) -> let (e', (t, _)) = expr table builder e and (i', (t', _)) = expr table builder i in 
+      | A.Call("access_point", [e; i]) -> let (e', (t, _)) = expr table builder e and (i', (t', _)) = expr table builder i in 
           (L.build_call access_point [| e' ; i' |] "access_point" builder, (A.Stone, 0));
-       (* | A.Call("access1", [e]) -> let (e', (t, _)) = expr table builder e and i' = (L.const_int i32_t 0) in  *)
-           (* (match t with
-             A.Mint -> (L.build_call mint_print_func [| e' |] "mint_print_func" builder, (t, 0)));
-          ((match t with
-            A.Mint -> L.build_call access_mint [| e' ; i' |] "access_mint" builder
-            | A.Curve -> L.build_call access_curve [| e' ; i' |] "access_curve" builder
-            | A.Point -> L.build_call access_point [| e' ; i' |] "access_point" builder),
-            (A.Stone, 0))   *)
       | A.Call ("printf", act) ->
           let actuals, _ = List.split (List.rev (List.map (expr table builder)
           (List.rev act))) in

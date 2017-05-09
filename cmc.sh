@@ -68,6 +68,6 @@ else
 
 	"$LLC" ${basename}.ll > ${basename}.s
 
-	cc -o ${basename} ${basename}.s special_arith.o "$CRYPTO"
+	cc -o ${basename} ${basename}.s special_arith.o access.o "$CRYPTO"
 fi
 
