@@ -4,31 +4,6 @@
 #include <openssl/bn.h>
 #include "types.h"
 
-
-/*  
-struct stone {
-    // actually a linked list of ints 
-    // int val;
-
-struct mint {
-
-    void *val;
-    void *mod; //should be immutable
-};
-
-struct curve {
-    struct mint a;
-    struct mint b;
-};
-
-struct point {
-    struct curve E;
-    void *x;
-    void *y;
-    char inf;
-};
-*/
-
 /*
 * Stone
 * @Michael We will need to implement these based on the bignum
@@ -441,12 +416,15 @@ int curve_print_func(struct curve *E) {
 //Point inversion
 /*struct point invert_point_func(struct point p)
 {
-  struct point inv_p;
-  inv_p.E = p.E;
-  inv_p.x = p.x;
-  inv_p.y = p.y; //invert
-  inv_p.inf = p.inf;  // not infinity
+  struct point *inv_p;
+  inv_p = (struct point *)malloc(sizeof(struct point));
+  inv_p->E = p.E;
+  inv_p->x = p.x;
+  inv_p->y = p.y; //invert
+  inv_p->inf = p.inf;  // not infinity
 
-  return inv_p;
+  return *inv_p;
 }*/
+
+
 
