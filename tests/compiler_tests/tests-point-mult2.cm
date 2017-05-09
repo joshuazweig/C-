@@ -32,5 +32,6 @@ int main() {
     Q = <E, c, d>;
 
     print_point(P+Q); // should print (59, 2)
+    print_point(P); //should print original P <25,37>
     return 0;
 }

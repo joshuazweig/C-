@@ -31,6 +31,6 @@ int main() {
     P = <E, a, b>;
     Q = <E, c, d>;
 
-    print_point(P+Q); // should print (59, 2)
+    print_point(P-Q); // should print (58, 51)
     return 0;
 }

@@ -1,6 +1,4 @@
 int main() {
-    stone a;
-    stone b;
     stone c;
     stone d;
 
@@ -8,8 +6,6 @@ int main() {
     stone b1;
     stone p;
 
-    a = "25";
-    b = "37";
     c = "19";
     d = "8";
 
@@ -25,12 +21,16 @@ int main() {
     B = <b1, p>;
     E = <A, B>;
 
-    point *P;
-    point *Q;
+    print_curve(E);
 
-    P = <E, a, b>;
+    point *Q;
+    point *R;
+
     Q = <E, c, d>;
 
-    print_point(P+Q); // should print (59, 2)
+    d = "53";
+    R = <E, c, d>;
+
+    print_point(Q+R); // should print inf
     return 0;
 }
