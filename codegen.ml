@@ -363,31 +363,15 @@ let translate (globals, functions) =
                (* | A.Point -> L.build_call invert_point_func [| e' |] "invert_point_func" builder *) )  (* Point inversion *)
            | A.Not     -> L.build_icmp L.Icmp.Eq (L.const_null (ltype_of_typ t)) e' "tmp" builder  (* Still need to test on Pointer types *)
            | _ -> raise(Failure("not implemented yet")) e' "tmp" builder
-           
-          ), (match op with
-            A.Neg -> (t, 0)
-            | A.Not -> (t, 0)
-            | _ -> (t, 0)
-            )) 
-        (*| A.Unop(op, e) -> 
-          let e', (t, _) = expr table builder e in
-          ((match op with
-            A.Neg     -> (match t with
-                A.Int -> L.build_neg e' "tmp" builder
-               (* | A.Point -> L.build_call invert_point_func [| e' |] "invert_point_func" builder *) )  (* Point inversion *)
-           | A.Not     -> L.build_icmp L.Icmp.Eq (L.const_null (ltype_of_typ t)) e' "tmp" builder  (* Still need to test on Pointer types *)
-           | _ -> raise(Failure("not implemented yet"))) e' "tmp" builder
-           (* | A.Deref   -> L.build_load e' "tmp" builder  *) (* load object pointed to *)
-           (* | A.AddrOf  -> fst(lookup e')  *)(*L.build_store e'  builder*)  (* (L.build_alloca (ltype_of_typ (A.Pointer t)) "tmp" builder)create pointer to address of object -- want what is returned by L.build_alloca -- could just move stuff everytime? seems inefficient *)
-           
+        (* | A.Deref   -> L.build_load e' "tmp" builder  *) (* load object pointed to *)
+        (* | A.AddrOf  -> fst(lookup e')  *)(*L.build_store e'  builder*)
           ), (match op with
             A.Neg -> (t, 0)
             | A.Not -> (t, 0)
             | _ -> (t, 0)
             (* | A.Deref -> (match t with
                 A.Pointer x -> x)
-            | A.AddrOf -> A.Pointer t *))) *)
-
+            | A.AddrOf -> A.Pointer t *)))   
        | A.Assign (s, e) -> let (e', (t, _)) = expr table builder e and
                               (* if t string, otherwise is behavior normal?*)
                             (*snd lookup is type of thing*)
