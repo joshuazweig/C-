@@ -1,0 +1,31 @@
+int main() {
+    stone a;
+    stone b;
+
+    stone a1;
+    stone b1;
+    stone p;
+
+    a = "25";
+    b = "37";
+
+    a1 = "7";
+    b1 = "26";
+    p = "61";
+
+    mint A;
+    mint B;
+    curve *E;
+
+    A = <a1, p>;
+    B = <b1, p>;
+    E = <A, B>;
+
+    point *P;
+
+    P = <E, a, b>;
+
+    print_point(P);
+    return 0;
+
+}

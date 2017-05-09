@@ -1,0 +1,27 @@
+Must start the terminals in backwards order (5-4-3-2-1)
+
+terminal 1:
+
+gcc -o bob-in bob.c
+./bob-in | nc localhost 10003
+
+
+terminal 2 (Just prints the numbers):
+
+cat pipe3 | nc localhost 10003 | nc -l 10004 | tee pipe3
+
+
+terminal 3 (Bob):
+
+cat pipe1 | nc localhost 10002 | nc -l 10003 | ./cmod.sh ElGamal_demo/bob-encrypt.cm | tee pipe1
+
+
+terminal 4 (Alice):
+
+cat pipe2 | nc localhost 10001 | nc -l 10002 | ./cmod.sh ElGamal_demo/alice-decrypt.cm | tee pipe2
+
+
+terminal 5:
+
+gcc -o alice-out alice.c
+nc -l 10001 | ./alice-out

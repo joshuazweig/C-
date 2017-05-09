@@ -1,0 +1,48 @@
+int main() {
+    curve *E;
+    mint A;
+    mint B;
+
+    stone a;
+    stone b;
+    stone p;
+    stone t;
+
+    a = "7";
+    b = "26";
+    p = "61";
+
+    A = <a, p>;
+    B = <b, p>;
+
+    E = <A, B>;
+
+    point *P;
+    point *Q;
+
+    a = "25";
+    b = "37";
+
+    P = <E, a, b>;
+    t = "23"; // bob's private key
+    P = t * P;
+
+    print_point_sep(P);// send it over
+
+    char *x;
+    char *y;
+
+    x = malloc(100);
+    y = malloc(100);
+    
+    scanf(x);
+    scanf(y);
+
+    a = x;
+    b = y;
+
+    Q = <E, a, b>;
+
+    print_point(t * Q);
+    return 0;
+}

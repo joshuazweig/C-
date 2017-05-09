@@ -1,0 +1,37 @@
+int main() {
+    stone a;
+    stone b;
+    stone c;
+    stone d;
+
+    stone a1;
+    stone b1;
+    stone p;
+
+    a = "25";
+    b = "37";
+    c = "19";
+    d = "8";
+
+    a1 = "7";
+    b1 = "26";
+    p = "61";
+
+    mint A;
+    mint B;
+    curve *E;
+
+    A = <a1, p>;
+    B = <b1, p>;
+    E = <A, B>;
+
+    point *P;
+    point *Q;
+
+    P = <E, a, b>;
+    Q = <E, c, d>;
+
+    print_point(P+Q); // should print (59, 2)
+    print_point(P); //should print original P <25,37>
+    return 0;
+}

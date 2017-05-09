@@ -1,0 +1,36 @@
+int main() {
+    stone c;
+    stone d;
+
+    stone a1;
+    stone b1;
+    stone p;
+
+    c = "19";
+    d = "8";
+
+    a1 = "7";
+    b1 = "26";
+    p = "61";
+
+    mint A;
+    mint B;
+    curve *E;
+
+    A = <a1, p>;
+    B = <b1, p>;
+    E = <A, B>;
+
+    print_curve(E);
+
+    point *Q;
+    point *R;
+
+    Q = <E, c, d>;
+
+    d = "53";
+    R = <E, c, d>;
+
+    print_point(Q+R); // should print inf
+    return 0;
+}
