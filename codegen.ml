@@ -157,10 +157,10 @@ let translate (globals, functions) =
   let access_mint_t = L.function_type obj_pointer [| mint_type ; i32_t |] in
     let access_mint = L.declare_function "access_mint" access_mint_t the_module in
 
-  let access_curve_t = L.function_type obj_pointer [| curve_type ; i32_t |] in
+  let access_curve_t = L.function_type obj_pointer [| curve_ptr ; i32_t |] in
     let access_curve = L.declare_function "access_curve" access_curve_t the_module in
 
-  let access_point_t = L.function_type obj_pointer [| point_type ; i32_t |] in
+  let access_point_t = L.function_type obj_pointer [| point_ptr ; i32_t |] in
     let access_point = L.declare_function "access_point" access_point_t the_module in
 
   let invert_point_func_t = L.function_type point_type [| point_type |] in

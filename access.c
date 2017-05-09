@@ -26,13 +26,13 @@ void *access_mint(struct mint m, int index)	{
 
 
 
-void *access_curve(struct curve c, int index)	{
+void *access_curve(struct curve *c, int index)	{
 	
 	if(index < 2) {
-		return access_mint(c.a, index);
+		return access_mint(c->a, index);
 	}
 	else {
-		return access_mint(c.b, index-2);
+		return access_mint(c->b, index-2);
 	}
 
 }

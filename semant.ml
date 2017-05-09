@@ -79,9 +79,9 @@ let check (globals, functions) =
 
        ("access_mint", {typ = Stone; fname = "access_mint"; formals = [(Mint, "m"); (Int, "i")];  
         locals = []; body = []}); 
-       ("access_curve", {typ = Stone; fname = "access_curve"; formals = [(Curve, "c"); (Int, "i")];  
+       ("access_curve", {typ = Stone; fname = "access_curve"; formals = [(Pointer(Curve), "c"); (Int, "i")];  
         locals = []; body = []}); 
-       ("access_point", {typ = Stone; fname = "access_point"; formals = [(Point, "p"); (Int, "i")];  
+       ("access_point", {typ = Stone; fname = "access_point"; formals = [(Pointer(Point), "p"); (Int, "i")];  
         locals = []; body = []}); 
 
        ("print_mint", { typ = Int; fname = "print_mint"; formals = [(Mint,
