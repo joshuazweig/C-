@@ -439,7 +439,7 @@ int curve_print_func(struct curve *E) {
 */
 
 //Point inversion
-struct point invert_point_func(struct point p)
+/*struct point invert_point_func(struct point p)
 {
   struct point inv_p;
   inv_p.E = p.E;
@@ -448,5 +448,5 @@ struct point invert_point_func(struct point p)
   inv_p.inf = p.inf;  // not infinity
 
   return inv_p;
-}
+}*/
 
