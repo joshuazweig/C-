@@ -65,9 +65,5 @@ else
 	basename=`echo "$TEST" | sed 's/.*\\///
                              s/.cm//'`
 	./cmod.native < "$TEST" > ${basename}.ll
-
-	"$LLC" ${basename}.ll > ${basename}.s
-
-	cc -o ${basename} ${basename}.s special_arith.o access.o "$CRYPTO"
 fi
 
