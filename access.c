@@ -22,43 +22,21 @@ void *access_mint(struct mint m, int index)	{
 
 	if(index == 0) { return m.val; }
 	return m.mod;
-	// return m.mod;
-	// return BN_bn2dec(m.val);
-	// printf("%s\n", BN_bn2dec(m.val));
-	// return "5";
-	// int index = 0;
-	// printf("In access_mint\n");
-	// BIGNUM *r = BN_new();
-	// if(index == 0) {
-	// 	BN_dec2bn(&r, (char *) m->val);
-	// }
-	// else {
-	// 	BN_dec2bn(&r, (char *) m->mod);
-	// }
-	// char *bn = BN_bn2dec(r);
-	// BN_clear_free(r);
-	// return bn;
-	// return "5";
-	
-	// printf("ACCESS: index %d gives %d\n", index, *((int *)a[index].val));
 }
 
-// int mint_print_func(struct mint a) {
-//     printf("<%s, %s>\n", BN_bn2dec(a.val), BN_bn2dec(a.mod));
-//     return 0;
-// }
-/*
-void *access_curve(struct curve* c, int index)	{
+
+
+void *access_curve(struct curve c, int index)	{
 	
 	if(index < 2) {
-		return access_mint(&(c->a), index);
+		return access_mint(c.a, index);
 	}
 	else {
-		return access_mint(&(c->b), index-2);
+		return access_mint(c.b, index-2);
 	}
 
 }
-
+/*
 void *access_point(struct point* p, int index)	{
 
 	if(index < 4)	{

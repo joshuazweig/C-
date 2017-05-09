@@ -44,8 +44,14 @@ let check (globals, functions) =
   if List.mem "printf" (List.map (fun fd -> fd.fname) functions)
   then raise (Failure ("function printf may not be defined")) else ();
   
-  if List.mem "access1" (List.map (fun fd -> fd.fname) functions)
-  then raise (Failure ("function access may not be defined")) else ();
+  if List.mem "access_mint" (List.map (fun fd -> fd.fname) functions)
+  then raise (Failure ("function access_mint may not be defined")) else ();
+
+  if List.mem "access_curve" (List.map (fun fd -> fd.fname) functions)
+  then raise (Failure ("function access_curve may not be defined")) else ();
+
+  if List.mem "access_point" (List.map (fun fd -> fd.fname) functions)
+  then raise (Failure ("function access_point may not be defined")) else ();
  
   if List.mem "scanf" (List.map (fun fd -> fd.fname) functions)
   then raise (Failure ("function scanf may not be defined")) else ();
@@ -71,7 +77,11 @@ let check (globals, functions) =
        ("print_stone", { typ = Int; fname = "print_stone"; formals = [(Stone,
        "x")]; locals = []; body = [] });
 
-       ("access1", {typ = Stone; fname = "access1"; formals = [(Mint, "m"); (Int, "x")]; (* formals = [(Mint, "m"); (Int, "i")];  *)
+       ("access_mint", {typ = Stone; fname = "access_mint"; formals = [(Mint, "m"); (Int, "i")];  
+        locals = []; body = []}); 
+       ("access_curve", {typ = Stone; fname = "access_curve"; formals = [(Curve, "c"); (Int, "i")];  
+        locals = []; body = []}); 
+       ("access_point", {typ = Stone; fname = "access_point"; formals = [(Point, "p"); (Int, "i")];  
         locals = []; body = []}); 
 
        ("print_mint", { typ = Int; fname = "print_mint"; formals = [(Mint,
