@@ -1,0 +1,8 @@
+Calling print_stone on a (=3): 3
+Calling print_stone on b (=5): 5
+Calling print_stone on c (=37): 37
+Calling print_stone on d (=101): 101
+Printing result of access_curve(cc, 0), should = a: 3
+Printing result of access_curve(cc, 1), should = b: 5
+Printing result of access_curve(cc, 2), should = c: 37
+Printing result of access_curve(cc, 3), should = d: 101

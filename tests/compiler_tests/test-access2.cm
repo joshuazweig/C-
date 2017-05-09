@@ -1,0 +1,59 @@
+int main()
+{
+
+	stone a;
+	stone b;
+	stone c;
+	stone d;
+
+	stone a1;
+	stone b1;
+	stone c1;
+	stone d1;
+
+	mint m;
+	mint n;
+
+	//curve cc;
+
+	a = "3";
+	b = "5";
+	c = "37";
+	d = "101";
+
+	m = <a, b>;
+	n = <c, d>;
+
+	//cc = <m, n>;
+
+	printf("Calling print_stone on a (=3): ");
+	print_stone(a);
+
+	printf("Calling print_stone on b (=5): ");
+	print_stone(b);
+
+	printf("Calling print_stone on c (=37): ");
+	print_stone(c);
+
+	printf("Calling print_stone on d (=101): ");
+	print_stone(d);
+
+	a1 = access_curve(<m, n>, 0);
+	printf("Printing result of access_curve(cc, 0), should = a: ");
+	print_stone(a1);
+
+	b1 = access_curve(<m, n>, 1);
+	printf("Printing result of access_curve(cc, 1), should = b: ");
+	print_stone(b1);
+
+	c1 = access_curve(<m, n>, 2);
+	printf("Printing result of access_curve(cc, 2), should = c: ");
+	print_stone(c1);
+
+	d1 = access_curve(<m, n>, 3);
+	printf("Printing result of access_curve(cc, 3), should = d: ");
+	print_stone(d1);
+
+		
+	return 0;
+}

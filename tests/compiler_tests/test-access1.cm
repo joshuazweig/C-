@@ -1,0 +1,28 @@
+int main()
+{
+
+	stone a;
+	stone b;
+	stone c;
+	stone d;
+	mint m; 
+	a = "3";
+	b = "5";
+	m = <a, b>;
+
+	printf("Calling print_stone on a (=3): ");
+	print_stone(a);
+
+	printf("Calling print_stone on b (=5): ");
+	print_stone(b);
+
+	c = access_mint(m, 0);
+	printf("Printing result of access_mint(m, 0), should = a: ");
+	print_stone(c);
+
+	d = access_mint(m, 1);
+	printf("Printing result of access_mint(m, 1), should = b: ");
+	print_stone(d);
+		
+	return 0;
+}

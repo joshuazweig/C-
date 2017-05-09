@@ -1,0 +1,82 @@
+int main()
+{
+
+	stone a;
+	stone b;
+	stone c;
+	stone d;
+	stone e;
+	stone f;
+
+	stone a1;
+	stone b1;
+	stone c1;
+	stone d1;
+	stone e1;
+	stone f1;
+
+	mint m;
+	mint n;
+
+	//curve cc;
+	//point p;
+
+	a = "3";
+	b = "5";
+	c = "37";
+	d = "101";
+	e = "103";
+	f = "107";
+
+	m = <a, b>;
+	n = <c, d>;
+
+	//cc = <m, n>;
+
+	printf("Calling print_stone on a (=3): ");
+	print_stone(a);
+
+	printf("Calling print_stone on b (=5): ");
+	print_stone(b);
+
+	printf("Calling print_stone on c (=37): ");
+	print_stone(c);
+
+	printf("Calling print_stone on d (=101): ");
+	print_stone(d);
+
+	printf("Calling print_stone on d (=101): ");
+	print_stone(e);
+
+	printf("Calling print_stone on d (=101): ");
+	print_stone(f);
+
+	// p = <cc, e, f> = <<m, n>, e, f>;
+
+	a1 = access_point(<<m, n>, e, f>, 0);
+	printf("Printing result of access_point(p, 0), should = a: ");
+	print_stone(a1);
+
+	b1 = access_point(<<m, n>, e, f>, 1);
+	printf("Printing result of access_point(p, 1), should = b: ");
+	print_stone(b1);
+
+	c1 = access_point(<<m, n>, e, f>, 2);
+	printf("Printing result of access_point(p, 2), should = c: ");
+	print_stone(c1);
+
+	d1 = access_point(<<m, n>, e, f>, 3);
+	printf("Printing result of access_point(p, 3), should = d: ");
+	print_stone(d1);
+
+	e1 = access_point(<<m, n>, e, f>, 4);
+	printf("Printing result of access_point(p, 4), should = e: ");
+	print_stone(e1);
+
+	f1 = access_point(<<m, n>, e, f>, 5);
+	printf("Printing result of access_point(p, 5), should = f: ");
+	print_stone(f1);
+
+		
+	return 0;
+}

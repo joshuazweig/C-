@@ -1,0 +1,4 @@
+Calling print_stone on a (=3): 3
+Calling print_stone on b (=5): 5
+Printing result of access_mint(m, 0), should = a: 3
+Printing result of access_mint(m, 1), should = b: 5
