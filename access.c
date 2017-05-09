@@ -17,21 +17,36 @@
 
 // takes a mint and an int (0 or 1), 
 // returning val for idx 0 and mod for idx 1
-void *access_mint(struct mint* m, int index)	{
+// void *access_mint(struct mint* m, int index)	{
+void *access_mint(struct mint m, int index)	{
 
-	BIGNUM *r = BN_new();
-	if(index == 0) {
-		BN_dec2bn(&r, (char *) m->val);
-	}
-	else {
-		BN_dec2bn(&r, (char *) m->mod);
-	}
-	char *bn = BN_bn2dec(r);
-	BN_clear_free(r);
-	return bn;
+	if(index == 0) { return m.val; }
+	return m.mod;
+	// return m.mod;
+	// return BN_bn2dec(m.val);
+	// printf("%s\n", BN_bn2dec(m.val));
+	// return "5";
+	// int index = 0;
+	// printf("In access_mint\n");
+	// BIGNUM *r = BN_new();
+	// if(index == 0) {
+	// 	BN_dec2bn(&r, (char *) m->val);
+	// }
+	// else {
+	// 	BN_dec2bn(&r, (char *) m->mod);
+	// }
+	// char *bn = BN_bn2dec(r);
+	// BN_clear_free(r);
+	// return bn;
+	// return "5";
 	
 	// printf("ACCESS: index %d gives %d\n", index, *((int *)a[index].val));
 }
+
+// int mint_print_func(struct mint a) {
+//     printf("<%s, %s>\n", BN_bn2dec(a.val), BN_bn2dec(a.mod));
+//     return 0;
+// }
 /*
 void *access_curve(struct curve* c, int index)	{
 	

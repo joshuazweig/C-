@@ -409,14 +409,16 @@ let translate (globals, functions) =
                        
 
 
-       (* | A.Call("access1", [e; i]) -> let (e', (t, _)) = expr table builder e and (i', (t', _)) = expr table builder i in *) 
-       | A.Call("access1", [e]) -> let (e', (t, _)) = expr table builder e and i' = (L.const_int i32_t 0) in 
+       | A.Call("access1", [e; i]) -> let (e', (t, _)) = expr table builder e and (i', (t', _)) = expr table builder i in 
+       (* | A.Call("access1", [e]) -> let (e', (t, _)) = expr table builder e and i' = (L.const_int i32_t 0) in  *)
+           (* (match t with
+             A.Mint -> (L.build_call mint_print_func [| e' |] "mint_print_func" builder, (t, 0)));*)
           ((match t with
             A.Mint -> let ptr = L.build_alloca mint_type "e" builder in 
-                L.build_call access_mint [| ptr ; i' |] "access_mint" builder
+                L.build_call access_mint [| e' ; i' |] "access_mint" builder
             | A.Curve -> L.build_call access_curve [| e' ; i' |] "access_curve" builder
             | A.Point -> L.build_call access_point [| e' ; i' |] "access_point" builder),
-            (A.Stone, 0))  
+            (A.Stone, 0))   
       | A.Call ("printf", act) ->
           let actuals, _ = List.split (List.rev (List.map (expr table builder)
           (List.rev act))) in

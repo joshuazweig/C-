@@ -53,7 +53,7 @@ if getopts "h:t:a:l:c:s:e:" c; then
 		e) # create executable
 			./cmod.native < "$TEST" > ${basename}.ll
 			"$LLC" ${basename}.ll > ${basename}.s
-			cc -o ${basename} ${basename}.s special_arith.o "$CRYPTO"
+			cc -o ${basename} ${basename}.s special_arith.o access.o "$CRYPTO"
 			;;
 		*) # everything else
 			usage
