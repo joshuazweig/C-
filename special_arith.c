@@ -413,18 +413,7 @@ int curve_print_func(struct curve *E) {
 * define the headers and functions in the same way as above
 */
 
-//Point inversion
-/*struct point invert_point_func(struct point p)
-{
-  struct point *inv_p;
-  inv_p = (struct point *)malloc(sizeof(struct point));
-  inv_p->E = p.E;
-  inv_p->x = p.x;
-  inv_p->y = p.y; //invert
-  inv_p->inf = p.inf;  // not infinity
 
-  return *inv_p;
-}*/
 
 
 
