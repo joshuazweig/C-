@@ -1,0 +1,15 @@
+int main()
+{
+	stone a;
+	stone b;
+
+	a = "123";
+	b = "456";
+
+	printf("%d\n", a < b);
+	printf("%d\n", a == b);
+	printf("%d\n", a != b);
+	printf("%d\n", a > b);
+	printf("%d\n", a >= b);
+	printf("%d\n", a <= b);
+}
