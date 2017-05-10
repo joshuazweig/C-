@@ -1,0 +1,8 @@
+int main()
+{
+    //test unop NEG on int types
+    int x;
+    x = 45;
+    printf("%d\n", -x);
+    return 0;
+}

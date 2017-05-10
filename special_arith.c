@@ -2,23 +2,7 @@
 #include <string.h> 
 #include <stdlib.h> 
 #include <openssl/bn.h>
-
-struct mint {
-    void *val;
-    void *mod; //should be immutable
-};
-
-struct curve {
-    struct mint a;
-    struct mint b;
-};
-
-struct point {
-    struct curve E;
-    void *x;
-    void *y;
-    char inf;
-};
+#include "types.h"
 
 /*
 * Stone
@@ -31,6 +15,7 @@ struct point {
 int stone_print_func(void *a)
 {
   printf("%s\n", BN_bn2dec(a));
+
   return 0; 
 }
 //construct
@@ -470,5 +455,8 @@ int curve_print_func(struct curve *E) {
 * thats your expertise so ill leave it to you to 
 * define the headers and functions in the same way as above
 */
+
+
+
 
 

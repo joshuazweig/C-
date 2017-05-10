@@ -1,0 +1,12 @@
+Calling print_stone on a (=3): 3
+Calling print_stone on b (=5): 5
+Calling print_stone on c (=37): 37
+Calling print_stone on d (=101): 101
+Calling print_stone on d (=101): 103
+Calling print_stone on d (=101): 107
+Printing result of access_point(p, 0), should = a: 3
+Printing result of access_point(p, 1), should = b: 5
+Printing result of access_point(p, 2), should = c: 37
+Printing result of access_point(p, 3), should = d: 101
+Printing result of access_point(p, 4), should = e: 103
+Printing result of access_point(p, 5), should = f: 107

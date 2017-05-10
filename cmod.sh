@@ -24,5 +24,5 @@ basename=`echo "$TEST" | sed 's/.*\\///
 
 "$LLC" ${basename}.ll > ${basename}.s
 
-cc -o ${basename}.exe ${basename}.s special_arith.o "$CRYPTO"
+cc -o ${basename}.exe ${basename}.s special_arith.o access.o "$CRYPTO"
 ./${basename}.exe

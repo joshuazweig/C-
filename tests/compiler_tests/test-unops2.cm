@@ -1,0 +1,14 @@
+int main()
+{
+    // test for NOT on int types
+    int x;
+    int y;
+
+    x = 4;
+    y = 0;
+
+    printf("%d\n", !x);  
+    printf("%d\n", !y); 
+
+    return 0;
+}

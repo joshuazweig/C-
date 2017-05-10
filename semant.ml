@@ -44,8 +44,14 @@ let check (globals, functions) =
   if List.mem "printf" (List.map (fun fd -> fd.fname) functions)
   then raise (Failure ("function printf may not be defined")) else ();
   
-  if List.mem "access" (List.map (fun fd -> fd.fname) functions)
-  then raise (Failure ("function access may not be defined")) else ();
+  if List.mem "access_mint" (List.map (fun fd -> fd.fname) functions)
+  then raise (Failure ("function access_mint may not be defined")) else ();
+
+  if List.mem "access_curve" (List.map (fun fd -> fd.fname) functions)
+  then raise (Failure ("function access_curve may not be defined")) else ();
+
+  if List.mem "access_point" (List.map (fun fd -> fd.fname) functions)
+  then raise (Failure ("function access_point may not be defined")) else ();
  
   if List.mem "scanf" (List.map (fun fd -> fd.fname) functions)
   then raise (Failure ("function scanf may not be defined")) else ();
@@ -70,6 +76,14 @@ let check (globals, functions) =
        "x")]; locals = []; body = [] });
        ("print_stone", { typ = Int; fname = "print_stone"; formals = [(Stone,
        "x")]; locals = []; body = [] });
+
+       ("access_mint", {typ = Stone; fname = "access_mint"; formals = [(Mint, "m"); (Int, "i")];  
+        locals = []; body = []}); 
+       ("access_curve", {typ = Stone; fname = "access_curve"; formals = [(Pointer(Curve), "c"); (Int, "i")];  
+        locals = []; body = []}); 
+       ("access_point", {typ = Stone; fname = "access_point"; formals = [(Pointer(Point), "p"); (Int, "i")];  
+        locals = []; body = []}); 
+
        ("print_mint", { typ = Int; fname = "print_mint"; formals = [(Mint,
        "x")]; locals = []; body = [] });
        ("print_div", { typ = Int; fname = "print_div"; formals = [(Mint,
@@ -89,6 +103,7 @@ let check (globals, functions) =
        locals = []; body = [] })
        ] 
        (* Can only malloc char pointers, best way to generalize? *)
+
    in
      
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
@@ -168,7 +183,7 @@ let check (globals, functions) =
          | Not when t = Int -> Int  
          | Deref -> type_of_pointer t e
          | AddrOf -> Pointer(t)
-         | Access when t = Mint || t = Point || t = Curve -> Pointer(Stone)
+         | Access when t = Mint || t = Point || t = Curve -> Stone
          | _ -> raise (Failure ("illegal unary operator " ^ string_of_uop op ^
 	  		   string_of_typ t ^ " in " ^ string_of_expr ex)))
       | Construct2(e1, e2) -> let t1 = expr table e1 and t2 = expr table e2 in

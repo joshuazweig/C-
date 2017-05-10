@@ -58,6 +58,7 @@ let translate (globals, functions) =
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func = L.declare_function "printf" printf_t the_module in
 
+
   let read_t = L.function_type i32_t [| L.pointer_type i8_t ; L.pointer_type i8_t |] in 
   let read_func = L.declare_function "scanf" read_t the_module in 
 
@@ -66,6 +67,7 @@ let translate (globals, functions) =
 
   let free_t = L.function_type void_t [| L.pointer_type i8_t |] in
   let free_func = L.declare_function "free" free_t the_module in
+
 
   (* Declare other linked to / "built in" functions *)
   (* Function returns an 8 byte pointer, taking in two 8 byte pointers as arguments *)
@@ -168,6 +170,19 @@ let translate (globals, functions) =
 
  (* let mint_free_t = L.function_type i32_t [| mint_pointer |] in 
   let mint_free_func = L.declare_function "mint_free_func" mint_free_t the_module in *)
+
+  let access_mint_t = L.function_type obj_pointer [| mint_type ; i32_t |] in
+    let access_mint = L.declare_function "access_mint" access_mint_t the_module in
+
+  let access_curve_t = L.function_type obj_pointer [| curve_ptr ; i32_t |] in
+    let access_curve = L.declare_function "access_curve" access_curve_t the_module in
+
+  let access_point_t = L.function_type obj_pointer [| point_ptr ; i32_t |] in
+    let access_point = L.declare_function "access_point" access_point_t the_module in
+
+  (* let invert_point_func_t = L.function_type point_type [| point_type |] in
+    let invert_point_func = L.declare_function "invert_point_func" invert_point_func_t the_module in *)
+
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -380,13 +395,24 @@ let translate (globals, functions) =
                 A.string_of_op op ^ A.string_of_typ t2))
         )  
 
-      | A.Unop(op, e) -> (*these will also require type matching *)
-      	  let e', (t, _) = expr table builder e in
-      	  (match op with
-      	     A.Neg     -> L.build_neg
-            | A.Not     -> L.build_not
-            | _ -> raise(Failure("not implemented yet"))) e' "tmp" builder, (t, 0)
 
+      | A.Unop(op, e) -> 
+      	  let e', (t, _) = expr table builder e in
+      	  ((match op with
+            A.Neg     -> (match t with
+                A.Int -> L.build_neg e' "tmp" builder
+               (* | A.Point -> L.build_call invert_point_func [| e' |] "invert_point_func" builder *) )  (* Point inversion *)
+           | A.Not     -> L.build_icmp L.Icmp.Eq (L.const_null (ltype_of_typ t)) e' "tmp" builder  (* Still need to test on Pointer types *)
+           | _ -> raise(Failure("not implemented yet")) e' "tmp" builder
+        (* | A.Deref   -> L.build_load e' "tmp" builder  *) (* load object pointed to *)
+        (* | A.AddrOf  -> fst(lookup e')  *)(*L.build_store e'  builder*)
+          ), (match op with
+            A.Neg -> (t, 0)
+            | A.Not -> (t, 0)
+            | _ -> (t, 0)
+            (* | A.Deref -> (match t with
+                A.Pointer x -> x)
+            | A.AddrOf -> A.Pointer t *)))   
        | A.Assign (s, e) -> let (e', (t, _)) = expr table builder e and
                               (* if t string, otherwise is behavior normal?*)
                             (*snd lookup is type of thing*)
@@ -399,9 +425,17 @@ let translate (globals, functions) =
                                   "stone_char_func" builder in *)
                                   ignore(L.build_store ptr (fst (lookup s table)) builder); (ptr, (t, 0))
 
+
                            | _ -> ignore (L.build_store e' (fst (lookup s table)) builder); (e', (t, 0)) )
                        
 
+
+      | A.Call("access_mint", [e; i]) -> let (e', (t, _)) = expr table builder e and (i', (t', _)) = expr table builder i in 
+          (L.build_call access_mint [| e' ; i' |] "access_mint" builder, (A.Stone, 0));
+      | A.Call("access_curve", [e; i]) -> let (e', (t, _)) = expr table builder e and (i', (t', _)) = expr table builder i in 
+          (L.build_call access_curve [| e' ; i' |] "access_curve" builder, (A.Stone, 0));
+      | A.Call("access_point", [e; i]) -> let (e', (t, _)) = expr table builder e and (i', (t', _)) = expr table builder i in 
+          (L.build_call access_point [| e' ; i' |] "access_point" builder, (A.Stone, 0));
       | A.Call ("printf", act) ->
           let actuals, _ = List.split (List.rev (List.map (expr table builder)
           (List.rev act))) in
@@ -452,6 +486,7 @@ let translate (globals, functions) =
 	
     (* Build the code for the given statement; return the builder for
        the statement's successor *)
+
     let rec stmt table builder = function
 	     A.Block (vl, sl) ->  
         let new_table =  
@@ -479,27 +514,30 @@ let translate (globals, functions) =
 	 add_terminal (stmt table (L.builder_at_end context else_bb) else_stmt)
 	   (L.build_br merge_bb);
 
-	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
-	 L.builder_at_end context merge_bb
+
+        	 ignore (L.build_cond_br bool_val then_bb else_bb builder);
+        	 L.builder_at_end context merge_bb
 
       | A.While (predicate, body) ->
-	  let pred_bb = L.append_block context "while" the_function in
-	  ignore (L.build_br pred_bb builder);
+          let pred_bb = L.append_block context "while" the_function in
+          ignore (L.build_br pred_bb builder);
 
-	  let body_bb = L.append_block context "while_body" the_function in
-	  add_terminal (stmt table (L.builder_at_end context body_bb) body)
-	    (L.build_br pred_bb);
+          let body_bb = L.append_block context "while_body" the_function in
+          add_terminal (stmt table (L.builder_at_end context body_bb) body)
+            (L.build_br pred_bb);
 
-	  let pred_builder = L.builder_at_end context pred_bb in
-	  let bool_val = fst (expr table pred_builder predicate) in
+          let pred_builder = L.builder_at_end context pred_bb in
+          let bool_val = fst (expr table pred_builder predicate) in
 
-	  let merge_bb = L.append_block context "merge" the_function in
-	  ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
-	  L.builder_at_end context merge_bb
+          let merge_bb = L.append_block context "merge" the_function in
+          ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
+          L.builder_at_end context merge_bb
+
 
       | A.For (e1, e2, e3, body) -> stmt table builder
       ( A.Block ([], [A.Expr e1 ; A.While (e2, A.Block ([], [body ; A.Expr e3])) ] ))
       | _ -> raise(Failure("illegal statement"))
+
     in
 
     let local_vars =
